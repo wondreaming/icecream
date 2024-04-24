@@ -57,7 +57,8 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
-
+  assets:
+    - asset/img/
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
@@ -86,5 +87,37 @@ flutter:
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
   #
+  fonts:
+    - family: Freesentation
+      fonts:
+        - asset: asset/fonts/Freesentation-Black.ttf
+          weight: 900
+        - asset: asset/fonts/Freesentation-ExtraBold.ttf
+          weight: 800
+        - asset: asset/fonts/Freesentation-Bold.ttf
+          weight: 700
+        - asset: asset/fonts/Freesentation-SemiBold.ttf
+          weight: 600
+        - asset: asset/fonts/Freesentation-Medium.ttf
+          weight: 500
+        - asset: asset/fonts/Freesentation-Regular.ttf
+          weight: 400
+        - asset: asset/fonts/Freesentation-Light.ttf
+          weight: 300
+        - asset: asset/fonts/Freesentation-ExtraLight.ttf
+          weight: 200
+        - asset: asset/fonts/Freesentation-Thin.ttf
+          weight: 100
+    - family: GmarketSans
+      fonts:
+        - asset: asset/fonts/GmarketSansBold.otf
+        - asset: asset/fonts/GmarketSansLight.otf
+        - asset: asset/fonts/GmarketSansMedium.otf
+    - family: WAGURI
+      fonts:
+        - asset: asset/fonts/WAGURI.ttf
+    - family: omyuPretty
+      fonts:
+        - asset: asset/fonts/omyuPretty.ttf
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
