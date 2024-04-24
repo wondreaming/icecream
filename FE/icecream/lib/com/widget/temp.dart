@@ -5,10 +5,10 @@ class Temp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       body: Center(
         child: Text(
-          '아이스크림',
+          '아이스크림여기',
           style: TextStyle(fontFamily: 'omyuPretty'),
         ),
       ),
