@@ -6,6 +6,10 @@ class Setting extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultLayout(child: Center(child: Text('세팅'),));
+    return DefaultLayout(
+      child: Center(
+        child: Text('세팅'),
+      ),
+    );
   }
 }
