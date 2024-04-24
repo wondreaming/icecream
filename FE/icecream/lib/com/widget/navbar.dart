@@ -1,104 +1,229 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
+import "package:flutter/material.dart";
+import 'package:icecream/provider/inherited_data_provider.dart';
+import 'package:flutter/rendering.dart';
 
 class CustomNav extends StatefulWidget {
-  const CustomNav(
-      {super.key, required this.currentPage, required this.onPageChanged});
-
+  final Widget child;
   final int currentPage;
-  final ValueChanged<int> onPageChanged;
+  final TabController tabController;
+  final List<Color> colors;
+  final Color unselectedColor;
+  final Color barColor;
+  final double end;
+  final double start;
+  const CustomNav({
+    required this.child,
+    required this.currentPage,
+    required this.tabController,
+    required this.colors,
+    required this.unselectedColor,
+    required this.barColor,
+    required this.end,
+    required this.start,
+    Key? key,
+  }) : super(key: key);
 
   @override
-  _CustomNavState createState() => _CustomNavState();
+  _CustomNavSate createState() => _CustomNavSate();
 }
 
-class _CustomNavState extends State<CustomNav>
+class _CustomNavSate extends State<CustomNav>
     with SingleTickerProviderStateMixin {
-  final List<Color> colors = [
-    Colors.yellow,
-    Colors.red,
-    Colors.blue,
-    Colors.pink,
-  ];
-
-  late TabController _tabController;
+  ScrollController scrollBottomBarController = ScrollController();
+  late AnimationController _controller;
+  late Animation<Offset> _offsetAnimation;
+  bool isScrollingDown = false;
+  bool isOnTop = true;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
-    _tabController.addListener(() {
-      widget.onPageChanged(_tabController.index);
-    });
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _offsetAnimation = Tween<Offset>(
+      begin: Offset(0, widget.end),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeIn,
+    ))
+      ..addListener(() {
+        if (mounted) {
+          setState(() {});
+        }
+      });
+    _controller.forward();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return BottomBar(
-      clip: Clip.none,
-      fit: StackFit.expand,
-      borderRadius: BorderRadius.circular(500),
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.decelerate,
-      showIcon: true,
-      width: MediaQuery.of(context).size.width * 0.8,
-      barColor: Colors.black,
-      start: 2,
-      end: 0,
-      offset: 10,
-      barAlignment: Alignment.bottomCenter,
-      iconHeight: 30,
-      iconWidth: 30,
-      reverse: false,
-      barDecoration: BoxDecoration(
-        color: colors[widget.currentPage],
-        borderRadius: BorderRadius.circular(500),
-      ),
-      iconDecoration: BoxDecoration(
-        color: colors[widget.currentPage],
-        borderRadius: BorderRadius.circular(500),
-      ),
-      hideOnScroll: true,
-      scrollOpposite: false,
-      onBottomBarHidden: () {},
-      onBottomBarShown: () {},
-      body: (context, controller) => const Text('부모페이지입니다.'),
-      child: TabBar(
-        overlayColor: MaterialStateProperty.all(Colors.transparent),
-        indicatorPadding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
-        controller: _tabController,
-        indicator: UnderlineTabIndicator(
-            borderSide: BorderSide(
-              color: colors[widget.currentPage],
-              width: 4,
-            ),
-            insets: const EdgeInsets.fromLTRB(16, 0, 16, 8)),
-        tabs: [
-          _buildTab(Icons.home, 0),
-          _buildTab(Icons.search, 1),
-          _buildTab(Icons.favorite, 2),
-          _buildTab(Icons.settings, 3),
-        ],
-      ),
-    );
+  void showBottomBar() {
+    if (mounted) {
+      setState(() {
+        _controller.forward();
+      });
+    }
   }
 
-  Widget _buildTab(IconData icon, int index) {
-    return SizedBox(
-      height: 55,
-      width: 40,
-      child: Center(
-        child: Icon(
-          icon,
-          color: widget.currentPage == index ? colors[index] : Colors.white,
-        ),
-      ),
-    );
+  void hideBottomBar() {
+    if (mounted) {
+      setState(() {
+        _controller.reverse();
+      });
+    }
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
+    scrollBottomBarController.removeListener(() {});
+    _controller.dispose();
     super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      alignment: Alignment.bottomCenter,
+      children: [
+        InheritedDataProvider(
+          scrollController: scrollBottomBarController,
+          child: widget.child,
+        ),
+        Positioned(
+          bottom: widget.start,
+          child: AnimatedContainer(
+            duration: Duration(milliseconds: 300),
+            curve: Curves.easeIn,
+            width: isOnTop == true ? 0 : 40,
+            height: isOnTop == true ? 0 : 40,
+            decoration: BoxDecoration(
+              color: widget.barColor,
+              shape: BoxShape.circle,
+            ),
+            padding: EdgeInsets.zero,
+            margin: EdgeInsets.zero,
+            child: ClipOval(
+              child: Material(
+                color: Colors.transparent,
+                child: SizedBox(
+                  height: 40,
+                  width: 40,
+                  child: Center(
+                    child: IconButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: () {
+                        scrollBottomBarController
+                            .animateTo(
+                          scrollBottomBarController.position.minScrollExtent,
+                          duration: const Duration(milliseconds: 500),
+                          curve: Curves.easeIn,
+                        )
+                            .then((value) {
+                          if (mounted) {
+                            setState(() {
+                              isOnTop = true;
+                              isScrollingDown = false;
+                            });
+                          }
+                          showBottomBar();
+                        });
+                      },
+                      icon: Icon(
+                        Icons.arrow_upward_rounded,
+                        color: widget.unselectedColor,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: widget.start,
+          child: SlideTransition(
+            position: _offsetAnimation,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(500),
+              child: Container(
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor,
+                    borderRadius: BorderRadius.circular(500),
+                  ),
+                  child: Material(
+                    color: widget.barColor,
+                    child: TabBar(
+                      indicatorPadding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
+                      controller: widget.tabController,
+                      indicator: UnderlineTabIndicator(
+                          borderSide: BorderSide(
+                              color: widget.currentPage == 0
+                                  ? widget.colors[0]
+                                  : widget.currentPage == 1
+                                      ? widget.colors[1]
+                                      : widget.currentPage == 2
+                                          ? widget.colors[2]
+                                          : widget.currentPage == 3
+                                              ? widget.colors[3]
+                                              : widget.currentPage == 4
+                                                  ? widget.colors[4]
+                                                  : widget.unselectedColor,
+                              width: 4),
+                          insets: EdgeInsets.fromLTRB(16, 0, 16, 8)),
+                      tabs: [
+                        SizedBox(
+                          height: 55,
+                          width: 40,
+                          child: Center(
+                              child: Icon(
+                            Icons.home,
+                            color: widget.currentPage == 0
+                                ? widget.colors[0]
+                                : widget.unselectedColor,
+                          )),
+                        ),
+                        SizedBox(
+                          height: 55,
+                          width: 40,
+                          child: Center(
+                              child: Icon(
+                            Icons.search,
+                            color: widget.currentPage == 1
+                                ? widget.colors[1]
+                                : widget.unselectedColor,
+                          )),
+                        ),
+                        SizedBox(
+                          height: 55,
+                          width: 40,
+                          child: Center(
+                              child: Icon(
+                            Icons.notifications,
+                            color: widget.currentPage == 2
+                                ? widget.colors[2]
+                                : widget.unselectedColor,
+                          )),
+                        ),
+                        SizedBox(
+                          height: 55,
+                          width: 40,
+                          child: Center(
+                              child: Icon(
+                            Icons.settings,
+                            color: widget.currentPage == 3
+                                ? widget.colors[3]
+                                : widget.unselectedColor,
+                          )),
+                        ),
+                      ],
+                    ),
+                  )),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
