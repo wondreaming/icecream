@@ -20,8 +20,8 @@ class CustomNav extends StatefulWidget {
     required this.barColor,
     required this.end,
     required this.start,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   _CustomNavSate createState() => _CustomNavSate();
@@ -93,7 +93,7 @@ class _CustomNavSate extends State<CustomNav>
         Positioned(
           bottom: widget.start,
           child: AnimatedContainer(
-            duration: Duration(milliseconds: 300),
+            duration: const Duration(milliseconds: 300),
             curve: Curves.easeIn,
             width: isOnTop == true ? 0 : 40,
             height: isOnTop == true ? 0 : 40,
@@ -171,7 +171,7 @@ class _CustomNavSate extends State<CustomNav>
                                                   ? widget.colors[4]
                                                   : widget.unselectedColor,
                               width: 4),
-                          insets: EdgeInsets.fromLTRB(16, 0, 16, 8)),
+                          insets: const EdgeInsets.fromLTRB(16, 0, 16, 8)),
                       tabs: [
                         SizedBox(
                           height: 55,
@@ -189,7 +189,7 @@ class _CustomNavSate extends State<CustomNav>
                           width: 40,
                           child: Center(
                               child: Icon(
-                            Icons.search,
+                            Icons.cable_outlined,
                             color: widget.currentPage == 1
                                 ? widget.colors[1]
                                 : widget.unselectedColor,
