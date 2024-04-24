@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:icecream/com/router/router.dart';
 
 void main() {
   runApp(const MyApp());
@@ -9,12 +10,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('아이스크림', style: TextStyle(fontFamily: 'omyuPretty'),),
-        ),
-      ),
+    return MaterialApp.router(
+      routerConfig: router,
     );
   }
 }
