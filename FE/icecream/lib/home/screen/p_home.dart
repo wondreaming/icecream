@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:icecream/main/screen/p_main.dart';
+import 'package:icecream/goal/screen/goal.dart';
+import 'package:icecream/noti/screen/notification.dart';
+import 'package:icecream/setting/screen/setting.dart';
+import 'package:flutter/gestures.dart';
 import 'package:icecream/com/widget/navbar.dart';
 
 class PHome extends StatefulWidget {
@@ -8,36 +13,66 @@ class PHome extends StatefulWidget {
   State<PHome> createState() => _PHomeState();
 }
 
-class _PHomeState extends State<PHome> {
-  int _currentPage = 0;
+class _PHomeState extends State<PHome> with SingleTickerProviderStateMixin {
+  late int currentPage;
+  late TabController tabController;
+  final List<Color> colors = [
+    Colors.red,
+    Colors.yellow,
+    Colors.green,
+    Colors.blue,
+  ];
+
+  @override
+  void initState() {
+    currentPage = 0;
+    tabController = TabController(length: 4, vsync: this);
+    tabController.animation!.addListener(
+      () {
+        final value = tabController.animation!.value.round();
+        if (value != currentPage && mounted) {
+          changePage(value);
+        }
+      },
+    );
+    super.initState();
+  }
+
+  void changePage(int newPage) {
+    setState(() {
+      currentPage = newPage;
+    });
+  }
+
+  @override
+  void dispose() {
+    tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        body: Stack(
-          children: [
-            // Add your page content here
-            const Center(
-              child: Text('부모페이지입니다.'),
-            ),
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: SizedBox(
-                height: 55, // Adjust the height as needed
-                child: CustomNav(
-                  currentPage: _currentPage,
-                  onPageChanged: (index) {
-                    setState(() {
-                      _currentPage = index;
-                    });
-                  },
-                ),
-              ),
-            ),
-          ],
+        body: CustomNav(
+          currentPage: currentPage,
+          tabController: tabController,
+          colors: colors,
+          unselectedColor: Colors.white,
+          barColor: Colors.black,
+          start: 10,
+          end: 2,
+          child: TabBarView(
+            controller: tabController,
+            dragStartBehavior: DragStartBehavior.down,
+            physics: const BouncingScrollPhysics(),
+            children: [
+              const PMain(), // 첫 번째 탭 (홈)
+              const Goal(), // 두 번째 탭 (목표)
+              const Noti(), // 세 번째 탭 (알림)
+              const Setting(), // 네 번째 탭 (설정)
+            ],
+          ),
         ),
       ),
     );

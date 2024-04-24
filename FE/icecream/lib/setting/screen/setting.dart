@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:icecream/setting/widget/default_layout.dart';
+import 'package:icecream/com/widget/default_layout.dart';
 
 class Setting extends StatelessWidget {
   const Setting({super.key});
