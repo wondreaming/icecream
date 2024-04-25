@@ -65,12 +65,12 @@ class _PHomeState extends State<PHome> with SingleTickerProviderStateMixin {
           child: TabBarView(
             controller: tabController,
             dragStartBehavior: DragStartBehavior.down,
-            physics: const BouncingScrollPhysics(),
-            children: [
-              const PMain(), // 첫 번째 탭 (홈)
-              const Goal(), // 두 번째 탭 (목표)
-              const Noti(), // 세 번째 탭 (알림)
-              const Setting(), // 네 번째 탭 (설정)
+            physics: const NeverScrollableScrollPhysics(),
+            children: const [
+              PMain(), // 첫 번째 탭 (홈)
+              Goal(), // 두 번째 탭 (목표)
+              Noti(), // 세 번째 탭 (알림)
+              Setting(), // 네 번째 탭 (설정)
             ],
           ),
         ),
