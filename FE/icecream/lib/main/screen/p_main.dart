@@ -7,6 +7,7 @@ class PMain extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultLayout(
+      title: '보호자 메인',
       child: Center(
         child: Text('보호자 메인 페이지'),
       ),
