@@ -3,11 +3,12 @@ import 'package:icecream/setting/widget/custom_text_container.dart';
 import 'package:icecream/setting/widget/profile_image.dart';
 
 class DetailProfile extends StatelessWidget {
-  final String name;
+  final String? name;
   final String id;
   final String number;
+  final bool is_parents;
   const DetailProfile(
-      {super.key, required this.name, required this.id, required this.number});
+      {super.key, this.name, required this.id, required this.number, this.is_parents = true});
 
   @override
   Widget build(BuildContext context) {
@@ -21,14 +22,16 @@ class DetailProfile extends StatelessWidget {
         SizedBox(
           height: 20.0,
         ),
+        if (is_parents)
         Text(
-          name,
+          name!,
           style: TextStyle(
             fontFamily: 'GmarketSans',
             fontSize: 28.0,
             fontWeight: FontWeight.w500,
           ),
         ),
+        if (is_parents)
         SizedBox(
           height: 20.0,
         ),
