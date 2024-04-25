@@ -10,10 +10,12 @@ import 'package:icecream/com/router/router.dart';
 // fcm background 핸들러
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  debugPrint(
-      "Handling a background message title: ${message.notification?.title}");
-  debugPrint(
-      "Handling a background message body: ${message.notification?.body}");
+  if (message.data.isNotEmpty) {
+    debugPrint("Data message title: ${message.data['title']}");
+    debugPrint("Data message body: ${message.data['body']}");
+  } else {
+    debugPrint("No data available in message.");
+  }
 }
 
 // 디바이스 id 가져오기
