@@ -11,7 +11,9 @@ class Temp extends StatelessWidget {
     return Scaffold(
       body: ListView(
         children: [
+          // 부모 페이지 이동 버튼
           ElevatedButton(onPressed: (){context.go('/parents');}, child: Text('부모 페이지'),),
+          ElevatedButton(onPressed: (){context.go('/parents/setting');}, child: Text('부모 설정 페이지'),),
         ],
       )
     );

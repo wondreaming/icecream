@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:icecream/com/widget/default_layout.dart';
 
-class PMain extends StatelessWidget {
-  const PMain({super.key});
+
+class LocationScreen extends StatelessWidget {
+  const LocationScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return DefaultLayout(
-      title: '보호자 메인',
+      title: '안심 보행 설정',
       child: Center(
-        child: Text('보호자 메인 페이지'),
-      ),
-    );
+      child: Text('안심보행 설정 페이지'),
+    ),);
   }
 }
