@@ -41,6 +41,7 @@ dependencies:
   dio: ^5.4.3+1
   provider: ^6.1.2
   flutter_floating_bottom_bar: ^1.2.0
+  kakao_map_plugin: ^0.3.0
 
 dev_dependencies:
   flutter_test:
