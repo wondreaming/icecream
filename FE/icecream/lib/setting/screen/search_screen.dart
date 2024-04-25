@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:icecream/com/widget/default_layout.dart';
 
-class PMain extends StatelessWidget {
-  const PMain({super.key});
+
+class SearchScreen extends StatelessWidget {
+  const SearchScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return DefaultLayout(
-      title: '보호자 메인',
+      title: '주소 검색',
       child: Center(
-        child: Text('보호자 메인 페이지'),
-      ),
-    );
+      child: Text('장소 찾는 페이지'),
+    ),);
   }
 }

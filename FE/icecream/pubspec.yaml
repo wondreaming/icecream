@@ -118,8 +118,11 @@ flutter:
     - family: GmarketSans
       fonts:
         - asset: asset/fonts/GmarketSansBold.otf
-        - asset: asset/fonts/GmarketSansLight.otf
+          weight: 700
         - asset: asset/fonts/GmarketSansMedium.otf
+          weight: 500
+        - asset: asset/fonts/GmarketSansLight.otf
+          weight: 300
     - family: WAGURI
       fonts:
         - asset: asset/fonts/WAGURI.ttf

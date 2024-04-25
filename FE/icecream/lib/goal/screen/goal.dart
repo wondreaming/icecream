@@ -7,6 +7,7 @@ class Goal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultLayout(
+      title: '부모 리워드',
       child: Center(
         child: Text('부모 리워드 페이지'),
       ),
