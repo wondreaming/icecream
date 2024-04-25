@@ -3,14 +3,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icecream/com/const/color.dart';
+import 'package:icecream/setting/widget/profile_image.dart';
 
 class Profile extends StatelessWidget {
-  const Profile({super.key});
+  final String name;
+  final String number;
+  final String? imgUrl;
+  final VoidCallback onPressed;
+  const Profile(
+      {super.key,
+      required this.name,
+      required this.number,
+      this.imgUrl, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: (){context.goNamed('my_page');},
+      onTap: onPressed,
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
@@ -22,14 +31,10 @@ class Profile extends StatelessWidget {
         child: Row(
           children: [
             Flexible(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(100),
-                child: Image.asset(
-                  'asset/img/picture.JPEG',
-                  fit: BoxFit.cover,
-                  width: 90,
-                  height: 90,
-                ),
+              child: ProfileImage(
+                imgUrl: imgUrl,
+                width: 90,
+                height: 90,
               ),
               flex: 1,
             ),
@@ -45,7 +50,7 @@ class Profile extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '김싸피님',
+                          '${name} 님',
                           style: TextStyle(
                             fontFamily: 'GmarketSans',
                             fontSize: 22.0,
@@ -56,7 +61,7 @@ class Profile extends StatelessWidget {
                           height: 5.0,
                         ),
                         Text(
-                          '010-1234-5678',
+                          number,
                           style: TextStyle(
                             fontFamily: 'GmarketSans',
                             fontSize: 18.0,
@@ -66,8 +71,11 @@ class Profile extends StatelessWidget {
                       ],
                     ),
                     IconButton(
-                      icon: Icon(Icons.arrow_forward_ios_rounded),
-                      onPressed: () {context.goNamed('my_page');},
+                      icon: Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        color: AppColors.custom_black,
+                      ),
+                      onPressed: onPressed,
                     ),
                   ],
                 ),

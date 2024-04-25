@@ -19,4 +19,5 @@ class AppColors {
   static const icon_red_color = Color(0xFFFF7062);
   static const icon_pink_color = Color(0xFFF5158C);
   static const icon_blue_color = Color(0xFF244A9B);
+  static const profile_black = Color(0xff49454F); // 프로필 이미지 블랙
 }
