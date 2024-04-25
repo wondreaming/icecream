@@ -38,7 +38,7 @@ class _CustomModalContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16.0),
+      margin: EdgeInsets.symmetric(horizontal: 24.0),
       child: Column(
         children: [
           Text(title),

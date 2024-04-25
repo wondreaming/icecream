@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:icecream/com/const/color.dart';
+import 'package:go_router/go_router.dart';
 import 'package:icecream/com/widget/default_layout.dart';
-import 'package:icecream/setting/widget/custom_elevated_button.dart';
-import 'package:icecream/setting/widget/custom_icon.dart';
-import 'package:icecream/setting/widget/custom_modal.dart';
-import 'package:icecream/setting/widget/custom_text_field.dart';
-
+import 'package:icecream/setting/widget/custom_text_container.dart';
 import 'package:icecream/setting/widget/profile.dart';
 
 class Setting extends StatelessWidget {
@@ -14,20 +10,35 @@ class Setting extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultLayout(
-        title: '설정',
+      title: '설정',
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          vertical: 20.0,
+        ),
         child: Column(
           children: [
-            Profile(),
-            CustomTextField(
-              hintText: '아림',
+            Profile(number: '010-1234-5678', name: '김싸피', onPressed: () {
+              context.goNamed('my_page');
+            },),
+            SizedBox(
+              height: 20.0,
             ),
-            CustomElevatedButton(
+            GestureDetector(
+              onTap: () {
+                context.goNamed('children');
+              },
+              child: CustomTextContainer(
+                backIcon: Icons.arrow_forward_ios_rounded,
+                text: '자녀관리',
+                is_frontIcon: false,
                 onPressed: () {
-                  customModal(context);
+                  context.goNamed('children');
                 },
-                child: '저장'),
-            CustomIcon(color: AppColors.custom_green, icon: Icons.home_filled)
+              ),
+            ),
           ],
-        ));
+        ),
+      ),
+    );
   }
 }
