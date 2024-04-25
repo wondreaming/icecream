@@ -52,6 +52,8 @@ android {
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+        // 멀티덱스를 활성화
+        multiDexEnabled true
     }
 
     buildTypes {
@@ -67,4 +69,7 @@ flutter {
     source '../..'
 }
 
-dependencies {}
+dependencies {
+    // 멀티덱스 라이브러리
+    implementation 'androidx.multidex:multidex:2.0.1'
+}

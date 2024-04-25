@@ -3,12 +3,17 @@ import 'package:icecream/com/const/color.dart';
 import 'package:icecream/setting/widget/custom_elevated_button.dart';
 import 'package:icecream/setting/widget/custom_text_field.dart';
 
-void customModal(BuildContext context) {
+void customModal(BuildContext context, String title, Widget body) {
   showModalBottomSheet(
       context: context,
       builder: (context) {
-        return const _CustomModalContent(
-            title: '비밀번호 변경', buttonName: '다음', hintText: '뭐지');
+        return Container(
+          width: double.infinity,
+          child: _CustomModalContent(
+            title: title,
+            body: body,
+          ),
+        );
       },
       backgroundColor: AppColors.background_color,
       shape: RoundedRectangleBorder(
@@ -25,27 +30,24 @@ void customModal(BuildContext context) {
 
 class _CustomModalContent extends StatelessWidget {
   final String title;
-  final String buttonName;
-  final VoidCallback? onPressed;
-  final String? hintText;
-  const _CustomModalContent(
-      {super.key,
-      required this.title,
-      required this.buttonName,
-      this.onPressed,
-      this.hintText});
+  final Widget body;
+  const _CustomModalContent({
+    super.key,
+    required this.title,
+    required this.body,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 24.0),
+      margin: EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title),
-          CustomTextField(
-            hintText: hintText,
-          ),
-          CustomElevatedButton(onPressed: (){}, child: buttonName),
+          Text(title, style: TextStyle(fontFamily: 'GmarketSans',
+            fontSize: 24.0,
+            fontWeight: FontWeight.w400,),),
+          body,
         ],
       ),
     );
