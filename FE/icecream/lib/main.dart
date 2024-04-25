@@ -1,3 +1,5 @@
+import 'package:android_id/android_id.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -5,6 +7,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'firebase_options.dart';
 import 'package:icecream/com/router/router.dart';
 
+// fcm background 핸들러
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   debugPrint(
@@ -13,9 +16,34 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       "Handling a background message body: ${message.notification?.body}");
 }
 
+// 디바이스 id 가져오기
+Future<void> checkDeviceWithServerUsingDio() async {
+  const _androidIdPlugin = AndroidId();
+  final String? deviceId = await _androidIdPlugin.getId();
+  debugPrint("android ID: $deviceId");
+  // 서버랑 통신해서 존재하는 유저인지 확인
+  // var dio = Dio();
+  // try {
+  //   var response = await dio.post(
+  //     'https://yourserver.com/api/auth/device/login',
+  //     data: {'device_id': deviceId}
+  //   );
+
+  //   if (response.statusCode == 200) {
+  //     debugPrint('Device is registered on the server');
+  //   } else {
+  //     debugPrint('Server responded with status code: ${response.statusCode}');
+  //   }
+  // } on DioError catch (e) {
+  //   debugPrint('Dio error: ${e.response?.data['message'] ?? e.message}');
+  // }
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // 디바이스id 가져오는 함수 실행
+  await checkDeviceWithServerUsingDio();
 
   FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
