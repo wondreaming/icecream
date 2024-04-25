@@ -116,6 +116,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp.router(
       // router 환경설정
       routerConfig: router,
+      debugShowCheckedModeBanner: false, // debug 배너 삭제
     );
   }
 }

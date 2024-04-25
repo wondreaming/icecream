@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icecream/com/widget/default_layout.dart';
 import 'package:icecream/setting/widget/add_container.dart';
+import 'package:icecream/setting/widget/custom_popupbutton.dart';
 import 'package:icecream/setting/widget/detail_profile.dart';
 
 class ChildScreen extends StatelessWidget {
@@ -11,11 +12,29 @@ class ChildScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return DefaultLayout(
       title: '자녀 관리',
+      action: [
+        CustomPopupButton(
+          first: '이름 변경',
+          secound: '전화번호 변경',
+          third: '연결 해제',
+          firstOnTap: (){Future.delayed(
+            const Duration(seconds: 0),
+                () => showDialog(
+              context: context,
+              builder: (context) => const AlertDialog(
+                title: Text('test dialog'),
+              ),
+            ),
+          );},
+          secoundOnTap: (){},
+          thirdOnTap: (){},
+        ),
+      ],
       child: Column(
         children: [
           DetailProfile(
-            name: '김싸피',
-            id: 'ssafy',
+            is_parents: false,
+            id: '김자식',
             number: '010-1234-5678',
           ),
           Container(
@@ -49,7 +68,11 @@ class ChildScreen extends StatelessWidget {
               ],
             ),
           ),
-          AddContainer(mention: '안심 보행지를 추가해주세요', onPressed: (){context.goNamed('location');})
+          AddContainer(
+              mention: '안심 보행지를 추가해주세요',
+              onPressed: () {
+                context.goNamed('location');
+              })
         ],
       ),
     );
