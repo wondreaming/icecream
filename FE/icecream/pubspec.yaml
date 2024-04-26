@@ -44,9 +44,12 @@ dependencies:
   firebase_messaging: ^14.9.0
   flutter_local_notifications: ^17.1.0
   flutter_floating_bottom_bar: ^1.2.0
+  android_id: ^0.3.6
   kakao_map_plugin: ^0.3.0
   permission_handler: ^11.3.1
   geolocator: ^11.0.0
+  image_picker: ^1.1.0
+
 
 
 dev_dependencies:
