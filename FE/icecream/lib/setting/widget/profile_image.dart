@@ -72,7 +72,7 @@ class _ProfileImageState extends State<ProfileImage> {
               child: IconButton(
                 icon: Icon(Icons.edit),
                 onPressed: () {
-                  customModal(
+                  showCustomModal(
                     context,
                     '프로필 사진 수정',
                     Column(
@@ -88,6 +88,7 @@ class _ProfileImageState extends State<ProfileImage> {
                         ),
                       ],
                     ),
+                    470.0,
                   );
                 },
               ),
