@@ -29,7 +29,7 @@ class ChildrenScreen extends StatelessWidget {
             ),
             AddContainer(
               mention: '자녀를 추가해주세요',
-              onPressed: () {},
+              onPressed: () {}, //QR로 이동하는 go_router 작성
             ),
           ],
         ),
