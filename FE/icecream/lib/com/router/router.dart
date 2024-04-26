@@ -41,11 +41,13 @@ final router = GoRouter(
                     routes: [
                       // setting의 자녀 1명 페이지
                       GoRoute(
-                        path: ':id',
+                        path: 'child',
+                        name: 'child',
                         builder: (context, state) => ChildScreen(),
                         routes: [
                           GoRoute(
-                            path: ':location_id',
+                            path: 'location',
+                            name: 'location',
                             builder: (context, state) => LocationScreen(),
                             routes: [
                               GoRoute(
