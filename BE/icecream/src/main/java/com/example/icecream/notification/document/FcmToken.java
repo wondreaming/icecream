@@ -1,10 +1,14 @@
-package com.example.icecream.notification.entity;
+package com.example.icecream.notification.document;
 
-import jakarta.persistence.Entity;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.MongoId;
+
+import java.time.LocalDateTime;
 
 @Document(collection = "fcm_token")
 @Getter
@@ -17,14 +21,24 @@ public class FcmToken {
     private String id;
 
     @Field(name = "user_id")
+    @NotNull
     private int userId;
 
     @Field(name = "token")
+    @NotNull
     private String token;
 
     @Field(name = "created_at")
-    private String createdAt;
+    @CreatedDate
+    @NotNull
+    private LocalDateTime createdAt;
 
     @Field(name = "updated_at")
-    private String updatedAt;
+    @LastModifiedDate
+    @NotNull
+    private LocalDateTime updatedAt;
+
+    public void updateToken(String token) {
+        this.token = token;
+    }
 }
