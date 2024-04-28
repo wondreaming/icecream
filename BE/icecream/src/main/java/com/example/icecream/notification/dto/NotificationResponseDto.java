@@ -1,7 +1,7 @@
 package com.example.icecream.notification.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.AllArgsConstructor;
 
 import java.time.LocalDateTime;
 

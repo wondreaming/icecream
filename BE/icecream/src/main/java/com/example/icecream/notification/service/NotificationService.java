@@ -12,4 +12,5 @@ public interface NotificationService {
     FcmToken saveOrUpdateFcmToken(LoginRequestDto loginRequestDto);
     NotificationList saveNotificationList(Integer UserId, String content);
     List<NotificationResponseDto> getNotificationList(Integer UserId);
+    // TODO: FCM 인증 및 발송 로직 추가 필요
 }

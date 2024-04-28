@@ -16,6 +16,7 @@ public class NotificationController {
 
     private final NotificationService notificationService;
 
+    // TODO: 시큐리티 적용 후 userId 관련 로직 수정 필요
     @GetMapping("/notification/{userId}")
     public ApiResponseDto<List<NotificationResponseDto>> getNotificationList(@PathVariable int userId) {
         List<NotificationResponseDto> notificationList = notificationService.getNotificationList(userId);

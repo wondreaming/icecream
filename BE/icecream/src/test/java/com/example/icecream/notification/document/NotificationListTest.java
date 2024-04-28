@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class NotificationListTest {
 
     @Test
-void notificationListBuilderTest() {
+    void notificationListBuilderTest() {
         NotificationList notificationList = NotificationList.builder()
                 .userId(1)
                 .content("testNotification")
