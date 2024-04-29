@@ -14,6 +14,7 @@ class Temp extends StatelessWidget {
           // 부모 페이지 이동 버튼
           ElevatedButton(onPressed: (){context.go('/parents');}, child: Text('부모 페이지'),),
           ElevatedButton(onPressed: (){context.go('/parents/setting');}, child: Text('부모 설정 페이지'),),
+          ElevatedButton(onPressed: (){context.go('/c_qrcode');}, child: Text('QRcode 생성페이지'),),
         ],
       )
     );

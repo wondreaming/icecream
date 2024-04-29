@@ -6,6 +6,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'firebase_options.dart';
 import 'package:icecream/com/router/router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // gps
 import 'package:geolocator/geolocator.dart'; // 임포트 추가
@@ -24,10 +25,24 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   }
 }
 
+// sharedpreferences에 저장
+Future<void> saveToDevicePrefs(String key, String value) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.setString(key, value);
+}
+
+// sharedpreferences에서 불러오기
+Future<String?> readFromDevicePrefs(String key) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  return prefs.getString(key);
+}
+
 // 디바이스 id 가져오기
 Future<void> checkDeviceWithServerUsingDio() async {
-  const androidIdPlugin = AndroidId();
-  final String? deviceId = await androidIdPlugin.getId();
+  const _androidIdPlugin = AndroidId();
+  final String? deviceId = await _androidIdPlugin.getId();
+  // 디바이스 id sharedPreferences에 저장
+  await saveToDevicePrefs("deviceId", deviceId!);
   debugPrint("android ID: $deviceId");
 }
 
@@ -40,6 +55,8 @@ void main() async {
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   final fcmToken = await firebaseMessaging.getToken();
+  // fcmToken sharedPreferences에 저장
+  await saveToDevicePrefs("fcmToken", fcmToken!);
   debugPrint('FCM Token: $fcmToken');
 
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -59,24 +76,43 @@ void main() async {
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
   const AndroidNotificationChannel channel = AndroidNotificationChannel(
-      'high_importance_channel', 'High Importance Notifications',
-      description: 'This channel is used for important notifications.',
-      importance: Importance.high);
+    'high_importance_channel', // 채널 id
+    'High Importance Notifications', // 채널 이름
+    description: 'This channel is used for important notifications.', // 채널 설명
+    importance: Importance.high,
+  );
   await flutterLocalNotificationsPlugin
       .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin>()
       ?.createNotificationChannel(channel);
 
   FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
-    const NotificationDetails notificationDetails = NotificationDetails(
-        android: AndroidNotificationDetails(
-            'high_importance_channel', 'High Importance Notifications',
-            channelDescription:
-                'This channel is used for important notifications.',
-            importance: Importance.high,
-            priority: Priority.high,
-            icon: 'mipmap/ic_launcher',
-            ticker: 'ticker'));
+    // 풀 스크린 인텐트 여부를 결정하는 플래그
+    bool isFullScreen = message.data['isFullScreen'] == 'true';
+
+    AndroidNotificationDetails androidDetails;
+
+    // 알림 세부정보
+    if (isFullScreen) {
+      androidDetails = const AndroidNotificationDetails(
+          'high_importance_channel', 'High Importance Notifications',
+          channelDescription:
+              'This channel is used for important notifications.',
+          importance: Importance.high,
+          priority: Priority.high,
+          fullScreenIntent: true,
+          icon: 'mipmap/ic_launcher',
+          ticker: 'ticker');
+    } else {
+      androidDetails = const AndroidNotificationDetails(
+          'regular_channel', 'Regular Notifications',
+          channelDescription: 'This channel is used for regular notifications.',
+          importance: Importance.defaultImportance,
+          priority: Priority.defaultPriority,
+          icon: 'mipmap/ic_launcher');
+    }
+
+    NotificationDetails notificationDetails = NotificationDetails(android: androidDetails);
 
     await flutterLocalNotificationsPlugin.show(
         message.hashCode,
