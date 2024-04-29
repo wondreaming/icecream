@@ -2,10 +2,17 @@ package com.example.icecream.notification.service;
 
 import com.example.icecream.notification.document.FcmToken;
 import com.example.icecream.notification.document.NotificationList;
+import com.example.icecream.notification.dto.FcmRequestDto;
+import com.example.icecream.notification.dto.FcmRequestDto2;
 import com.example.icecream.notification.dto.LoginRequestDto;
 import com.example.icecream.notification.dto.NotificationResponseDto;
 import com.example.icecream.notification.repository.FcmTokenRepository;
 import com.example.icecream.notification.repository.NotificationListRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,8 +21,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -29,12 +38,23 @@ public class NotificationServiceTest {
     @Mock
     private NotificationListRepository notificationListRepository;
 
+    private MockWebServer mockWebServer;
+
     @InjectMocks
     private NotificationServiceImpl notificationService;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws IOException {
         MockitoAnnotations.openMocks(this);
+        ObjectMapper objectMapper = new ObjectMapper();
+        mockWebServer = new MockWebServer();
+        mockWebServer.start();
+        notificationService = new NotificationServiceImpl(fcmTokenRepository, notificationListRepository, mockWebServer.url("/").toString(), objectMapper);
+    }
+
+    @AfterEach
+    void tearDown() throws IOException {
+        mockWebServer.shutdown();
     }
 
     @Test
@@ -128,5 +148,47 @@ public class NotificationServiceTest {
         assertEquals(content1, result.get(1).getContent());
 
         verify(notificationListRepository, times(1)).findByUserIdOrderByCreatedAtDesc(userId);
+    }
+
+    @Test
+    @DisplayName("특정 유저에게 알림 발송(개인)")
+    void testSendMessageTo() throws IOException {
+        String token = "testFcmToken";
+        FcmRequestDto fcmRequestDto = new FcmRequestDto(token, "title", "body", "key1", "key2", "key3");
+
+        FcmToken mockFcmToken = FcmToken.builder()
+                .userId(1)
+                .token(token)
+                .build();
+
+        when(fcmTokenRepository.findByToken(token)).thenReturn(mockFcmToken);
+
+        mockWebServer.enqueue(new MockResponse().setBody("success"));
+
+        notificationService.sendMessageTo(fcmRequestDto);
+
+        verify(fcmTokenRepository, times(1)).findByToken(token);
+    }
+
+    @Test
+    @DisplayName("특정 유저들에게 알림 발송(단체)")
+    void testSendMessageToUsers() throws InterruptedException {
+        List<Integer> userIds = Arrays.asList(1, 2, 3);
+        FcmRequestDto2 fcmRequestDto2 = new FcmRequestDto2(userIds, "title", "body", "key1", "key2", "key3");
+
+        CountDownLatch latch = new CountDownLatch(userIds.size());
+
+        doAnswer(invocation -> {
+            latch.countDown();
+            return null;
+        }).when(fcmTokenRepository).findByUserId(anyInt());
+
+        notificationService.sendMessageToUsers(fcmRequestDto2);
+
+        latch.await();
+
+        for (Integer userId : userIds) {
+            verify(fcmTokenRepository, times(1)).findByUserId(userId);
+        }
     }
 }

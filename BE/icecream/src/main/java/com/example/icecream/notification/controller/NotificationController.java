@@ -2,8 +2,10 @@ package com.example.icecream.notification.controller;
 
 import com.example.icecream.notification.dto.ApiResponseDto;
 import com.example.icecream.notification.dto.FcmRequestDto;
+import com.example.icecream.notification.dto.FcmRequestDto2;
 import com.example.icecream.notification.dto.NotificationResponseDto;
 import com.example.icecream.notification.service.NotificationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,6 +32,16 @@ public class NotificationController {
     public ApiResponseDto<String> fcmTest(@RequestBody FcmRequestDto fcmRequestDto) {
         try {
             notificationService.sendMessageTo(fcmRequestDto);
+        } catch (Exception e) {
+            return ApiResponseDto.error(e.getMessage());
+        }
+        return ApiResponseDto.success("메시지 전송 성공", null);
+    }
+
+    @PostMapping("/fcmTest2")
+    public ApiResponseDto<String> fcmTest2(@RequestBody @Valid FcmRequestDto2 fcmRequestDto2) {
+        try {
+            notificationService.sendMessageToUsers(fcmRequestDto2);
         } catch (Exception e) {
             return ApiResponseDto.error(e.getMessage());
         }
