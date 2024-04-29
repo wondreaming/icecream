@@ -3,17 +3,50 @@ import 'package:icecream/com/const/color.dart';
 import 'package:icecream/setting/widget/custom_elevated_button.dart';
 import 'package:icecream/setting/widget/custom_text_field.dart';
 
-void customModal(BuildContext context, String title, Widget body) {
+class CustomModal extends StatelessWidget {
+  final String title;
+  final Widget body;
+  final double height;
+
+  const CustomModal({
+    super.key,
+    required this.title,
+    required this.body,
+    required this.height,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // 키보드가 열릴 때 바닥 부분의 높이를 동적으로 얻기 위해 MediaQuery를 사용
+    double bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    return Container(
+      height: height + bottomInset,
+      width: double.infinity,
+      margin: EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontFamily: 'GmarketSans',
+              fontSize: 24.0,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+          Expanded(child: body),
+        ],
+      ),
+    );
+  }
+}
+
+// 외부에서 이 함수를 호출하여 모달을 표시합니다.
+void showCustomModal(BuildContext context, String title, Widget body, double height) {
   showModalBottomSheet(
       context: context,
-      builder: (context) {
-        return Container(
-          width: double.infinity,
-          child: _CustomModalContent(
-            title: title,
-            body: body,
-          ),
-        );
+      builder: (BuildContext context) {
+        return CustomModal(title: title, body: body, height: height);
       },
       backgroundColor: AppColors.background_color,
       shape: RoundedRectangleBorder(
@@ -22,34 +55,7 @@ void customModal(BuildContext context, String title, Widget body) {
           topLeft: Radius.circular(20),
         ),
       ),
-      isScrollControlled: false, // modal의 최대 높이가 전체 화면의 1/2
-      barrierLabel:
-          "이제 모달이 열려 있어서 화면이 더 어두워졌습니다. 이 메뉴를 닫을 때까지 앱의 나머지 부분을 터치할 수 없습니다." // 시각 장애인을 위한 안내 멘트
-      );
-}
-
-class _CustomModalContent extends StatelessWidget {
-  final String title;
-  final Widget body;
-  const _CustomModalContent({
-    super.key,
-    required this.title,
-    required this.body,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 30.0, vertical: 20.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: TextStyle(fontFamily: 'GmarketSans',
-            fontSize: 24.0,
-            fontWeight: FontWeight.w400,),),
-          body,
-        ],
-      ),
-    );
-  }
+      isScrollControlled: true,
+      barrierLabel: "이제 모달이 열려 있어서 화면이 더 어두워졌습니다. 이 메뉴를 닫을 때까지 앱의 나머지 부분을 터치할 수 없습니다."
+  );
 }

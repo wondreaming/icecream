@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:icecream/com/widget/default_layout.dart';
+import 'package:icecream/setting/widget/custom_elevated_button.dart';
+import 'package:icecream/setting/widget/custom_modal.dart';
 import 'package:icecream/setting/widget/custom_popupbutton.dart';
+import 'package:icecream/setting/widget/custom_show_dialog.dart';
+import 'package:icecream/setting/widget/custom_text_field.dart';
 import 'package:icecream/setting/widget/detail_profile.dart';
 
 class MyPage extends StatelessWidget {
@@ -16,18 +21,31 @@ class MyPage extends StatelessWidget {
           secound: '로그아웃',
           third: '회원 탈퇴',
           firstOnTap: () {
-            Future.delayed(
-              const Duration(seconds: 0),
-              () => showDialog(
-                context: context,
-                builder: (context) => const AlertDialog(
-                  title: Text('test dialog'),
-                ),
+            showCustomModal(
+              context,
+              '비밀번호 변경',
+              Column(
+                children: [
+                  SizedBox(height: 16.0),
+                  CustomTextField(
+                    hintText: '현재 비밀번호를 입력해주세요',
+                  ),
+                  SizedBox(height: 16.0),
+                  CustomElevatedButton(onPressed: () {
+                    context.pop();
+                    changePasswordModal(context);
+                  }, child: '다음'),
+                ],
               ),
+              160.0,
             );
           },
-          secoundOnTap: () {},
-          thirdOnTap: () {},
+          secoundOnTap: () {
+            showCustomDialog(context, '로그아웃하시겠습니까?');
+          },
+          thirdOnTap: () {
+            showCustomDialog(context, '회원 탈퇴하시겠습니까?');
+          },
         ),
       ],
       child: DetailProfile(
@@ -37,4 +55,27 @@ class MyPage extends StatelessWidget {
       ),
     );
   }
+}
+
+// 비밀번호 변경 모달
+void changePasswordModal(BuildContext context){
+  showCustomModal(
+    context,
+    '비밀번호 변경',
+    Column(
+      children: [
+        SizedBox(height: 16.0),
+        CustomTextField(
+          hintText: '변경할 비밀번호를 입력해주세요',
+        ),
+        SizedBox(height: 16.0),
+        CustomTextField(
+          hintText: '변경할 비밀번호를 다시 입력해주세요',
+        ),
+        SizedBox(height: 16.0),
+        CustomElevatedButton(onPressed: () {context.pop();}, child: '저장'),
+      ],
+    ),
+    220.0,
+  );
 }
