@@ -1,17 +1,17 @@
 package com.example.icecream.notification.controller;
 
 import com.example.icecream.notification.dto.ApiResponseDto;
+import com.example.icecream.notification.dto.FcmRequestDto;
 import com.example.icecream.notification.dto.NotificationResponseDto;
 import com.example.icecream.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api")
 public class NotificationController {
 
     private final NotificationService notificationService;
@@ -21,8 +21,18 @@ public class NotificationController {
     public ApiResponseDto<List<NotificationResponseDto>> getNotificationList(@PathVariable int userId) {
         List<NotificationResponseDto> notificationList = notificationService.getNotificationList(userId);
         if (notificationList.isEmpty()) {
-            return ApiResponseDto.notFound();
+            return ApiResponseDto.notFound("알림 목록이 존재하지 않습니다.");
         }
-        return ApiResponseDto.success(notificationList);
+        return ApiResponseDto.success("알림 목록 조회에 성공하였습니다.", notificationList);
+    }
+
+    @PostMapping("/fcmTest")
+    public ApiResponseDto<String> fcmTest(@RequestBody FcmRequestDto fcmRequestDto) {
+        try {
+            notificationService.sendMessageTo(fcmRequestDto);
+        } catch (Exception e) {
+            return ApiResponseDto.error(e.getMessage());
+        }
+        return ApiResponseDto.success("메시지 전송 성공", null);
     }
 }
