@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository;
 public interface FcmTokenRepository extends MongoRepository<FcmToken, String> {
 
     FcmToken findByUserId(int userId);
+    FcmToken findByToken(String token);
 }

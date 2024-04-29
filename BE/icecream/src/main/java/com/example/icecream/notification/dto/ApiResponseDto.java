@@ -11,11 +11,15 @@ public class ApiResponseDto<T> {
     private String message;
     private T data;
 
-    public static <T> ApiResponseDto<T> success(T data) {
-        return new ApiResponseDto<>(200, "알림 목록 조회에 성공하였습니다.", data);
+    public static <T> ApiResponseDto<T> success(String message, T data) {
+        return new ApiResponseDto<>(200, message, data);
     }
 
-    public static <T> ApiResponseDto<T> notFound() {
-        return new ApiResponseDto<>(404, "알림 목록이 존재하지 않습니다.", null);
+    public static <T> ApiResponseDto<T> notFound(String message) {
+        return new ApiResponseDto<>(404, message, null);
+    }
+
+    public static <T> ApiResponseDto<T> error(String errorMessage) {
+        return new ApiResponseDto<>(500, "서버 에러 발생: " + errorMessage, null);
     }
 }
