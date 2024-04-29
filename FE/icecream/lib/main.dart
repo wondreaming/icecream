@@ -8,6 +8,12 @@ import 'firebase_options.dart';
 import 'package:icecream/com/router/router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// gps
+import 'package:geolocator/geolocator.dart'; // 임포트 추가
+import 'package:icecream/gps/location_service.dart';
+import 'package:icecream/gps/rabbitmq_service.dart';
+import 'dart:async';
+
 // fcm background 핸들러
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -38,28 +44,11 @@ Future<void> checkDeviceWithServerUsingDio() async {
   // 디바이스 id sharedPreferences에 저장
   await saveToDevicePrefs("deviceId", deviceId!);
   debugPrint("android ID: $deviceId");
-  // 서버랑 통신해서 존재하는 유저인지 확인
-  // var dio = Dio();
-  // try {
-  //   var response = await dio.post(
-  //     'https://yourserver.com/api/auth/device/login',
-  //     data: {'device_id': deviceId}
-  //   );
-
-  //   if (response.statusCode == 200) {
-  //     debugPrint('Device is registered on the server');
-  //   } else {
-  //     debugPrint('Server responded with status code: ${response.statusCode}');
-  //   }
-  // } on DioError catch (e) {
-  //   debugPrint('Dio error: ${e.response?.data['message'] ?? e.message}');
-  // }
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  // 디바이스id 가져오는 함수 실행
   await checkDeviceWithServerUsingDio();
 
   FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
@@ -86,7 +75,6 @@ void main() async {
       InitializationSettings(android: initializationSettingsAndroid);
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
-  // Notification Channel 설정
   const AndroidNotificationChannel channel = AndroidNotificationChannel(
     'high_importance_channel', // 채널 id
     'High Importance Notifications', // 채널 이름
@@ -98,7 +86,6 @@ void main() async {
           AndroidFlutterLocalNotificationsPlugin>()
       ?.createNotificationChannel(channel);
 
-  // Foreground 알림 메시지 처리
   FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
     // 풀 스크린 인텐트 여부를 결정하는 플래그
     bool isFullScreen = message.data['isFullScreen'] == 'true';
@@ -127,7 +114,6 @@ void main() async {
 
     NotificationDetails notificationDetails = NotificationDetails(android: androidDetails);
 
-    // 알림 표시
     await flutterLocalNotificationsPlugin.show(
         message.hashCode,
         message.notification?.title,
@@ -135,7 +121,6 @@ void main() async {
         notificationDetails,
         payload: 'Notification Payload');
 
-    // 받은 알림 출력
     debugPrint("Received notification title: ${message.notification?.title}");
     debugPrint("Received notification: ${message.notification?.body}");
   });
@@ -143,15 +128,44 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final LocationService _locationService = LocationService();
+  final RabbitMQService _rabbitMQService = RabbitMQService();
+  late StreamSubscription<Position> _locationSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    initServices();
+  }
+
+  Future<void> initServices() async {
+    await _locationService.initLocationService();
+    await _rabbitMQService.initRabbitMQ();
+    _locationSubscription =
+        _locationService.getLocationStream().listen((position) {
+      _rabbitMQService.sendLocation(position.latitude, position.longitude, 1);
+    });
+  }
+
+  @override
+  void dispose() {
+    _locationSubscription.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      // router 환경설정
       routerConfig: router,
-      debugShowCheckedModeBanner: false, // debug 배너 삭제
+      debugShowCheckedModeBanner: false,
     );
   }
 }

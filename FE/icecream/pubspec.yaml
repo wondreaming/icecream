@@ -52,6 +52,8 @@ dependencies:
   shared_preferences: ^2.2.3
   pretty_qr_code: ^3.3.0
   encrypt: ^5.0.3
+  dart_amqp: ^0.2.5
+
 
 
 
