@@ -3,6 +3,7 @@ package com.example.icecream.domain.map.service;
 import com.example.icecream.domain.map.entity.Crosswalk;
 import com.example.icecream.domain.map.repository.CrosswalkRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -27,20 +28,26 @@ public class CrosswalkService {
     }
 
 
-    public boolean checkCrosswalkArea(double latitude, double longitude) {
-
+    public void checkCrosswalkArea(int userId, double latitude, double longitude) {
         Point point = geometryFactory.createPoint(new Coordinate(longitude, latitude));
+        ListOperations<String, Object> listOps = redisTemplate.opsForList();
+
         for (Crosswalk crosswalk : crosswalkRepository.findAll()) {
-            boolean isWithin = crosswalk.getCrosswalkArea().contains(point);
-            List<String> list = Arrays.asList("a", "b", "c");
-            redisTemplate.opsForValue().set("abc", list);
-            System.out.println(redisTemplate.opsForValue().get("abc"));
-//            if (isWithin && valueFromRedis != null && valueFromRedis.equals("True")) {
-//                return true; // 포함되고, 레디스 값이 True면 true 반환
-//            } else if (!isWithin && valueFromRedis != null && valueFromRedis.equals("False")) {
-//                return true; // 포함되지 않고, 레디스 값이 False면 true 반환
-//            }
+            String key = crosswalk.getCrosswalkName();
+            long index = listOps.indexOf(key, userId);
+
+            if (crosswalk.getCrosswalkArea().contains(point)) {
+                if (index == -1) {
+                    listOps.rightPush(key, String.valueOf(userId));
+                }
+
+            } else {
+                if (index != -1) {
+                    listOps.remove(key, 0, String.valueOf(userId));
+                }
+
+            }
         }
-        return false; // 모든 순회에서 조건을 만족하지 못하면 false 반환
+
     }
 }

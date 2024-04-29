@@ -18,10 +18,6 @@ public class GPSMessageListener {
 
     @RabbitListener(queues = "crosswalk")
     public void receiveMessage(GPSMessageDto gpsMessageDto) {
-        double latitude = gpsMessageDto.getLatitude();
-        double longitude = gpsMessageDto.getLongitude();
-
-        boolean roadsContainingPoint = crosswalkService.checkCrosswalkArea(latitude, longitude);
-        System.out.println("Roads containing the point: " + roadsContainingPoint);
+        crosswalkService.checkCrosswalkArea(gpsMessageDto.getUserId(), gpsMessageDto.getLatitude(), gpsMessageDto.getLongitude());
     }
 }
