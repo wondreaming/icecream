@@ -75,4 +75,28 @@ public class FcmTokenRepositoryTest {
 
         assertNull(findFcmToken);
     }
+
+    @Test
+    void testFindByToken() {
+        FcmToken fcmToken = FcmToken.builder()
+                .userId(5)
+                .token("testFcmToken")
+                .build();
+        fcmTokenRepository.save(fcmToken);
+
+        FcmToken findFcmToken = fcmTokenRepository.findByToken("testFcmToken");
+
+        assertNotNull(findFcmToken);
+        assertEquals(fcmToken.getUserId(), findFcmToken.getUserId());
+        assertEquals(fcmToken.getToken(), findFcmToken.getToken());
+        assertNotNull(findFcmToken.getCreatedAt());
+        assertNotNull(findFcmToken.getUpdatedAt());
+    }
+
+    @Test
+    void testFindByTokenNotFound() {
+        FcmToken findFcmToken = fcmTokenRepository.findByToken("testFcmTokenEmpty");
+
+        assertNull(findFcmToken);
+    }
 }

@@ -2,26 +2,29 @@ package com.example.icecream.notification.service;
 
 import com.example.icecream.notification.document.FcmToken;
 import com.example.icecream.notification.document.NotificationList;
-import com.example.icecream.notification.dto.FcmMessageDto;
-import com.example.icecream.notification.dto.FcmRequestDto;
-import com.example.icecream.notification.dto.LoginRequestDto;
-import com.example.icecream.notification.dto.NotificationResponseDto;
+import com.example.icecream.notification.dto.*;
 import com.example.icecream.notification.repository.FcmTokenRepository;
 import com.example.icecream.notification.repository.NotificationListRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.oauth2.GoogleCredentials;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class NotificationServiceImpl implements NotificationService {
 
@@ -73,6 +76,40 @@ public class NotificationServiceImpl implements NotificationService {
                 .collect(Collectors.toList());
     }
 
+    @Async
+    @Override
+    @Transactional
+    public void sendMessageToUsers(FcmRequestDto2 fcmRequestDto2) {
+        log.info("알림 대상 유저 ID: {}", fcmRequestDto2.getUserIds());
+        long total = fcmRequestDto2.getUserIds().size();
+        AtomicInteger success = new AtomicInteger(0);
+        AtomicInteger failed = new AtomicInteger(0);
+
+        List<CompletableFuture<Void>> futures = fcmRequestDto2.getUserIds().stream()
+                .map(userId -> CompletableFuture.runAsync(() -> {
+                    FcmToken fcmToken = fcmTokenRepository.findByUserId(userId);
+                    if (fcmToken != null) {
+                        FcmRequestDto fcmRequestDto = new FcmRequestDto(fcmToken.getToken(), fcmRequestDto2.getTitle(), fcmRequestDto2.getBody(), fcmRequestDto2.getKey1(), fcmRequestDto2.getKey2(), fcmRequestDto2.getKey3());
+                        try {
+                            sendMessageTo(fcmRequestDto);
+                            success.incrementAndGet();
+                        } catch (IOException e) {
+                            throw new RuntimeException("Failed to send message to FCM", e);
+                        }
+                    } else {
+                        throw new RuntimeException("Failed to find FCM token by userId: " + userId);
+                    }
+                }, Executors.newCachedThreadPool()).exceptionally((ex) -> {
+                    failed.incrementAndGet();
+                    log.error("에러 발생: {}", ex.getMessage());
+                    return null;
+                }))
+                .toList();
+
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                .thenRun(() -> log.info("FCM 전송 완료: 성공 {}, 실패 {}", success.get(), failed.get()));
+    }
+
     @Override
     @Transactional
     public void sendMessageTo(FcmRequestDto fcmRequestDto) throws IOException {
@@ -91,8 +128,6 @@ public class NotificationServiceImpl implements NotificationService {
         try (Response response = client.newCall(request).execute()) {
             if (response.body() != null) {
                 saveNotificationList(fcmTokenRepository.findByToken(fcmRequestDto.getToken()).getUserId(), fcmRequestDto.getBody());
-                System.out.println("메시지 내용: " + message);
-                System.out.println("Successfully sent message to FCM: " + response.body().string());
             } else {
                 throw new IOException("Failed to send message to FCM");
             }
