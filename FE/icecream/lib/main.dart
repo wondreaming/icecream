@@ -137,7 +137,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final LocationService _locationService = LocationService();
-  final RabbitMQService _rabbitMQService = RabbitMQService();
+  // final RabbitMQService _rabbitMQService = RabbitMQService();
   late StreamSubscription<Position> _locationSubscription;
 
   @override
@@ -148,10 +148,10 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> initServices() async {
     await _locationService.initLocationService();
-    await _rabbitMQService.initRabbitMQ();
+    // await _rabbitMQService.initRabbitMQ();
     _locationSubscription =
         _locationService.getLocationStream().listen((position) {
-      _rabbitMQService.sendLocation(position.latitude, position.longitude, 1);
+      // _rabbitMQService.sendLocation(position.latitude, position.longitude, 1);
     });
   }
 
