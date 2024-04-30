@@ -26,6 +26,7 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 **/application-local.properties
+**/fcm-admin-sdk.json
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
