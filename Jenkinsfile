@@ -10,8 +10,8 @@ pipeline {
         stage('BE Env Prepare') {
             steps {
                 withCredentials([
-                    file(credentialsId: 'icecream-prod', variable: 'application_prod.properties'),
-                    file(credentialsId: 'icecream-fcm', variable: 'fcm_admin_sdk.json')
+                    file(credentialsId: 'icecream-prod', variable: 'PROD_PROPERTIES'),
+                    file(credentialsId: 'icecream-fcm', variable: 'FCM_JSON')
                     ]) {
 
                 script{
@@ -19,12 +19,12 @@ pipeline {
                     // sh 'chmod -R 755 icecream/src/main/resources/'
 
                     // Secret File Credential을 사용하여 설정 파일을 Spring 프로젝트의 resources 디렉토리로 복사
-                    sh 'cp "${application_prod.properties}" BE/icecream/src/main/resources/application-prod.properties'
-                    sh 'cp "${fcm_admin_sdk.json}" BE/icecream/src/main/resources/fcm-admin-sdk.json'
-                }
-            }   
+                    sh 'cp "${PROD_PROPERTIES}" BE/icecream/src/main/resources/application-prod.properties'
+                    sh 'cp "${FCM_JSON}" BE/icecream/src/main/resources/fcm-admin-sdk.json'
+                    }
+                }   
+            }
         }
-    }
 
         // 빌드
         stage('Build BE') {
@@ -33,7 +33,7 @@ pipeline {
                 // 백엔드 소스코드가 있는 경로로 이동
                 dir('BE/icecream') {
                     // Docker 이미지 빌드 명령어
-                    sh 'docker build --no-cache -t icecream .'
+                    sh 'docker build -t icecream .'
                 }
             }
         }
