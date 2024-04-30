@@ -1,15 +1,10 @@
-import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:camera/camera.dart';
-import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
-import 'package:ffmpeg_kit_flutter/return_code.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:icecreamcctv/common/default_layout.dart';
 import 'package:icecreamcctv/main.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class WebsocketScreen extends StatefulWidget {
@@ -26,7 +21,6 @@ class _WebsocketScreenState extends State<WebsocketScreen> with WidgetsBindingOb
 
   // 카메라 controller
   late CameraController controller;
-  XFile? videoFile;
   bool is_recording = false; // 동영상 촬영 유무
 
   @override
@@ -66,9 +60,11 @@ class _WebsocketScreenState extends State<WebsocketScreen> with WidgetsBindingOb
   }
 
   // cctv 이미지 방출
-  void sendCCTVImage(String imageText) {
-    Map<String, String> CCTVImage = {
-      'CCTVImage': imageText,
+  void sendCCTVImage(int width, int height, Uint8List payload) {
+    Map<String, dynamic> CCTVImage = {
+      'CCTVImage': payload,
+      'width' : width,
+      'height' : height,
     };
     socket.emit('sendCCTVImage', CCTVImage);
   }
@@ -86,72 +82,54 @@ class _WebsocketScreenState extends State<WebsocketScreen> with WidgetsBindingOb
       if (e is CameraException) {
         switch (e.code) {
           case 'CameraAccessDenied':
-            // Handle access errors here.
+            print(e.code);
             break;
           default:
-            // Handle other errors here.
+            print(e.code);
             break;
         }
       }
     });
   }
-
-  // video를 frame으로 쪼개기
-  void extractFrames(String videoPath, String outputPath) {
-    final command = "-i $videoPath -vf fps=30 $outputPath/frame_%04d.png";
-    FFmpegKit.execute(command).then((session) async {
-      final returnCode = await session.getReturnCode();
-      if (ReturnCode.isSuccess(returnCode)) {
-        print("Frames extracted successfully");
-      } else {
-        print("Error in extracting frames");
-      }
+  // 카메라에서 YUV 데이터 처리
+  void startImageStream () {
+    controller.startImageStream((CameraImage image) {
+      sendImageOverWebSocket(image);
     });
   }
 
-  // 프레임 이미지는 blob로 변환
-  Future<Uint8List> getFrameBytes(String framePath) async {
-    File frameFile = File(framePath);
-    return await frameFile.readAsBytes();
+  // 웹소캣 처리해서 보내기
+  void sendImageOverWebSocket(CameraImage image) {
+    final int width = image.width;
+    final int height = image.height;
+
+    final Uint8List y = image.planes[0].bytes;
+    final Uint8List u = image.planes[1].bytes;
+    final Uint8List v = image.planes[2].bytes;
+
+    final Uint8List payload = Uint8List.fromList([...y, ...u, ...v]);
+    sendCCTVImage(width, height, payload);
   }
-
-  void processVideoAndSendFrames(String videoPath) async {
-    print('동영상을 프레임으로 쪼개서, 텍스트로 전송');
-    // Define output path for frames
-    final outputPath = (await getTemporaryDirectory()).path + "/frames";
-    await Directory(outputPath).create(recursive: true);
-
-    // Extract frames using FFmpegKit
-    extractFrames(videoPath, outputPath);
-
-    // Send each frame
-    var dir = Directory(outputPath);
-    await for (var entity in dir.list()) {
-      if (entity is File) {
-        Uint8List imageData = await getFrameBytes(entity.path);
-        sendCCTVImage(base64Encode(imageData));  // Encode to base64 if needed or send directly
-        print("Frame sent: ${entity.path}");
-      }
-    }
-  }
-
 
   @override
   void dispose() {
     controller.dispose(); // 카메라 종료
-    WidgetsBinding.instance?.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
-  // 생명 주기 관리
+  // 카메라 생명 주기 관리
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     if (controller != null && controller.value.isInitialized) {
       if (state == AppLifecycleState.paused) {
-        controller.dispose();
+        if (controller.value.isStreamingImages) {
+          controller.stopImageStream(); // 스트리밍 중지
+        }
+        controller.dispose(); // 카메라 해제
       } else if (state == AppLifecycleState.resumed) {
-        initCamera();
+        initCamera(); // 카메라 재초기화
       }
     }
   }
@@ -168,18 +146,20 @@ class _WebsocketScreenState extends State<WebsocketScreen> with WidgetsBindingOb
                 IconButton(
                   onPressed: () async {
                     if (is_recording) {
-                      print('동영상 촬영 끝');
-                      videoFile = await controller.stopVideoRecording();
-                      print(videoFile!.path);
-
-                      processVideoAndSendFrames(videoFile!.path);
-
+                      print('동영상 전송 끝');
+                      if (controller.value.isStreamingImages) {
+                        await controller.stopImageStream();
+                      }
                       setState(() {
                         is_recording = false;
                       });
                     } else {
-                      print('동영상 촬영 시작');
-                      await controller.startVideoRecording();
+                      print('동영상 전송 시작');
+                      // 카메라가 초기화 되었는 지 확인
+                      if (!controller.value.isInitialized) {
+                        await controller.initialize();
+                      }
+                      startImageStream();
                       setState(() => is_recording = true);
                     }
                   },
