@@ -7,11 +7,11 @@ pipeline {
 
     stages {
         // 빌드
-        stage('Build Service') {
+        stage('Build BE') {
             steps {
-                echo 'Building Service'
+                echo 'Building BE'
                 // 백엔드 소스코드가 있는 경로로 이동
-                dir('BE') {
+                dir('develop-BE') {
                     // Docker 이미지 빌드 명령어
                     sh 'docker build -t icecream .'
                 }
@@ -27,7 +27,7 @@ pipeline {
         }
 
         // 배포
-        stage('Deploy Bank') {
+        stage('Deploy BEank') {
             steps {
                 // 배포 관련 작업을 여기에 추가
                 echo 'Deploying Bank...'
@@ -35,7 +35,7 @@ pipeline {
                 sh 'docker stop bank || true'
                 sh 'docker rm bank || true'
                 // 백엔드 이미지 실행
-                sh 'docker run -d -p 58938:8080 --name icecream icecream'
+                sh 'docker run -d -p 8080:8080 --name icecream icecream'
             }
         }
     }
