@@ -1,6 +1,6 @@
 package com.example.icecream.notification.repository;
 
-import com.example.icecream.domain.notification.config.MongoConfig;
+import com.example.icecream.common.config.MongoConfig;
 import com.example.icecream.domain.notification.document.NotificationList;
 import com.example.icecream.domain.notification.repository.NotificationListRepository;
 import org.junit.jupiter.api.AfterEach;
