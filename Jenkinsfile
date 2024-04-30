@@ -32,8 +32,8 @@ pipeline {
                 // 배포 관련 작업을 여기에 추가
                 echo 'Deploying Bank...'
                 // 빌드가 진행되면 기존의 컨테이너 중지 및 제거 & 컨테이너가 없어도 실패하지 않고계속 수행
-                sh 'docker stop bank || true'
-                sh 'docker rm bank || true'
+                sh 'docker stop icecream || true'
+                sh 'docker rm icecream || true'
                 // 백엔드 이미지 실행
                 sh 'docker run -d -p 8080:8080 --name icecream icecream'
             }
