@@ -23,4 +23,4 @@ RUN ls -al /app
 RUN ls /app/*.jar
 
 # 애플리케이션 실행
-ENTRYPOINT ["java","-jar","/app/Backend-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java","-jar","/app/icecream-0.0.1-SNAPSHOT.jar"]
