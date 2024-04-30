@@ -9,14 +9,14 @@ import java.util.List;
 @Service
 public class RedisListenService {
 
-    private final RedisTemplate<String, List<Integer>> redisTemplate;
+    private final RedisTemplate<String, Integer> redisTemplate;
 
     @Autowired
-    public RedisListenService(RedisTemplate<String, List<Integer>> redisTemplate) {
+    public RedisListenService(RedisTemplate<String, Integer> redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
     public List<Integer> getRedisValue(String key) {
-        return redisTemplate.opsForValue().get(key);
+        return redisTemplate.opsForList().range(key, 0, -1);
     }
 }

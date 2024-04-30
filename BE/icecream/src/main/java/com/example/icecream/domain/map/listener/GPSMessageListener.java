@@ -1,4 +1,4 @@
-package com.example.icecream.domain.map.controller;
+package com.example.icecream.domain.map.listener;
 
 import com.example.icecream.domain.map.dto.GPSMessageDto;
 import com.example.icecream.domain.map.service.CrosswalkService;
