@@ -11,7 +11,7 @@ pipeline {
             steps {
                 echo 'Building BE...'
                 dir('CCTV-BE') {
-                    sh 'docker build -t cctv . .'
+                    sh 'docker build -t cctv .'
                 }
             }
         }
