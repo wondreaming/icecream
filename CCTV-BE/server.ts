@@ -14,7 +14,7 @@ const port = process.env.PORT || 8050;
 const roomName = process.env.roomName || "chatRoom";
 
 // server port
-server.listen(port, () => {
+server.listen(port, "0.0.0.0", () => {
   console.log("port에 서버 연결됨");
 });
 
@@ -31,8 +31,9 @@ app.get("/cctv", (req, res) => {
   // 초기 데이터 설정
   const initialData = {
     CCTVImage: null,
+    width: null,
+    height: null,
   };
-
   res.render("cctv", { data: initialData }); // 'data' 객체를 전달
 });
 
@@ -44,11 +45,11 @@ io.on("connect", socket => {
     // 방 참여
     socket.join(roomName);
     roomCapacity[roomName]++;
-    console.log("현재 방에 참여한 인원", roomCapacity.chatRoom);
+    console.log("현재 방에 참여한 인원", roomCapacity[roomName]);
 
     // cctv 이미지 받고 전송
     socket.on("sendCCTVImage", data => {
-      console.log(data, roomName);
+      console.log(data.CCTVImage);
       io.to(roomName).emit("getCCTVImage", data);
     });
 

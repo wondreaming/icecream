@@ -7,18 +7,15 @@
   </head>
   <body>
     <h1>CCTV 영상 출력</h1>
-    <img
-      src="data:image/png;base64, <%= data.CCTVImage %>"
-      alt="CCTVImage"
-      id="CCTVImage"
-    />
+
     <script src="https://cdn.jsdelivr.net/npm/socket.io@4.7.2/client-dist/socket.io.min.js"></script>
     <script>
       const socket = io();
       socket.on("getCCTVImage", data => {
+        console.log("333333333");
+        const time = new Date();
+        console.log("받는 시간", time);
         console.log(data);
-        const imageElement = document.getElementById("CCTVImage");
-        imageElement.src = `data:image/png;base64,${data.CCTVImage}`;
       });
     </script>
   </body>
