@@ -10,8 +10,8 @@ pipeline {
         stage('BE Env Prepare') {
             steps {
                 withCredentials([
-                    file(credentialsId: 'icecream-prod', variable: 'application-prod.properties'),
-                    file(credentialsId: 'icecream-fcm', variable: 'fcm-admin-sdk.json')
+                    file(credentialsId: 'icecream-prod', variable: 'application_prod.properties'),
+                    file(credentialsId: 'icecream-fcm', variable: 'fcm_admin_sdk.json')
                     ]) {
 
                 script{
@@ -19,8 +19,8 @@ pipeline {
                     // sh 'chmod -R 755 icecream/src/main/resources/'
 
                     // Secret File Credential을 사용하여 설정 파일을 Spring 프로젝트의 resources 디렉토리로 복사
-                    sh 'cp "${application-prod.properties}" icecream/src/main/resources/application-prod.properties'
-                    sh 'cp "${fcm-admin-sdk.json}" icecream/src/main/resources/fcm-admin-sdk.json'
+                    sh 'cp "${application_prod.properties}" icecream/src/main/resources/application-prod.properties'
+                    sh 'cp "${fcm_admin_sdk.json}" icecream/src/main/resources/fcm-admin-sdk.json'
                 }
             }   
         }
