@@ -47,7 +47,7 @@ pipeline {
         }
 
         // 배포
-        stage('Deploy BEank') {
+        stage('Deploy BE') {
             steps {
                 // 배포 관련 작업을 여기에 추가
                 echo 'Deploying Bank...'
