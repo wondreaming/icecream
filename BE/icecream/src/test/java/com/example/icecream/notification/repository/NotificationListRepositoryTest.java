@@ -1,7 +1,8 @@
 package com.example.icecream.notification.repository;
 
-import com.example.icecream.notification.config.MongoConfig;
-import com.example.icecream.notification.document.NotificationList;
+import com.example.icecream.domain.notification.config.MongoConfig;
+import com.example.icecream.domain.notification.document.NotificationList;
+import com.example.icecream.domain.notification.repository.NotificationListRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,5 +1,6 @@
 package com.example.icecream.notification.document;
 
+import com.example.icecream.domain.notification.document.FcmToken;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

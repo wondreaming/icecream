@@ -1,13 +1,14 @@
 package com.example.icecream.notification.service;
 
-import com.example.icecream.notification.document.FcmToken;
-import com.example.icecream.notification.document.NotificationList;
-import com.example.icecream.notification.dto.FcmRequestDto;
-import com.example.icecream.notification.dto.FcmRequestDto2;
-import com.example.icecream.notification.dto.LoginRequestDto;
-import com.example.icecream.notification.dto.NotificationResponseDto;
-import com.example.icecream.notification.repository.FcmTokenRepository;
-import com.example.icecream.notification.repository.NotificationListRepository;
+import com.example.icecream.domain.notification.document.FcmToken;
+import com.example.icecream.domain.notification.document.NotificationList;
+import com.example.icecream.domain.notification.dto.FcmRequestDto;
+import com.example.icecream.domain.notification.dto.FcmRequestDto2;
+import com.example.icecream.domain.notification.dto.LoginRequestDto;
+import com.example.icecream.domain.notification.dto.NotificationResponseDto;
+import com.example.icecream.domain.notification.repository.FcmTokenRepository;
+import com.example.icecream.domain.notification.repository.NotificationListRepository;
+import com.example.icecream.domain.notification.service.NotificationServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import okhttp3.mockwebserver.MockResponse;
