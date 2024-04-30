@@ -17,6 +17,4 @@ public class RedisTestController {
         redisTemplate.opsForValue().set(redisMessageDto.getId(), redisMessageDto.getContent());
     }
 
-
-
 }
