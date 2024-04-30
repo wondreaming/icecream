@@ -25,7 +25,7 @@ pipeline {
             }   
         }
     }
-}
+
         // 빌드
         stage('Build BE') {
             steps {
