@@ -11,43 +11,45 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Point;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Service
 public class CrosswalkService {
 
     private final CrosswalkRepository crosswalkRepository;
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, Integer> redisTemplate;
     private final GeometryFactory geometryFactory = new GeometryFactory();
 
     @Autowired
-    public CrosswalkService(CrosswalkRepository crosswalkRepository, RedisTemplate<String, Object> redisTemplate) {
+    public CrosswalkService(CrosswalkRepository crosswalkRepository, RedisTemplate<String, Integer> redisTemplate) {
         this.crosswalkRepository = crosswalkRepository;
         this.redisTemplate = redisTemplate;
     }
 
 
     public void checkCrosswalkArea(int userId, double latitude, double longitude) {
+
         Point point = geometryFactory.createPoint(new Coordinate(longitude, latitude));
-        ListOperations<String, Object> listOps = redisTemplate.opsForList();
 
         for (Crosswalk crosswalk : crosswalkRepository.findAll()) {
             String key = crosswalk.getCrosswalkName();
-            long index = listOps.indexOf(key, userId);
+            System.out.println(key);
+            ListOperations<String, Integer> listOperations = redisTemplate.opsForList();
+            Long idx = listOperations.indexOf(key, userId);
+            System.out.println("idx = " + idx);
+            System.out.println("포함 여부 = " + crosswalk.getCrosswalkArea().contains(point));
+            List<Integer> userIds = listOperations.range(key, 0, -1);
+            System.out.println(userIds);
 
             if (crosswalk.getCrosswalkArea().contains(point)) {
-                if (index == -1) {
-                    listOps.rightPush(key, String.valueOf(userId));
+                if (idx == null) {
+                    listOperations.rightPush(key, userId);
                 }
-
             } else {
-                if (index != -1) {
-                    listOps.remove(key, 0, String.valueOf(userId));
+                if (idx != null) {
+                    listOperations.remove(key, 0, userId);
                 }
-
             }
         }
-
     }
 }
