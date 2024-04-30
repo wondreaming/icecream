@@ -11,7 +11,7 @@ pipeline {
             steps {
                 echo 'Building BE'
                 // 백엔드 소스코드가 있는 경로로 이동
-                dir('icecream') {
+                dir('BE/icecream') {
                     // Docker 이미지 빌드 명령어
                     sh 'docker build -t icecream .'
                 }
