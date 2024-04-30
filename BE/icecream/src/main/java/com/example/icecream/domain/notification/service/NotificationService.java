@@ -6,7 +6,6 @@ import com.example.icecream.domain.notification.dto.FcmRequestDto;
 import com.example.icecream.domain.notification.dto.FcmRequestDto2;
 import com.example.icecream.domain.notification.dto.LoginRequestDto;
 import com.example.icecream.domain.notification.dto.NotificationResponseDto;
-import com.example.icecream.notification.dto.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import java.io.IOException;

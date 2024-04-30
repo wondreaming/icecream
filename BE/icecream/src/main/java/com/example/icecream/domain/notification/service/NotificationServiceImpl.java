@@ -3,7 +3,6 @@ package com.example.icecream.domain.notification.service;
 import com.example.icecream.domain.notification.document.NotificationList;
 import com.example.icecream.domain.notification.dto.*;
 import com.example.icecream.domain.notification.document.FcmToken;
-import com.example.icecream.notification.dto.*;
 import com.example.icecream.domain.notification.repository.FcmTokenRepository;
 import com.example.icecream.domain.notification.repository.NotificationListRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
