@@ -19,8 +19,8 @@ pipeline {
                     // sh 'chmod -R 755 icecream/src/main/resources/'
 
                     // Secret File Credential을 사용하여 설정 파일을 Spring 프로젝트의 resources 디렉토리로 복사
-                    sh 'cp "${application_prod.properties}" icecream/src/main/resources/application-prod.properties'
-                    sh 'cp "${fcm_admin_sdk.json}" icecream/src/main/resources/fcm-admin-sdk.json'
+                    sh 'cp "${application_prod.properties}" BE/icecream/src/main/resources/application-prod.properties'
+                    sh 'cp "${fcm_admin_sdk.json}" BE/icecream/src/main/resources/fcm-admin-sdk.json'
                 }
             }   
         }
