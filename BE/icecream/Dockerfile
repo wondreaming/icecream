@@ -18,8 +18,9 @@ ENV TZ=Asia/Seoul
 # 이전 단계에서 빌드된 JAR 파일을 복사
 COPY --from=build /app/build/libs/*.jar /app/
 RUN ls -al /app
+
 # JAR 파일의 이름 출력
-RUN ls /app/*.jar | xargs -n1 basename
+RUN ls /app/*.jar
 
 # 애플리케이션 실행
 ENTRYPOINT ["java","-jar","/app/Backend-0.0.1-SNAPSHOT.jar"]
