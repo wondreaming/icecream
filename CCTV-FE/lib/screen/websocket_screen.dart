@@ -1,5 +1,7 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
-
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -17,11 +19,11 @@ class WebsocketScreen extends StatefulWidget {
 class _WebsocketScreenState extends State<WebsocketScreen> with WidgetsBindingObserver {
   // 웹 소캣 연결
   late IO.Socket socket;
-  String url = dotenv.get('url');
 
   // 카메라 controller
   late CameraController controller;
-  bool is_recording = false; // 동영상 촬영 유무
+  bool isTaking = false; // 촬영 유무
+  Timer? timer; // 동영상 찍는 시간
 
   @override
   void initState() {
@@ -34,6 +36,7 @@ class _WebsocketScreenState extends State<WebsocketScreen> with WidgetsBindingOb
 
   // socket 최초 렌더링 때, 함수
   void initSocket() {
+    String url = dotenv.get('url'); // socket 연결하는 url
     socket = IO.io(
       url,
       IO.OptionBuilder()
@@ -60,11 +63,11 @@ class _WebsocketScreenState extends State<WebsocketScreen> with WidgetsBindingOb
   }
 
   // cctv 이미지 방출
-  void sendCCTVImage(int width, int height, Uint8List payload) {
+  void sendCCTVImage(String payload) {
     Map<String, dynamic> CCTVImage = {
       'CCTVImage': payload,
-      'width' : width,
-      'height' : height,
+      'width' : 0,
+      'height' : 0,
     };
     socket.emit('sendCCTVImage', CCTVImage);
   }
@@ -79,36 +82,43 @@ class _WebsocketScreenState extends State<WebsocketScreen> with WidgetsBindingOb
       }
       setState(() {});
     }).catchError((Object e) {
-      if (e is CameraException) {
-        switch (e.code) {
-          case 'CameraAccessDenied':
-            print(e.code);
-            break;
-          default:
-            print(e.code);
-            break;
-        }
-      }
-    });
-  }
-  // 카메라에서 YUV 데이터 처리
-  void startImageStream () {
-    controller.startImageStream((CameraImage image) {
-      sendImageOverWebSocket(image);
+      print(e);
     });
   }
 
-  // 웹소캣 처리해서 보내기
-  void sendImageOverWebSocket(CameraImage image) {
-    final int width = image.width;
-    final int height = image.height;
+  // 시작하면, websocket으로 이미지 계속 보냄
+  void startTakingPictures() async {
+    if (timer == null || !timer!.isActive) {
+      _takePicturePeriodically();
+    }
+  }
 
-    final Uint8List y = image.planes[0].bytes;
-    final Uint8List u = image.planes[1].bytes;
-    final Uint8List v = image.planes[2].bytes;
+  void _takePicturePeriodically() async {
+    try {
+      final image = await controller.takePicture();
+      String bytes = await getFrameBytes(image.path);
+      sendCCTVImage(bytes);
+      // 다음 이미지 캡처를 스케줄링
+      timer = Timer(Duration(milliseconds: (1000 / 30).round()), _takePicturePeriodically);
+    } catch (e) {
+      print('Error taking picture: $e');
+      stopTakingPictures(); // Stop taking pictures if an error occurs
+    }
+  }
 
-    final Uint8List payload = Uint8List.fromList([...y, ...u, ...v]);
-    sendCCTVImage(width, height, payload);
+  // 프레임 이미지는 blob로 변환
+  Future<String> getFrameBytes(String framePath) async {
+    File frameFile = File(framePath);
+    Uint8List bytes = await frameFile.readAsBytes();
+    final String base64String = base64.encode(bytes);
+    return base64String;
+  }
+
+  void stopTakingPictures() {
+    timer?.cancel();
+    setState(() {
+      timer = null;
+    });
   }
 
   @override
@@ -124,12 +134,11 @@ class _WebsocketScreenState extends State<WebsocketScreen> with WidgetsBindingOb
     super.didChangeAppLifecycleState(state);
     if (controller != null && controller.value.isInitialized) {
       if (state == AppLifecycleState.paused) {
-        if (controller.value.isStreamingImages) {
-          controller.stopImageStream(); // 스트리밍 중지
-        }
-        controller.dispose(); // 카메라 해제
+        controller.stopImageStream();
       } else if (state == AppLifecycleState.resumed) {
-        initCamera(); // 카메라 재초기화
+        if (!controller.value.isStreamingImages) {
+          startTakingPictures();
+        }
       }
     }
   }
@@ -140,36 +149,32 @@ class _WebsocketScreenState extends State<WebsocketScreen> with WidgetsBindingOb
       title: '웹소캣 연결됨',
       child: (!controller.value.isInitialized)
           ? Container()
-          : Column(
-              children: [
-                CameraPreview(controller),
-                IconButton(
-                  onPressed: () async {
-                    if (is_recording) {
-                      print('동영상 전송 끝');
-                      if (controller.value.isStreamingImages) {
-                        await controller.stopImageStream();
+          : SingleChildScrollView(
+            child: Column(
+                children: [
+                  CameraPreview(controller),
+                  IconButton(
+                    onPressed: () async {
+                      if (isTaking) {
+                        print('동영상 전송 끝');
+                        stopTakingPictures();
+                        setState(() {
+                          isTaking = false;
+                        });
+                      } else {
+                        print('동영상 전송 시작');
+                        startTakingPictures();
+                        setState(() => isTaking = true);
                       }
-                      setState(() {
-                        is_recording = false;
-                      });
-                    } else {
-                      print('동영상 전송 시작');
-                      // 카메라가 초기화 되었는 지 확인
-                      if (!controller.value.isInitialized) {
-                        await controller.initialize();
-                      }
-                      startImageStream();
-                      setState(() => is_recording = true);
-                    }
-                  },
-                  icon: Icon(
-                    is_recording ? Icons.stop : Icons.play_arrow,
-                    size: 50,
+                    },
+                    icon: Icon(
+                      isTaking ? Icons.stop : Icons.play_arrow,
+                      size: 50,
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+          ),
     );
   }
 }

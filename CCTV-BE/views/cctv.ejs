@@ -8,14 +8,23 @@
   <body>
     <h1>CCTV 영상 출력</h1>
 
+    <!-- Change this to an img tag -->
+    <img
+      id="CCTVImage"
+      alt="CCTV Image"
+      style="max-width: 100%; height: auto"
+    />
+
     <script src="https://cdn.jsdelivr.net/npm/socket.io@4.7.2/client-dist/socket.io.min.js"></script>
     <script>
       const socket = io();
       socket.on("getCCTVImage", data => {
-        console.log("333333333");
-        const time = new Date();
-        console.log("받는 시간", time);
-        console.log(data);
+        console.log("Received CCTV Image Data", data);
+        const imageElement = document.getElementById("CCTVImage");
+        // Update the src attribute to display the image
+        if (data.CCTVImage) {
+          imageElement.src = `data:image/png;base64,${data.CCTVImage}`;
+        }
       });
     </script>
   </body>
