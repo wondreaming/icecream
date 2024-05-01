@@ -16,6 +16,7 @@ class DefaultLayout extends StatelessWidget {
         title: Text(title),
         actions: action,
       ),
+      resizeToAvoidBottomInset: false,
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: child,

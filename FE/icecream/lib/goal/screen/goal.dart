@@ -3,6 +3,7 @@ import 'package:icecream/com/widget/default_layout.dart';
 import 'package:icecream/goal/model/goal_model.dart';
 import 'package:icecream/goal/widget/daily_goal.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:icecream/goal/widget/reward_modal.dart';
 
 class Goal extends StatefulWidget {
   const Goal({super.key});
@@ -155,13 +156,17 @@ class _GoalState extends State<Goal> {
             padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: OutlinedButton(
               onPressed: () {
-                // TODO: '보상 설정' 버튼 로직 구현
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return const RewardModal();
+                  },
+                );
               },
               style: OutlinedButton.styleFrom(
-                side:
-                    BorderSide(color: Theme.of(context).primaryColor), // 경계선 색상
+                side: BorderSide(color: Theme.of(context).primaryColor),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30), // 모서리 둥글게
+                  borderRadius: BorderRadius.circular(30),
                 ),
               ),
               child: Padding(
