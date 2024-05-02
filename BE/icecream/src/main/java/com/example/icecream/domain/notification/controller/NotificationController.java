@@ -1,6 +1,6 @@
 package com.example.icecream.domain.notification.controller;
 
-import com.example.icecream.domain.notification.dto.ApiResponseDto;
+import com.example.icecream.common.dto.ApiResponseDto;
 import com.example.icecream.domain.notification.dto.FcmRequestDto;
 import com.example.icecream.domain.notification.dto.FcmRequestDto2;
 import com.example.icecream.domain.notification.dto.NotificationResponseDto;
