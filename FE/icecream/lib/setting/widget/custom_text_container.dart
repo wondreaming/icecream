@@ -13,6 +13,8 @@ class CustomTextContainer extends StatelessWidget {
   final bool is_explain;
   final String? explainText;
   final VoidCallback? onTap;
+  final ValueChanged<String>? onChanged;
+  final TextEditingController? controller;
   const CustomTextContainer(
       {super.key,
       required this.text,
@@ -24,7 +26,9 @@ class CustomTextContainer extends StatelessWidget {
       this.hintText,
       this.is_explain = false,
       this.explainText,
-      this.onTap});
+      this.onTap,
+      this.onChanged,
+      this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -80,9 +84,11 @@ class CustomTextContainer extends StatelessWidget {
           if (is_detail)
             Flexible(
               child: CustomTextFieldVersion2(
+                controller: controller,
+                onChanged: onChanged,
                 hintText: hintText,
               ),
-              flex: 16,
+              flex: 15,
               fit: FlexFit.tight,
             ),
           if (is_explain)
