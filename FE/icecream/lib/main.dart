@@ -39,8 +39,8 @@ Future<String?> readFromDevicePrefs(String key) async {
 
 // 디바이스 id 가져오기
 Future<void> checkDeviceWithServerUsingDio() async {
-  const _androidIdPlugin = AndroidId();
-  final String? deviceId = await _androidIdPlugin.getId();
+  const androidIdPlugin = AndroidId();
+  final String? deviceId = await androidIdPlugin.getId();
   // 디바이스 id sharedPreferences에 저장
   await saveToDevicePrefs("deviceId", deviceId!);
   debugPrint("android ID: $deviceId");
@@ -112,7 +112,8 @@ void main() async {
           icon: 'mipmap/ic_launcher');
     }
 
-    NotificationDetails notificationDetails = NotificationDetails(android: androidDetails);
+    NotificationDetails notificationDetails =
+        NotificationDetails(android: androidDetails);
 
     await flutterLocalNotificationsPlugin.show(
         message.hashCode,
@@ -137,7 +138,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final LocationService _locationService = LocationService();
-  // final RabbitMQService _rabbitMQService = RabbitMQService();
+  final RabbitMQService _rabbitMQService = RabbitMQService();
   late StreamSubscription<Position> _locationSubscription;
 
   @override
@@ -148,10 +149,11 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> initServices() async {
     await _locationService.initLocationService();
-    // await _rabbitMQService.initRabbitMQ();
+    await _rabbitMQService.initRabbitMQ();
     _locationSubscription =
         _locationService.getLocationStream().listen((position) {
-      // _rabbitMQService.sendLocation(position.latitude, position.longitude, 1);
+      _rabbitMQService.sendLocation(position.latitude, position.longitude, 5);
+      // _rabbitMQService.sendLocation(3, 3, 20);
     });
   }
 

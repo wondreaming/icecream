@@ -54,6 +54,7 @@ class _PHomeState extends State<PHome> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         body: CustomNav(
           currentPage: currentPage,
           tabController: tabController,

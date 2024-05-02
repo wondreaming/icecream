@@ -15,42 +15,45 @@ final router = GoRouter(
     GoRoute(
         path: '/',
         builder: (context, state) {
-          return Temp();
+          return const Temp();
         },
         routes: [
-          GoRoute(path: 'c_qrcode', builder:(context, state) => QRCodePage()),
+          GoRoute(
+              path: 'c_qrcode',
+              builder: (context, state) => const QRCodePage()),
+          GoRoute(path: 'child', builder: (context, state) => const CHome()),
           GoRoute(
             path: 'parents',
-            builder: (context, state) => PHome(),
+            builder: (context, state) => const PHome(),
             routes: [
               // setting 페이지
               GoRoute(
                 path: 'setting',
                 name: 'setting',
-                builder: (context, state) => Setting(),
+                builder: (context, state) => const Setting(),
                 routes: [
                   // setting 페이지의 마이페이지
                   GoRoute(
                     path: 'my_page',
                     name: 'my_page',
-                    builder: (context, state) => MyPage(),
+                    builder: (context, state) => const MyPage(),
                   ),
                   // setting 페이지의 자녀 관리 페이지
                   GoRoute(
                     path: 'children',
                     name: 'children',
-                    builder: (context, state) => ChildrenScreen(),
+                    builder: (context, state) => const ChildrenScreen(),
                     routes: [
                       // setting의 자녀 1명 페이지
                       GoRoute(
                         path: 'child',
                         name: 'child',
-                        builder: (context, state) => ChildScreen(),
+                        builder: (context, state) => const ChildScreen(),
                         routes: [
                           GoRoute(
                             path: 'location',
                             name: 'location',
-                            builder: (context, state) => LocationScreen(),
+                            builder: (context, state) => const LocationScreen(),
                             routes: [
                               GoRoute(
                                 path: 'query_parameter',
@@ -70,7 +73,7 @@ final router = GoRouter(
           GoRoute(
             path: 'children',
             builder: (context, state) {
-              return CHome();
+              return const CHome();
             },
           ),
         ]),
