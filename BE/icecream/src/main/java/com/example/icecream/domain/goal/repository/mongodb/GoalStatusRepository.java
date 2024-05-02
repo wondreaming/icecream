@@ -1,6 +1,6 @@
 package com.example.icecream.domain.goal.repository.mongodb;
 
-import com.example.icecream.domain.goal.entity.mongodb.GoalStatus;
+import com.example.icecream.domain.goal.document.GoalStatus;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 

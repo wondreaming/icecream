@@ -1,4 +1,4 @@
-package com.example.icecream.domain.goal.entity.mongodb;
+package com.example.icecream.domain.goal.document;
 
 import jakarta.persistence.Id;
 import lombok.*;
