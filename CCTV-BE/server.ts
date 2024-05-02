@@ -30,9 +30,8 @@ app.get("/", (req, res) => {
 app.get("/cctv", (req, res) => {
   // 초기 데이터 설정
   const initialData = {
+    CCTVName: "CCTV 위치",
     CCTVImage: null,
-    width: null,
-    height: null,
   };
   res.render("cctv", { data: initialData }); // 'data' 객체를 전달
 });
@@ -49,7 +48,6 @@ io.on("connect", socket => {
 
     // cctv 이미지 받고 전송
     socket.on("sendCCTVImage", data => {
-      console.log(data.CCTVImage);
       io.to(roomName).emit("getCCTVImage", data);
     });
 

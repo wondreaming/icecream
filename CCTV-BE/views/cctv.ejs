@@ -7,7 +7,7 @@
   </head>
   <body>
     <h1>CCTV 영상 출력</h1>
-
+    <h3 id="CCTVName"><%= data.CCTVName %></h3>
     <!-- Change this to an img tag -->
     <img
       id="CCTVImage"
@@ -21,7 +21,11 @@
       socket.on("getCCTVImage", data => {
         console.log("Received CCTV Image Data", data);
         const imageElement = document.getElementById("CCTVImage");
+        const nameElement = document.getElementById("CCTVName");
         // Update the src attribute to display the image
+        if (data.CCTVName) {
+          nameElement.textContent = data.CCTVName;
+        }
         if (data.CCTVImage) {
           imageElement.src = `data:image/png;base64,${data.CCTVImage}`;
         }

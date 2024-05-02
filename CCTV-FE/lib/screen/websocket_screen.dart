@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:camera/camera.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:icecreamcctv/common/default_layout.dart';
@@ -18,6 +19,10 @@ class WebsocketScreen extends StatefulWidget {
 
 class _WebsocketScreenState extends State<WebsocketScreen>
     with WidgetsBindingObserver {
+  // cctv 이름 설정
+  TextEditingController _cctvNameController = TextEditingController();
+  late String cctvName = '';
+
   // 웹 소캣 연결
   late IO.Socket socket;
 
@@ -30,11 +35,42 @@ class _WebsocketScreenState extends State<WebsocketScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance?.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showRegisterCCTVName();
+    });
     // 로드 할때, 소켓, 카메라 실행
     initSocket();
     initCamera();
   }
 
+  // 방 이름 생성 모달
+  void _showRegisterCCTVName(){
+    showDialog(context: context, builder: (BuildContext context){
+      return AlertDialog(
+        content: Container(
+          height: 80,
+          child: Column(
+            children: [
+              Text('CCTV 이름을 등록해주세요'),
+              TextField(
+                controller: _cctvNameController,
+                onChanged: (_cctvNameController){
+                  cctvName = _cctvNameController;
+                },
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          ElevatedButton(onPressed: (){
+            Navigator.of(context).pop();
+          }, child: Text(
+            '저장'
+          ))
+        ],
+      );
+    });
+  }
   // socket 최초 렌더링 때, 함수
   void initSocket() {
     String url = dotenv.get('url'); // socket 연결하는 url
@@ -64,11 +100,10 @@ class _WebsocketScreenState extends State<WebsocketScreen>
   }
 
   // cctv 이미지 방출
-  void sendCCTVImage(String payload) {
+  void sendCCTVImage(String cctvName, String payload) {
     Map<String, dynamic> CCTVImage = {
+      'CCTVName': cctvName,
       'CCTVImage': payload,
-      'width': 0,
-      'height': 0,
     };
     socket.emit('sendCCTVImage', CCTVImage);
   }
@@ -112,7 +147,7 @@ class _WebsocketScreenState extends State<WebsocketScreen>
     try {
       final image = await controller.takePicture();
       String bytes = await getFrameBytes(image.path);
-      sendCCTVImage(bytes);
+      sendCCTVImage(cctvName ,bytes);
       // 다음 이미지 캡처를 스케줄링
       timer = Timer(Duration(milliseconds: (1000 / 30).round()),
           _takePicturePeriodically);
@@ -169,7 +204,7 @@ class _WebsocketScreenState extends State<WebsocketScreen>
     final size = MediaQuery.of(context).size;
 
     return DefaultLayout(
-      title: 'CCTV 송출',
+      title: cctvName,
       // controller가 초기화 안되면 화면 안뜸
       child: (!controller.value.isInitialized)
           ? Container()
