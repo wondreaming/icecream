@@ -16,7 +16,8 @@ class WebsocketScreen extends StatefulWidget {
   State<WebsocketScreen> createState() => _WebsocketScreenState();
 }
 
-class _WebsocketScreenState extends State<WebsocketScreen> with WidgetsBindingObserver {
+class _WebsocketScreenState extends State<WebsocketScreen>
+    with WidgetsBindingObserver {
   // 웹 소캣 연결
   late IO.Socket socket;
 
@@ -66,8 +67,8 @@ class _WebsocketScreenState extends State<WebsocketScreen> with WidgetsBindingOb
   void sendCCTVImage(String payload) {
     Map<String, dynamic> CCTVImage = {
       'CCTVImage': payload,
-      'width' : 0,
-      'height' : 0,
+      'width': 0,
+      'height': 0,
     };
     socket.emit('sendCCTVImage', CCTVImage);
   }
@@ -86,23 +87,38 @@ class _WebsocketScreenState extends State<WebsocketScreen> with WidgetsBindingOb
     });
   }
 
+  // 카메라 flash_off
+  Future<void> turnFlashOff() async {
+    try {
+      await controller.setFlashMode(FlashMode.off);
+      print('카메라 플래시가 꺼짐');
+    } catch (e) {
+      print('카메라 flash off : $e');
+    }
+  }
+
   // 시작하면, websocket으로 이미지 계속 보냄
   void startTakingPictures() async {
-    if (timer == null || !timer!.isActive) {
+    if (!isTaking) {
+      setState(() => isTaking = true);
       _takePicturePeriodically();
     }
   }
 
   void _takePicturePeriodically() async {
+    if (!mounted || !isTaking) {
+      return; // 타이머가 활성화 상태가 아닌 경우에는 재귀 호출을 중단
+    }
     try {
       final image = await controller.takePicture();
       String bytes = await getFrameBytes(image.path);
       sendCCTVImage(bytes);
       // 다음 이미지 캡처를 스케줄링
-      timer = Timer(Duration(milliseconds: (1000 / 30).round()), _takePicturePeriodically);
+      timer = Timer(Duration(milliseconds: (1000 / 30).round()),
+          _takePicturePeriodically);
     } catch (e) {
       print('Error taking picture: $e');
-      stopTakingPictures(); // Stop taking pictures if an error occurs
+      stopTakingPictures(); // 오류 발생 시 사진 촬영 중지
     }
   }
 
@@ -115,8 +131,12 @@ class _WebsocketScreenState extends State<WebsocketScreen> with WidgetsBindingOb
   }
 
   void stopTakingPictures() {
-    timer?.cancel();
+    if (timer != null && timer!.isActive) {
+      timer!.cancel();
+      print("타이머가 취소되었습니다."); // 로그로 타이머 상태 확인
+    }
     setState(() {
+      isTaking = false;
       timer = null;
     });
   }
@@ -145,36 +165,47 @@ class _WebsocketScreenState extends State<WebsocketScreen> with WidgetsBindingOb
 
   @override
   Widget build(BuildContext context) {
+    // camera preview 화면 전체 출력
+    final size = MediaQuery.of(context).size;
+
     return DefaultLayout(
-      title: '웹소캣 연결됨',
+      title: 'CCTV 송출',
+      // controller가 초기화 안되면 화면 안뜸
       child: (!controller.value.isInitialized)
           ? Container()
-          : SingleChildScrollView(
-            child: Column(
-                children: [
-                  CameraPreview(controller),
-                  IconButton(
-                    onPressed: () async {
-                      if (isTaking) {
-                        print('동영상 전송 끝');
-                        stopTakingPictures();
-                        setState(() {
-                          isTaking = false;
-                        });
-                      } else {
-                        print('동영상 전송 시작');
-                        startTakingPictures();
-                        setState(() => isTaking = true);
-                      }
-                    },
-                    icon: Icon(
-                      isTaking ? Icons.stop : Icons.play_arrow,
-                      size: 50,
-                    ),
-                  ),
-                ],
+          : Container(
+              height: size.height,
+              width: size.width,
+              child: CameraPreview(controller),
+            ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: [
+          BottomNavigationBarItem(
+              icon: IconButton(
+                onPressed: () async {
+                  if (isTaking) {
+                    print('동영상 전송 끝');
+                    stopTakingPictures();
+                  } else {
+                    print('동영상 전송 시작');
+                    startTakingPictures();
+                  }
+                },
+                icon: Icon(
+                  isTaking ? Icons.stop : Icons.play_arrow,
+                ),
               ),
-          ),
+              label: '동영상 전송'),
+          BottomNavigationBarItem(
+              icon: IconButton(
+                icon: Icon(Icons.flash_off),
+                onPressed: () {
+                  turnFlashOff();
+                },
+              ),
+              label: 'flash off')
+        ],
+      ),
     );
   }
 }
