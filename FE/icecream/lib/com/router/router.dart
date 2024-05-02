@@ -57,8 +57,8 @@ final router = GoRouter(
                             routes: [
                               GoRoute(
                                 path: 'query_parameter',
-                                builder: (context, state) =>
-                                    const SearchScreen(),
+                                name: 'search',
+                                builder: (context, state) => SearchScreen(),
                               ),
                             ],
                           ),
