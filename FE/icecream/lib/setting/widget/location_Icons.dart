@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:icecream/com/const/color.dart';
 import 'package:icecream/setting/widget/custom_icon.dart';
 
-class LocationIcon {
+class LocationIcons {
   static const home = CustomIcon(color: AppColors.custom_green, icon: Icons.home_filled);
   static const star = CustomIcon(color: AppColors.icon_red_color, icon: Icons.star);
   static const school = CustomIcon(color: AppColors.icon_yellow_color, icon: Icons.local_library);
