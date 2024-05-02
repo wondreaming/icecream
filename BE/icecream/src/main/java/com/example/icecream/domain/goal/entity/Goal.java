@@ -1,4 +1,4 @@
-package com.example.icecream.domain.goal.entity.postgres;
+package com.example.icecream.domain.goal.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -30,7 +30,7 @@ public class Goal {
 
         @Column(name = "record", nullable = false)
         @NotNull
-        private int record;
+        private int record = 0;
 
         @Column(name = "content", nullable = false, length = 500)
         @NotNull
@@ -38,7 +38,7 @@ public class Goal {
 
         @Column(name = "is_active", nullable = false)
         @NotNull
-        private boolean isActive;
+        private boolean isActive = true;
 
         @Column(name = "created_at", nullable = false)
         @CreatedDate
@@ -49,4 +49,9 @@ public class Goal {
         @LastModifiedDate
         @NotNull
         private LocalDateTime updatedAt;
+
+        public void updateGoal(int period, String content) {
+                this.period = period;
+                this.content = content;
+        }
 }

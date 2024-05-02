@@ -1,4 +1,4 @@
-package com.example.icecream.domain.goal.dto;
+package com.example.icecream.common.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
