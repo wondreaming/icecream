@@ -24,3 +24,4 @@ public class CctvMessageListenService {
         return crosswalkCCTVMapping.getCrosswalkName();
     }
 }
+
