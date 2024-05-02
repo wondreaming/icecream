@@ -1,7 +1,7 @@
 package com.example.icecream.notification.controller;
 
 import com.example.icecream.domain.notification.controller.NotificationController;
-import com.example.icecream.domain.notification.dto.ApiResponseDto;
+import com.example.icecream.common.dto.ApiResponseDto;
 import com.example.icecream.domain.notification.dto.NotificationResponseDto;
 import com.example.icecream.domain.notification.service.NotificationService;
 import org.junit.jupiter.api.BeforeEach;

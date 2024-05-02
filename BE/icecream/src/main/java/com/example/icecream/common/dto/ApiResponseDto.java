@@ -1,4 +1,4 @@
-package com.example.icecream.domain.notification.dto;
+package com.example.icecream.common.dto;
 
 import lombok.Getter;
 import lombok.AllArgsConstructor;
@@ -13,6 +13,10 @@ public class ApiResponseDto<T> {
 
     public static <T> ApiResponseDto<T> success(String message, T data) {
         return new ApiResponseDto<>(200, message, data);
+    }
+
+    public static <T> ApiResponseDto<T> created(String message, T data) {
+        return new ApiResponseDto<>(201, message, data);
     }
 
     public static <T> ApiResponseDto<T> notFound(String message) {
