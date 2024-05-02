@@ -11,6 +11,7 @@ class DefaultLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false, // 키보드 올라왔을 때, 영역 보존
       backgroundColor: AppColors.background_color,
       appBar: AppBar(
         title: Text(title),

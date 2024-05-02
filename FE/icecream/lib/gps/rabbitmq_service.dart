@@ -15,13 +15,13 @@ class RabbitMQService {
     while (!isConnected && attempts < maxAttempts) {
       try {
         _client = Client(
-          settings: ConnectionSettings(
-            host: "10.0.2.2",
-          ),
+          settings: ConnectionSettings(host: "k10e202.p.ssafy.io", port: 5672
+              // host: "10.0.2.2",  // 플러터 로컬 주소
+              ),
         );
         _channel = await _client!.channel();
         _exchange = await _channel!
-            .exchange("icecream_ex", ExchangeType.DIRECT, durable: true);
+            .exchange("crosswalk.direct", ExchangeType.DIRECT, durable: true);
         isConnected = true;
       } catch (e) {
         attempts++;
@@ -43,12 +43,12 @@ class RabbitMQService {
     }
     try {
       var locationData = {
-        'userId': userId,
+        'user_id': userId,
         'latitude': latitude,
         'longitude': longitude,
         'timestamp': DateTime.now().toIso8601String()
       };
-      _exchange!.publish(jsonEncode(locationData), "ssafy123");
+      _exchange!.publish(jsonEncode(locationData), "Busan.ocean");
     } catch (e) {
       print('Failed to send message: $e');
       rethrow;
@@ -57,5 +57,11 @@ class RabbitMQService {
 
   void close() {
     _client?.close();
+  }
+
+  void startSendingLocation(double latitude, double longitude, int userId) {
+    Timer.periodic(const Duration(seconds: 1), (timer) {
+      sendLocation(latitude, longitude, userId);
+    });
   }
 }

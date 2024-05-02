@@ -67,8 +67,8 @@ Future<String?> readFromDevicePrefs(String key) async {
 
 // 디바이스 id 가져오기
 Future<void> checkDeviceWithServerUsingDio() async {
-  const _androidIdPlugin = AndroidId();
-  final String? deviceId = await _androidIdPlugin.getId();
+  const androidIdPlugin = AndroidId();
+  final String? deviceId = await androidIdPlugin.getId();
   // 디바이스 id sharedPreferences에 저장
   await saveToDevicePrefs("deviceId", deviceId!);
   debugPrint("android ID: $deviceId");
@@ -228,7 +228,8 @@ class _MyAppState extends State<MyApp> {
     await _rabbitMQService.initRabbitMQ();
     _locationSubscription =
         _locationService.getLocationStream().listen((position) {
-      _rabbitMQService.sendLocation(position.latitude, position.longitude, 1);
+      _rabbitMQService.sendLocation(position.latitude, position.longitude, 5);
+      // _rabbitMQService.sendLocation(3, 3, 20);
     });
   }
 
