@@ -1,12 +1,18 @@
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:android_id/android_id.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'firebase_options.dart';
 import 'package:icecream/com/router/router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:http/http.dart' as http;
+import 'package:image/image.dart' as image;
 
 // gps
 import 'package:geolocator/geolocator.dart'; // 임포트 추가
@@ -14,9 +20,31 @@ import 'package:icecream/gps/location_service.dart';
 import 'package:icecream/gps/rabbitmq_service.dart';
 import 'dart:async';
 
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
 // fcm background 핸들러
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  bool isFullScreen = message.data['isFullScreen'] == 'true';
+  String channelId =
+      isFullScreen ? 'high_importance_channel' : 'regular_channel';
+
+  AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      channelId,
+      isFullScreen ? 'High Importance Notifications' : 'Regular Notifications',
+      channelDescription:
+          'This channel is used for important notifications if full screen.',
+      importance: isFullScreen ? Importance.high : Importance.defaultImportance,
+      priority: isFullScreen ? Priority.high : Priority.defaultPriority,
+      fullScreenIntent: isFullScreen,
+      icon: 'mipmap/ic_launcher',
+      ticker: 'ticker');
+
+  NotificationDetails notificationDetails =
+      NotificationDetails(android: androidDetails);
+  await flutterLocalNotificationsPlugin.show(message.hashCode,
+      message.data['title'], message.data['body'], notificationDetails);
   if (message.data.isNotEmpty) {
     debugPrint("Data message title: ${message.data['title']}");
     debugPrint("Data message body: ${message.data['body']}");
@@ -71,9 +99,18 @@ void main() async {
 
   const AndroidInitializationSettings initializationSettingsAndroid =
       AndroidInitializationSettings('mipmap/ic_launcher');
-  const InitializationSettings initializationSettings =
-      InitializationSettings(android: initializationSettingsAndroid);
-  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  final InitializationSettings initializationSettings = InitializationSettings(
+    android: initializationSettingsAndroid,
+  );
+  // 알림 초기화
+  await flutterLocalNotificationsPlugin.initialize(
+    initializationSettings,
+    onDidReceiveNotificationResponse: handleNotificationResponse,
+  );
+
+  // Notification App Launch Details 가져오기
+  final NotificationAppLaunchDetails? notificationAppLaunchDetails =
+      await flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails();
 
   const AndroidNotificationChannel channel = AndroidNotificationChannel(
     'high_importance_channel', // 채널 id
@@ -90,43 +127,82 @@ void main() async {
     // 풀 스크린 인텐트 여부를 결정하는 플래그
     bool isFullScreen = message.data['isFullScreen'] == 'true';
 
-    AndroidNotificationDetails androidDetails;
+    // 이미지 파일을 로컬 파일 시스템에 복사
+    final byteData = await rootBundle.load('asset/img/overspeed.png');
+    final directory = await getTemporaryDirectory();
+    final filePath = '${directory.path}/overspeed.png';
+    final file = File(filePath);
+    await file.writeAsBytes(byteData.buffer
+        .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
 
-    // 알림 세부정보
+    // 알림에 사용할 이미지 설정
+    final BigPictureStyleInformation bigPictureStyleInformation =
+        BigPictureStyleInformation(
+      FilePathAndroidBitmap(filePath),
+      largeIcon: DrawableResourceAndroidBitmap('mipmap/ic_launcher'),
+      contentTitle: message.data['title'] ?? '긴급 메시지',
+      summaryText: message.data['body'] ?? '긴급 상황 발생!',
+      htmlFormatContent: true,
+      htmlFormatContentTitle: true,
+    );
+
+    AndroidNotificationDetails androidDetails;
+    // 과속 차량이 있으면 = true, 이외의 알림은 = false
     if (isFullScreen) {
-      androidDetails = const AndroidNotificationDetails(
-          'high_importance_channel', 'High Importance Notifications',
-          channelDescription:
-              'This channel is used for important notifications.',
-          importance: Importance.high,
-          priority: Priority.high,
-          fullScreenIntent: true,
-          icon: 'mipmap/ic_launcher',
-          ticker: 'ticker');
+      androidDetails = AndroidNotificationDetails(
+        'high_importance_channel', // 채널 ID
+        'High Importance Notifications', // 채널 이름
+        channelDescription: 'This channel is used for important notifications.',
+        styleInformation: bigPictureStyleInformation,
+        importance: Importance.high,
+        priority: Priority.high,
+        fullScreenIntent: true, // 전체 화면 인텐트 활성화
+        icon: 'mipmap/ic_launcher',
+        ticker: 'ticker',
+      );
+
+      // 전체 화면 알림 세부 설정
+      NotificationDetails platformChannelSpecifics =
+          NotificationDetails(android: androidDetails);
+
+      // 알림 표시
+      await flutterLocalNotificationsPlugin.show(
+          message.hashCode,
+          message.data['title'] ?? '긴급 메시지', // 타이틀
+          message.data['body'] ?? '긴급 상황 발생!', // 본문
+          platformChannelSpecifics,
+          payload: 'confirm_action');
     } else {
-      androidDetails = const AndroidNotificationDetails(
+      androidDetails = AndroidNotificationDetails(
           'regular_channel', 'Regular Notifications',
           channelDescription: 'This channel is used for regular notifications.',
           importance: Importance.defaultImportance,
           priority: Priority.defaultPriority,
           icon: 'mipmap/ic_launcher');
+
+      NotificationDetails notificationDetails =
+          NotificationDetails(android: androidDetails);
+
+      await flutterLocalNotificationsPlugin.show(message.hashCode,
+          message.data['title'], message.data['body'], notificationDetails,
+          payload: 'Notification Payload');
     }
 
-    NotificationDetails notificationDetails =
-        NotificationDetails(android: androidDetails);
-
-    await flutterLocalNotificationsPlugin.show(
-        message.hashCode,
-        message.notification?.title,
-        message.notification?.body,
-        notificationDetails,
-        payload: 'Notification Payload');
-
-    debugPrint("Received notification title: ${message.notification?.title}");
-    debugPrint("Received notification: ${message.notification?.body}");
+    debugPrint("Received notification title: ${message.data['title']}");
+    debugPrint("Received notification body: ${message.data['body']}");
   });
 
   runApp(const MyApp());
+}
+
+void handleNotificationResponse(NotificationResponse response) async {
+  if (response.payload != null) {
+    debugPrint('Notification action received: ${response.payload}');
+    if (response.payload == 'confirm_action') {
+      await flutterLocalNotificationsPlugin.cancel(0);
+      debugPrint('Confirmed and dismissed notification.');
+    }
+  }
 }
 
 class MyApp extends StatefulWidget {
