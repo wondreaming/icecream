@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface GoalStatusRepository extends MongoRepository<GoalStatus, String>{
+    GoalStatus findByUserId(int userId);
 }

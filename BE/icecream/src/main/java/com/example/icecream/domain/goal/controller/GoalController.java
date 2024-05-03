@@ -6,9 +6,11 @@ import com.example.icecream.domain.goal.dto.UpdateGoalDto;
 import com.example.icecream.domain.goal.entity.Goal;
 import com.example.icecream.domain.goal.service.GoalService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Controller
@@ -33,5 +35,12 @@ public class GoalController {
     public ApiResponseDto<List<Goal>> getGoal(@RequestParam int userId) {
         List<Goal> goals = goalService.getGoals(userId);
         return ApiResponseDto.success("목표를 불러왔습니다.", goals);
+    }
+
+    @GetMapping("/goal/status")
+    public ApiResponseDto<Object> getGoalStatus(
+            @RequestParam("date") LocalDate date,
+            @RequestParam("user_id") int userId) {
+        return ApiResponseDto.success("목표 상태를 불러왔습니다.", null);
     }
 }
