@@ -13,7 +13,7 @@ public class Crosswalk {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private int id;
 
     @Column(name = "crosswalk_area", nullable = false, columnDefinition = "geometry(Polygon, 4326)")
     @NotNull

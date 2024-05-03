@@ -12,8 +12,8 @@ import lombok.ToString;
 @ToString
 public class GPSMessageDto {
 
-    private Integer userId;
-    private Integer destinationId;
+    private int userId;
+    private int destinationId;
     private double latitude;
     private double longitude;
     private String timestamp;
