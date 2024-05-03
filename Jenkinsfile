@@ -28,7 +28,7 @@ pipeline {
                 echo 'Deploying BE...'
                 sh 'docker stop cctv || true'
                 sh 'docker rm cctv || true'
-                sh 'docker run -d -p 8050:8050 --name cctv cctv'
+                sh 'docker run -d -p 1996:1996 --name cctv cctv'
             }
         }
     }
