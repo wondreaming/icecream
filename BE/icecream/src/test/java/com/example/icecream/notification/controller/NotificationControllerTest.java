@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -45,11 +47,11 @@ public class NotificationControllerTest {
 
         when(notificationService.getNotificationList(userId)).thenReturn(notificationResponseDtos);
 
-        ApiResponseDto<List<NotificationResponseDto>> result = notificationController.getNotificationList(userId);
+        ResponseEntity<ApiResponseDto<List<NotificationResponseDto>>> result = notificationController.getNotificationList(userId);
 
         assertNotNull(result);
-        assertEquals(200, result.getStatus());
-        List<?> resultBody = result.getData();
+        assertEquals(HttpStatusCode.valueOf(200), result.getStatusCode());
+        List<?> resultBody = result.getBody().getData();
         assertEquals(2, resultBody.size());
         assertInstanceOf(NotificationResponseDto.class, resultBody.get(0));
         assertInstanceOf(NotificationResponseDto.class, resultBody.get(1));
