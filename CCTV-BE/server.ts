@@ -10,7 +10,7 @@ const io = new Server(server);
 app.set("view engine", "ejs");
 
 require("dotenv").config(); // .env 파일에서 환경변수 불러오기
-const port = process.env.PORT || 8050;
+const port = process.env.PORT || 1996;
 const roomName = process.env.roomName || "chatRoom";
 
 // server port
