@@ -7,6 +7,7 @@ import lombok.Getter;
 @Getter
 @Builder
 public class CreateGoalDto {
+
     @NotNull
     private Integer userId;
     @NotNull
