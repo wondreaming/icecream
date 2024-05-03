@@ -48,6 +48,8 @@ io.on("connect", socket => {
 
     // cctv 이미지 받고 전송
     socket.on("sendCCTVImage", data => {
+      let cnt = 0;
+      console.log(cnt++);
       io.to(roomName).emit("getCCTVImage", data);
     });
 
