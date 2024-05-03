@@ -10,11 +10,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -60,7 +58,6 @@ public class GoalServiceImpl implements GoalService {
 
     @Override
     public List<Map<LocalDate, Integer>> getGoalStatus(LocalDate date, int userId) {
-        LocalDate todayDate = LocalDate.now();
         List<Map<LocalDate, Integer>> allResult = goalStatusRepository.findByUserId(userId).getResult();
         allResult.sort((map1, map2) -> {
             LocalDate date1 = map1.keySet().iterator().next(); // 첫 번째 맵의 키 추출
@@ -68,7 +65,33 @@ public class GoalServiceImpl implements GoalService {
             return date2.compareTo(date1);
         });
         int allResultSize = allResult.size();
-        LocalDate startDate = date.minusDays(9);
-        return allResult;
+
+        LocalDate todayDate = LocalDate.now();
+        int period = Period.between(date, todayDate).getDays();
+
+        List<Map<LocalDate, Integer>> result = new ArrayList<>();
+        for (int i = period; i < period + 10; i++) {
+            if (i >= allResultSize) {
+                break;
+            }
+            result.add(allResult.get(i));
+        }
+        return result;
     }
+
+    @Override
+    public void updateGoalStatus(Map<String, Object> body) {
+        int userId = (int) body.get("user_id");
+        LocalDate date = LocalDate.parse((String) body.get("date"), DateTimeFormatter.ISO_DATE);
+        int status = (int) body.get("status");
+
+        GoalStatus goalStatus = goalStatusRepository.findByUserId(userId);
+        Map<LocalDate, Integer> result = goalStatus.getResult().stream()
+                .filter(map -> map.containsKey(date))
+                .findFirst()
+                .orElse(null);
+        result.put(date, status);
+        goalStatusRepository.save(goalStatus);
+    }
+
 }

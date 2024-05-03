@@ -16,4 +16,5 @@ public interface GoalService {
     List<Goal> getGoals(int userId);
     void createGoalStatus(int userId);
     List<Map<LocalDate, Integer>> getGoalStatus(LocalDate date, int userId);
+    void updateGoalStatus(Map<String, Object> body);
 }
