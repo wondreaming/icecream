@@ -1,5 +1,6 @@
 package com.example.icecream.domain.map.service;
 
+import com.example.icecream.common.exception.NotFoundException;
 import com.example.icecream.domain.map.dto.DestinationModifyDto;
 import com.example.icecream.domain.map.dto.DestinationRegisterDto;
 import com.example.icecream.domain.map.dto.DestinationResponseDto;
@@ -64,7 +65,7 @@ public class DestinationServiceImpl implements DestinationService {
     @Override
     public void modifyDestination(DestinationModifyDto destinationModifyDto) {
         Destination destination = destinationRepository.findById(destinationModifyDto.getDestinationId())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid destination id"));
+                .orElseThrow(() -> new NotFoundException("해당 목적지가 존재하지 않습니다."));
 
         Point location = geometryFactory.createPoint(
                 new Coordinate(destinationModifyDto.getLongitude(),
