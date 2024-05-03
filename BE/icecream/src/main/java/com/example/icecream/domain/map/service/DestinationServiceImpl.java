@@ -81,6 +81,8 @@ public class DestinationServiceImpl implements DestinationService {
 
     @Override
     public void deleteDestination(Integer destinationId) {
-        destinationRepository.deleteById(destinationId);
+        Destination destination = destinationRepository.findById(destinationId)
+                .orElseThrow(() -> new NotFoundException("해당 목적지가 존재하지 않습니다."));
+        destinationRepository.delete(destination);
     }
 }
