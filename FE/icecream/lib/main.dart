@@ -26,25 +26,48 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 // fcm background 핸들러
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  bool isFullScreen = message.data['isFullScreen'] == 'true';
-  String channelId =
-      isFullScreen ? 'high_importance_channel' : 'regular_channel';
+  final bool isOverSpeed = message.data['isOverSpeed'] == 'true';
+
+  // 이미지 파일을 로컬 파일 시스템에 복사
+  final byteData = await rootBundle.load('asset/img/overspeed.png');
+  final directory = await getTemporaryDirectory();
+  final filePath = '${directory.path}/overspeed.png';
+  final file = File(filePath);
+    await file.writeAsBytes(byteData.buffer
+        .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+
+  // 알림에 사용할 이미지 설정
+    final BigPictureStyleInformation bigPictureStyleInformation =
+        BigPictureStyleInformation(
+      FilePathAndroidBitmap(filePath),
+      largeIcon: DrawableResourceAndroidBitmap('mipmap/ic_launcher'),
+      contentTitle: message.data['title'] ?? '긴급 메시지',
+      summaryText: message.data['body'] ?? '긴급 상황 발생!',
+      htmlFormatContent: true,
+      htmlFormatContentTitle: true,
+    );
 
   AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-      channelId,
-      isFullScreen ? 'High Importance Notifications' : 'Regular Notifications',
-      channelDescription:
-          'This channel is used for important notifications if full screen.',
-      importance: isFullScreen ? Importance.high : Importance.defaultImportance,
-      priority: isFullScreen ? Priority.high : Priority.defaultPriority,
-      fullScreenIntent: isFullScreen,
-      icon: 'mipmap/ic_launcher',
-      ticker: 'ticker');
+    isOverSpeed ? 'high_importance_channel' : 'regular_channel',
+    isOverSpeed ? 'High Importance Notifications' : 'Regular Notifications',
+    channelDescription: isOverSpeed ? 'This channel is used for important notifications.' : 'This channel is used for regular notifications.',
+    styleInformation: bigPictureStyleInformation,
+    importance: isOverSpeed ? Importance.high : Importance.defaultImportance,
+    priority: isOverSpeed ? Priority.high : Priority.defaultPriority,
+    fullScreenIntent: isOverSpeed,
+    icon: 'mipmap/ic_launcher',
+    ticker: 'ticker'
+  );
 
-  NotificationDetails notificationDetails =
+  // 전체 화면 알림 세부 설정
+  NotificationDetails platformChannelSpecifics =
       NotificationDetails(android: androidDetails);
-  await flutterLocalNotificationsPlugin.show(message.hashCode,
-      message.data['title'], message.data['body'], notificationDetails);
+  await flutterLocalNotificationsPlugin.show(
+    message.hashCode,
+    message.data['title'] ?? 'Notification',
+    message.data['body'] ?? 'You have a new message!',
+    platformChannelSpecifics
+  );
   if (message.data.isNotEmpty) {
     debugPrint("Data message title: ${message.data['title']}");
     debugPrint("Data message body: ${message.data['body']}");
@@ -125,7 +148,7 @@ void main() async {
 
   FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
     // 풀 스크린 인텐트 여부를 결정하는 플래그
-    bool isFullScreen = message.data['isFullScreen'] == 'true';
+    bool isOverSpeed = message.data['isOverSpeed'] == 'true';
 
     // 이미지 파일을 로컬 파일 시스템에 복사
     final byteData = await rootBundle.load('asset/img/overspeed.png');
@@ -148,13 +171,13 @@ void main() async {
 
     AndroidNotificationDetails androidDetails;
     // 과속 차량이 있으면 = true, 이외의 알림은 = false
-    if (isFullScreen) {
+    if (isOverSpeed) {
       androidDetails = AndroidNotificationDetails(
         'high_importance_channel', // 채널 ID
         'High Importance Notifications', // 채널 이름
         channelDescription: 'This channel is used for important notifications.',
         styleInformation: bigPictureStyleInformation,
-        importance: Importance.high,
+        importance: Importance.max,
         priority: Priority.high,
         fullScreenIntent: true, // 전체 화면 인텐트 활성화
         icon: 'mipmap/ic_launcher',
