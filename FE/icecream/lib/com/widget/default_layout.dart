@@ -5,8 +5,16 @@ class DefaultLayout extends StatelessWidget {
   final Widget child;
   final String title;
   final List<Widget>? action;
-  const DefaultLayout(
-      {super.key, required this.child, required this.title, this.action});
+  final bool isMap;
+  final Widget? floatingActionButton;
+  const DefaultLayout({
+    super.key,
+    required this.child,
+    required this.title,
+    this.action,
+    this.isMap = false,
+    this.floatingActionButton,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +26,9 @@ class DefaultLayout extends StatelessWidget {
         actions: action,
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        padding: isMap
+            ? EdgeInsets.symmetric(horizontal: 0.0)
+            : EdgeInsets.symmetric(horizontal: 16.0),
         child: child,
       ),
     );
