@@ -1,16 +1,171 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:go_router/go_router.dart';
+import 'package:icecream/com/const/color.dart';
 import 'package:icecream/com/widget/default_layout.dart';
+import 'package:icecream/setting/widget/custom_elevated_button.dart';
+import 'package:icecream/setting/widget/custom_text_field.dart';
+import 'package:kpostal/kpostal.dart';
 
-
-class SearchScreen extends StatelessWidget {
+class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
+
+  @override
+  State<SearchScreen> createState() => _SearchScreenState();
+}
+
+class _SearchScreenState extends State<SearchScreen> {
+  String postCode = '-';
+  String roadAddress = '-';
+  String jibunAddress = '-';
+  String latitude = '-';
+  String longitude = '-';
+  String kakaoLatitude = '-';
+  String kakaoLongitude = '-';
 
   @override
   Widget build(BuildContext context) {
     return DefaultLayout(
       title: '주소 검색',
-      child: Center(
-      child: Text('장소 찾는 페이지'),
-    ),);
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            '안심 보행 목적지 주소를\n검색해주세요',
+            style: TextStyle(
+              fontFamily: 'GmarketSans',
+              fontSize: 24.0,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+          SizedBox(
+            height: 10.0,
+          ),
+          CustomTextField(
+            hintText: '지번, 도로명, 건물명으로 검색',
+            suffixIcon: IconButton(
+              icon: Icon(Icons.search),
+              onPressed: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => KpostalView(
+                      // useLocalServer: true,
+                      // localPort: 1024,
+                      kakaoKey: dotenv.env['KAKAO_API_KEY']!, // null safety
+                      callback: (Kpostal result) {
+                        setState(() {
+                          this.postCode = result.postCode;
+                          this.roadAddress = result.address;
+                          this.jibunAddress = result.jibunAddress;
+                          this.latitude = result.latitude.toString();
+                          this.longitude = result.longitude.toString();
+                          this.kakaoLatitude = result.kakaoLatitude.toString();
+                          this.kakaoLongitude =
+                              result.kakaoLongitude.toString();
+                          print(kakaoLatitude);
+                          print(kakaoLongitude);
+                        });
+                      },
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          SizedBox(
+            height: 8.0,
+          ),
+          CustomElevatedButton(
+            onPressed: () {
+              context.goNamed('map');
+            },
+            child: '현재 위치로 찾기',
+            backgroundColor: AppColors.background_color,
+            isSearch: true,
+          ),
+          SizedBox(
+            height: 24.0,
+          ),
+          Container(
+            height: 90.0,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Text(
+                  '이렇게 검색해 보세요',
+                  style: TextStyle(
+                    fontFamily: 'GmarketSans',
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                Row(
+                  children: [
+                    Text(
+                      '·',
+                      style: TextStyle(
+                        fontFamily: 'GmarketSans',
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    Text(
+                      ' 도로명 + 건물번호 (녹산산업중로 333)',
+                      style: TextStyle(
+                        fontFamily: 'GmarketSans',
+                        fontSize: 12.0,
+                        fontWeight: FontWeight.w300,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Text(
+                      '·',
+                      style: TextStyle(
+                        fontFamily: 'GmarketSans',
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    Text(
+                      ' 건물명 + 번지 (송정동 1623-2)',
+                      style: TextStyle(
+                        fontFamily: 'GmarketSans',
+                        fontSize: 12.0,
+                        fontWeight: FontWeight.w300,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Text(
+                      '·',
+                      style: TextStyle(
+                        fontFamily: 'GmarketSans',
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    Text(
+                      ' 건물명, 아파트명 (삼성전기 부산사업장, 반포 자이)',
+                      style: TextStyle(
+                        fontFamily: 'GmarketSans',
+                        fontSize: 12.0,
+                        fontWeight: FontWeight.w300,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
