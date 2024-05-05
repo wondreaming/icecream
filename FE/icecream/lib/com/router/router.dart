@@ -3,9 +3,10 @@ import 'package:icecream/auth/screen/c_qrcode.dart';
 import 'package:icecream/com/widget/temp.dart';
 import 'package:icecream/home/screen/c_home.dart';
 import 'package:icecream/home/screen/p_home.dart';
+import 'package:icecream/setting/screen/child_detail_screen.dart';
 import 'package:icecream/setting/screen/child_screen.dart';
-import 'package:icecream/setting/screen/children_screen.dart';
-import 'package:icecream/setting/screen/location_screen.dart';
+import 'package:icecream/setting/screen/destination_screen.dart';
+import 'package:icecream/setting/screen/map_screen.dart';
 import 'package:icecream/setting/screen/my_page.dart';
 import 'package:icecream/setting/screen/search_screen.dart';
 import 'package:icecream/setting/screen/setting.dart';
@@ -42,23 +43,35 @@ final router = GoRouter(
                   GoRoute(
                     path: 'children',
                     name: 'children',
-                    builder: (context, state) => const ChildrenScreen(),
+                    builder: (context, state) => const ChildScreen(),
                     routes: [
                       // setting의 자녀 1명 페이지
                       GoRoute(
                         path: 'child',
                         name: 'child',
-                        builder: (context, state) => const ChildScreen(),
+                        builder: (context, state) => const ChildDetailScreen(
+                          user_id: 1,
+                        ),
                         routes: [
                           GoRoute(
-                            path: 'location',
-                            name: 'location',
-                            builder: (context, state) => const LocationScreen(),
+                            path: 'destination',
+                            name: 'destination',
+                            builder: (context, state) =>
+                                const DestinationScreen(
+                              user_id: 1,
+                            ),
                             routes: [
                               GoRoute(
                                 path: 'query_parameter',
                                 name: 'search',
                                 builder: (context, state) => SearchScreen(),
+                                routes: [
+                                  GoRoute(
+                                    path: 'map',
+                                    name: 'map',
+                                    builder: (context, state) => MapScreen(),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
