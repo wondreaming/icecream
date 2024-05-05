@@ -2,18 +2,19 @@ package com.example.icecream.domain.goal.controller;
 
 import com.example.icecream.common.dto.ApiResponseDto;
 import com.example.icecream.domain.goal.dto.CreateGoalDto;
+import com.example.icecream.domain.goal.dto.GoalStatusDto;
 import com.example.icecream.domain.goal.dto.UpdateGoalDto;
+import com.example.icecream.domain.goal.dto.UpdateGoalStatusDto;
 import com.example.icecream.domain.goal.entity.Goal;
 import com.example.icecream.domain.goal.service.GoalService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 public class GoalController {
 
@@ -32,23 +33,22 @@ public class GoalController {
     }
 
     @GetMapping("/goal")
-    public ApiResponseDto<List<Goal>> getGoal(@RequestParam int userId) {
+    public ApiResponseDto<List<Goal>> getGoal(@RequestParam(name = "user_id") int userId) {
         List<Goal> goals = goalService.getGoals(userId);
         return ApiResponseDto.success("목표를 불러왔습니다.", goals);
     }
 
     @GetMapping("/goal/status")
-    public ApiResponseDto<Object> getGoalStatus(
-            @RequestParam("date") LocalDate date,
-            @RequestParam("user_id") int userId) {
-
-        List<Map<LocalDate, Integer>> goalStatus = goalService.getGoalStatus(date, userId);
-        return ApiResponseDto.success("목표 상태를 불러왔습니다.", goalStatus);
+    public ApiResponseDto<Map<LocalDate, Integer>> getGoalStatus(
+            @RequestParam("user_id") int userId,
+            @RequestParam("date") LocalDate date) {
+        GoalStatusDto goalStatus = goalService.getGoalStatus(userId, date);
+        return ApiResponseDto.success("목표 상태를 불러왔습니다.", goalStatus.getGoalStatusMap());
     }
 
     @PatchMapping("/goal/status")
-    public ApiResponseDto<String> updateGoalStatus(@RequestBody Map<String, Object> body) {
-        goalService.updateGoalStatus(body);
+    public ApiResponseDto<String> updateGoalStatus(@RequestBody UpdateGoalStatusDto updateGoalStatusDto) {
+        goalService.updateGoalStatus(updateGoalStatusDto);
         return ApiResponseDto.success("목표 상태를 수정하였습니다.", null);
     }
 }

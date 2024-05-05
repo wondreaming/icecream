@@ -53,5 +53,6 @@ public class Goal {
         public void updateGoal(int period, String content) {
                 this.period = period;
                 this.content = content;
+                this.updatedAt = LocalDateTime.now();
         }
 }

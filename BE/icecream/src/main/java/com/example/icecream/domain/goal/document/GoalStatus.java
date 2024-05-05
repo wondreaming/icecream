@@ -9,10 +9,8 @@ import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Document(collection = "goal_status")
 @Getter
@@ -28,13 +26,18 @@ public class GoalStatus {
     private int userId;
 
     @Field(name = "result")
-    private List<Map<LocalDate, Integer>> result;
+    private Map<LocalDate, Integer> result;
 
     @Field(name = "created_at")
     @CreatedDate
-    private String createdAt;
+    private LocalDateTime createdAt;
 
     @Field(name = "updated_at")
     @LastModifiedDate
-    private String updatedAt;
+    private LocalDateTime updatedAt;
+
+    public void updateGoalStatus(LocalDate date, Integer status) {
+        this.result.put(date, status);
+        this.updatedAt = LocalDateTime.now();
+    }
 }
