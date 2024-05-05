@@ -12,3 +12,14 @@ class LocationIcons {
   static const music = CustomIcon(color: AppColors.custom_red, icon: Icons.music_note);
   static const math = CustomIcon(color: AppColors.custom_brown, icon: Icons.calculate);
 }
+
+final List<Widget> locationIcons = [
+  LocationIcons.star,
+  LocationIcons.home,
+  LocationIcons.school,
+  LocationIcons.flag,
+  LocationIcons.favorite,
+  LocationIcons.science,
+  LocationIcons.music,
+  LocationIcons.math,
+];
