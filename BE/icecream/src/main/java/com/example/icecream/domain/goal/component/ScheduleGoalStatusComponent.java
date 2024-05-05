@@ -25,10 +25,9 @@ public class ScheduleGoalStatusComponent {
         users.forEach(user -> {
             int userId = user.getId();
             GoalStatus goalStatus = goalStatusRepository.findByUserId(userId);
-            List<Map<LocalDate, Integer>> result = goalStatus.getResult();
-            Map<LocalDate, Integer> lastResult = result.get(result.size() - 1);
-            if (lastResult.get(LocalDate.now()) == 0) {
-                lastResult.put(LocalDate.now(), 1);
+            Map<LocalDate, Integer> result = goalStatus.getResult();
+            if (result.get(LocalDate.now().minusDays(1)) == 0) {
+                result.put(LocalDate.now().minusDays(1), 1);
                 goalStatusRepository.save(goalStatus);
             }
         });

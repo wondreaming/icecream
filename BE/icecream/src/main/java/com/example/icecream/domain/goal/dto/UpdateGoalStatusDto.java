@@ -1,19 +1,21 @@
 package com.example.icecream.domain.goal.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
+
+import java.time.LocalDate;
 
 @Getter
 @Builder
-public class CreateGoalDto {
+public class UpdateGoalStatusDto {
 
     @NotNull
-    @JsonProperty("user_id")
+    @JsonProperty(namespace = "user_id")
     private Integer userId;
     @NotNull
-    private Integer period;
+    private LocalDate date;
     @NotNull
-    private String content;
+    private Integer status;
 }
