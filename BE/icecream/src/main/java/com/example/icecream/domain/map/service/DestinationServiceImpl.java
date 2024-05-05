@@ -7,6 +7,7 @@ import com.example.icecream.domain.map.dto.DestinationModifyDto;
 import com.example.icecream.domain.map.dto.DestinationRegisterDto;
 import com.example.icecream.domain.map.dto.DestinationResponseDto;
 import com.example.icecream.domain.map.entity.Destination;
+import com.example.icecream.domain.map.error.MapErrorCode;
 import com.example.icecream.domain.map.repository.DestinationRepository;
 import com.example.icecream.domain.user.repository.ParentChildMappingRepository;
 import com.example.icecream.domain.user.repository.UserRepository;
@@ -35,11 +36,11 @@ public class DestinationServiceImpl extends CommonService implements Destination
     @Override
     public List<DestinationResponseDto> getDestinations(Integer userId, Integer childId) {
         if (!isUserExist(childId)) {
-            throw new NotFoundException("해당 사용자가 존재하지 않습니다.");
+            throw new NotFoundException(MapErrorCode.USER_NOT_FOUND.getMessage());
         }
 
         if (!isParentUserWithPermission(userId, childId) && !userId.equals(childId)) {
-            throw new DataAccessException("목적지 조회 권한이 없습니다.");
+            throw new DataAccessException(MapErrorCode.GET_DESTINATION_ACCESS_DENIED.getMessage());
         }
 
         return destinationRepository.findAllByUserId(childId)
@@ -61,7 +62,7 @@ public class DestinationServiceImpl extends CommonService implements Destination
     @Transactional
     public void registerDestination(Integer userId, DestinationRegisterDto destinationRegisterDto) {
         if (!isParentUserWithPermission(userId, destinationRegisterDto.getUserId())) {
-            throw new DataAccessException("목적지 등록 권한이 없습니다.");
+            throw new DataAccessException(MapErrorCode.REGISTER_DESTINATION_ACCESS_DENIED.getMessage());
         }
         Point location = geometryFactory.createPoint(
                 new Coordinate(destinationRegisterDto.getLongitude(),
@@ -87,10 +88,10 @@ public class DestinationServiceImpl extends CommonService implements Destination
     @Transactional
     public void modifyDestination(Integer userId, DestinationModifyDto destinationModifyDto) {
         Destination destination = destinationRepository.findById(destinationModifyDto.getDestinationId())
-                .orElseThrow(() -> new NotFoundException("해당 목적지가 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundException(MapErrorCode.DESTINATION_NOT_FOUND.getMessage()));
 
         if (!isParentUserWithPermission(userId, destination.getUserId())) {
-            throw new DataAccessException("목적지 수정 권한이 없습니다.");
+            throw new DataAccessException(MapErrorCode.MODIFY_DESTINATION_ACCESS_DENIED.getMessage());
         }
 
         Point location = geometryFactory.createPoint(
@@ -109,10 +110,10 @@ public class DestinationServiceImpl extends CommonService implements Destination
     @Transactional
     public void deleteDestination(Integer userId, Integer destinationId) {
         Destination destination = destinationRepository.findById(destinationId)
-                .orElseThrow(() -> new NotFoundException("해당 목적지가 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundException(MapErrorCode.DESTINATION_NOT_FOUND.getMessage()));
 
         if (!isParentUserWithPermission(userId, destination.getUserId())) {
-            throw new DataAccessException("목적지 삭제 권한이 없습니다.");
+            throw new DataAccessException(MapErrorCode.DELETE_DESTINATION_ACCESS_DENIED.getMessage());
         }
 
         destinationRepository.delete(destination);
