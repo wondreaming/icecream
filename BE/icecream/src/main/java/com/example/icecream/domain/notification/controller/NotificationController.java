@@ -22,9 +22,6 @@ public class NotificationController {
     @GetMapping("/notification/{userId}")
     public ResponseEntity<ApiResponseDto<List<NotificationResponseDto>>> getNotificationList(@PathVariable int userId) {
         List<NotificationResponseDto> notificationList = notificationService.getNotificationList(userId);
-        if (notificationList.isEmpty()) {
-            return ApiResponseDto.notFound("알림 목록이 존재하지 않습니다.");
-        }
         return ApiResponseDto.success("알림 목록 조회에 성공하였습니다.", notificationList);
     }
 

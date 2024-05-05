@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ParentChildMappingRepository extends JpaRepository<ParentChildMapping, Integer> {
+
+    boolean existsByParentIdAndChildId(Integer parentId, Integer childId);
 }

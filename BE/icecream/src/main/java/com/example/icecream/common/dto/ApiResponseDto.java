@@ -27,6 +27,11 @@ public class ApiResponseDto<T> {
         return ResponseEntity.status(201).body(response);
     }
 
+    public static <T> ResponseEntity<ApiResponseDto<T>> forbidden(String message) {
+        ApiResponseDto<T> response = new ApiResponseDto<>(403, message, null);
+        return ResponseEntity.status(403).body(response);
+    }
+
     public static <T> ResponseEntity<ApiResponseDto<T>> notFound(String message) {
         ApiResponseDto<T> response = new ApiResponseDto<>(404, message, null);
         return ResponseEntity.status(404).body(response);

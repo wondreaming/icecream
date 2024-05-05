@@ -89,7 +89,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .map(userId -> CompletableFuture.runAsync(() -> {
                     FcmToken fcmToken = fcmTokenRepository.findByUserId(userId);
                     if (fcmToken != null) {
-                        FcmRequestDto fcmRequestDto = new FcmRequestDto(fcmToken.getToken(), fcmRequestDto2.getTitle(), fcmRequestDto2.getBody(), fcmRequestDto2.getKey1(), fcmRequestDto2.getKey2(), fcmRequestDto2.getKey3());
+                        FcmRequestDto fcmRequestDto = new FcmRequestDto(fcmToken.getToken(), fcmRequestDto2.getTitle(), fcmRequestDto2.getBody(), fcmRequestDto2.getIsOverSpeed(), fcmRequestDto2.getIsCreated(), fcmRequestDto2.getKey3());
                         try {
                             sendMessageTo(fcmRequestDto);
                             success.incrementAndGet();
@@ -155,13 +155,11 @@ public class NotificationServiceImpl implements NotificationService {
                 .validateOnly(false)
                 .message(FcmMessageDto.Message.builder()
                         .token(fcmRequestDto.getToken())
-                        .notification(FcmMessageDto.Notification.builder()
+                        .data(FcmMessageDto.Data.builder()
                                 .title(fcmRequestDto.getTitle())
                                 .body(fcmRequestDto.getBody())
-                                .build())
-                        .data(FcmMessageDto.Data.builder()
-                                .key1(fcmRequestDto.getKey1())
-                                .key2(fcmRequestDto.getKey2())
+                                .isOverSpeed(fcmRequestDto.getIsOverSpeed())
+                                .isCreated(fcmRequestDto.getIsCreated())
                                 .key3(fcmRequestDto.getKey3())
                                 .build())
                         .build())
