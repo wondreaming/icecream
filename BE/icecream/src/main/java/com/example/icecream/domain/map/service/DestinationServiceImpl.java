@@ -1,6 +1,8 @@
 package com.example.icecream.domain.map.service;
 
+import com.example.icecream.common.exception.BadRequestException;
 import com.example.icecream.common.exception.DataAccessException;
+import com.example.icecream.common.exception.DataConflictException;
 import com.example.icecream.common.exception.NotFoundException;
 import com.example.icecream.common.service.CommonService;
 import com.example.icecream.domain.map.dto.DestinationModifyDto;
@@ -17,6 +19,7 @@ import org.locationtech.jts.geom.Point;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalTime;
 import java.util.List;
 
 @Transactional(readOnly = true)
@@ -64,6 +67,12 @@ public class DestinationServiceImpl extends CommonService implements Destination
         if (!isParentUserWithPermission(userId, destinationRegisterDto.getUserId())) {
             throw new DataAccessException(MapErrorCode.REGISTER_DESTINATION_ACCESS_DENIED.getMessage());
         }
+
+        validateDestinationDetails(destinationRegisterDto.getDay(), destinationRegisterDto.getStartTime(), destinationRegisterDto.getEndTime());
+
+        checkDestinationOverlap(null, destinationRegisterDto.getUserId(), destinationRegisterDto.getDay(),
+                destinationRegisterDto.getStartTime(), destinationRegisterDto.getEndTime());
+
         Point location = geometryFactory.createPoint(
                 new Coordinate(destinationRegisterDto.getLongitude(),
                         destinationRegisterDto.getLatitude()));
@@ -94,6 +103,11 @@ public class DestinationServiceImpl extends CommonService implements Destination
             throw new DataAccessException(MapErrorCode.MODIFY_DESTINATION_ACCESS_DENIED.getMessage());
         }
 
+        validateDestinationDetails(destinationModifyDto.getDay(), destinationModifyDto.getStartTime(), destinationModifyDto.getEndTime());
+
+        checkDestinationOverlap(destinationModifyDto.getDestinationId(), destination.getUserId(), destinationModifyDto.getDay(),
+                destinationModifyDto.getStartTime(), destinationModifyDto.getEndTime());
+
         Point location = geometryFactory.createPoint(
                 new Coordinate(destinationModifyDto.getLongitude(),
                         destinationModifyDto.getLatitude()));
@@ -117,5 +131,33 @@ public class DestinationServiceImpl extends CommonService implements Destination
         }
 
         destinationRepository.delete(destination);
+    }
+
+    private void validateDestinationDetails(String day, LocalTime startTime, LocalTime endTime) {
+        if (startTime.isAfter(endTime)) {
+            throw new BadRequestException(MapErrorCode.DESTINATION_TIME_INVALID.getMessage());
+        }
+        if (day.length() != 7 || day.equals("0000000") || !day.matches("[01]{7}")) {
+            throw new BadRequestException(MapErrorCode.DESTINATION_DAY_INVALID.getMessage());
+        }
+    }
+
+    private void checkDestinationOverlap(Integer destinationId, Integer userId, String day, LocalTime startTime, LocalTime endTime) {
+        List<Destination> overlappingDestinations = destinationRepository.findOverlappingDestinationsByTime(userId, destinationId, startTime, endTime);
+
+        for (Destination destination : overlappingDestinations) {
+            if (daysOverlap(destination.getDay(), day)) {
+                throw new DataConflictException(MapErrorCode.DESTINATION_OVERLAP.getMessage());
+            }
+        }
+    }
+
+    private boolean daysOverlap(String existingDays, String newDays) {
+        for (int i = 0; i < 7; i++) {
+            if (existingDays.charAt(i) == '1' && newDays.charAt(i) == '1') {
+                return true;
+            }
+        }
+        return false;
     }
 }

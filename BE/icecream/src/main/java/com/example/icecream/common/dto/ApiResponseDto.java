@@ -27,6 +27,11 @@ public class ApiResponseDto<T> {
         return ResponseEntity.status(201).body(response);
     }
 
+    public static <T> ResponseEntity<ApiResponseDto<T>> badRequest(String message) {
+        ApiResponseDto<T> response = new ApiResponseDto<>(400, message, null);
+        return ResponseEntity.status(400).body(response);
+    }
+
     public static <T> ResponseEntity<ApiResponseDto<T>> forbidden(String message) {
         ApiResponseDto<T> response = new ApiResponseDto<>(403, message, null);
         return ResponseEntity.status(403).body(response);
@@ -35,6 +40,11 @@ public class ApiResponseDto<T> {
     public static <T> ResponseEntity<ApiResponseDto<T>> notFound(String message) {
         ApiResponseDto<T> response = new ApiResponseDto<>(404, message, null);
         return ResponseEntity.status(404).body(response);
+    }
+
+    public static <T> ResponseEntity<ApiResponseDto<T>> conflict(String message) {
+        ApiResponseDto<T> response = new ApiResponseDto<>(409, message, null);
+        return ResponseEntity.status(409).body(response);
     }
 
     public static <T> ResponseEntity<ApiResponseDto<T>> error(String errorMessage) {
