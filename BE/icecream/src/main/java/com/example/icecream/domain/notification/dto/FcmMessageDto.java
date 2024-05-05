@@ -17,24 +17,17 @@ public class FcmMessageDto {
     @AllArgsConstructor
     public static class Message {
         private String token;
-        private Notification notification;
         private Data data;
     }
 
     @Getter
     @Builder
     @AllArgsConstructor
-    public static class Notification {
+    public static class Data {
         private String title;
         private String body;
-    }
-
-    @Getter
-    @Builder
-    @AllArgsConstructor
-    public static class Data {
-        private String key1;
-        private String key2;
+        private String isOverSpeed;
+        private String isCreated;
         private String key3;
     }
 }

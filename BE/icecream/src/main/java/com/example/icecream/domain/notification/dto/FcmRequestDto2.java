@@ -1,6 +1,5 @@
 package com.example.icecream.domain.notification.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,9 +19,9 @@ public class FcmRequestDto2 {
     @NotNull
     private String body;
     @NotNull
-    private String key1;
+    private String isOverSpeed;
     @NotNull
-    private String key2;
+    private String isCreated;
     @NotNull
     private String key3;
 }

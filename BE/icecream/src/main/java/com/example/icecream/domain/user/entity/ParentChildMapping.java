@@ -19,10 +19,10 @@ public class ParentChildMapping {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id", nullable = false)
     @NotNull
-    private Users parent;
+    private User parent;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "child_id", nullable = false)
     @NotNull
-    private Users child;
+    private User child;
 }

@@ -1,6 +1,7 @@
 package com.example.icecream.common.handler;
 
 import com.example.icecream.common.dto.ApiResponseDto;
+import com.example.icecream.common.exception.DataAccessException;
 import com.example.icecream.common.exception.InternalServerException;
 import com.example.icecream.common.exception.NotFoundException;
 import org.springframework.http.ResponseEntity;
@@ -18,5 +19,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InternalServerException.class)
     public ResponseEntity<ApiResponseDto<String>> handleInternalServerException(InternalServerException e) {
         return ApiResponseDto.error(e.getMessage());
+    }
+
+    @ExceptionHandler(DataAccessException.class)
+    public ResponseEntity<ApiResponseDto<String>> handleDataAccessException(DataAccessException e) {
+        return ApiResponseDto.forbidden(e.getMessage());
     }
 }

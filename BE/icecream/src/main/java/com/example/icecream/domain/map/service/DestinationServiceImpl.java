@@ -1,12 +1,15 @@
 package com.example.icecream.domain.map.service;
 
+import com.example.icecream.common.exception.DataAccessException;
 import com.example.icecream.common.exception.NotFoundException;
+import com.example.icecream.common.service.CommonService;
 import com.example.icecream.domain.map.dto.DestinationModifyDto;
 import com.example.icecream.domain.map.dto.DestinationRegisterDto;
 import com.example.icecream.domain.map.dto.DestinationResponseDto;
 import com.example.icecream.domain.map.entity.Destination;
 import com.example.icecream.domain.map.repository.DestinationRepository;
-import lombok.RequiredArgsConstructor;
+import com.example.icecream.domain.user.repository.ParentChildMappingRepository;
+import com.example.icecream.domain.user.repository.UserRepository;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
@@ -15,16 +18,31 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Transactional(readOnly = true)
 @Service
-@RequiredArgsConstructor
-public class DestinationServiceImpl implements DestinationService {
+public class DestinationServiceImpl extends CommonService implements DestinationService {
 
     private final DestinationRepository destinationRepository;
     private final GeometryFactory geometryFactory = new GeometryFactory();
 
+    public DestinationServiceImpl(UserRepository userRepository,
+                                  ParentChildMappingRepository parentChildMappingRepository,
+                                  DestinationRepository destinationRepository) {
+        super(userRepository, parentChildMappingRepository);
+        this.destinationRepository = destinationRepository;
+    }
+
     @Override
-    public List<DestinationResponseDto> getDestinations(Integer userId) {
-        return destinationRepository.findAllByUserId(userId)
+    public List<DestinationResponseDto> getDestinations(Integer userId, Integer childId) {
+        if (!isUserExist(childId)) {
+            throw new NotFoundException("해당 사용자가 존재하지 않습니다.");
+        }
+
+        if (!isParentUserWithPermission(userId, childId) && !userId.equals(childId)) {
+            throw new DataAccessException("목적지 조회 권한이 없습니다.");
+        }
+
+        return destinationRepository.findAllByUserId(childId)
                 .stream()
                 .map(destination -> new DestinationResponseDto(
                         destination.getId(),
@@ -32,8 +50,8 @@ public class DestinationServiceImpl implements DestinationService {
                         destination.getIcon(),
                         destination.getLatitude(),
                         destination.getLongitude(),
-                        destination.getStartTime().toString(),
-                        destination.getEndTime().toString(),
+                        destination.getStartTime(),
+                        destination.getEndTime(),
                         destination.getDay()
                 ))
                 .toList();
@@ -41,7 +59,10 @@ public class DestinationServiceImpl implements DestinationService {
 
     @Override
     @Transactional
-    public void registerDestination(DestinationRegisterDto destinationRegisterDto) {
+    public void registerDestination(Integer userId, DestinationRegisterDto destinationRegisterDto) {
+        if (!isParentUserWithPermission(userId, destinationRegisterDto.getUserId())) {
+            throw new DataAccessException("목적지 등록 권한이 없습니다.");
+        }
         Point location = geometryFactory.createPoint(
                 new Coordinate(destinationRegisterDto.getLongitude(),
                         destinationRegisterDto.getLatitude()));
@@ -63,9 +84,14 @@ public class DestinationServiceImpl implements DestinationService {
     }
 
     @Override
-    public void modifyDestination(DestinationModifyDto destinationModifyDto) {
+    @Transactional
+    public void modifyDestination(Integer userId, DestinationModifyDto destinationModifyDto) {
         Destination destination = destinationRepository.findById(destinationModifyDto.getDestinationId())
                 .orElseThrow(() -> new NotFoundException("해당 목적지가 존재하지 않습니다."));
+
+        if (!isParentUserWithPermission(userId, destination.getUserId())) {
+            throw new DataAccessException("목적지 수정 권한이 없습니다.");
+        }
 
         Point location = geometryFactory.createPoint(
                 new Coordinate(destinationModifyDto.getLongitude(),
@@ -80,9 +106,15 @@ public class DestinationServiceImpl implements DestinationService {
     }
 
     @Override
-    public void deleteDestination(Integer destinationId) {
+    @Transactional
+    public void deleteDestination(Integer userId, Integer destinationId) {
         Destination destination = destinationRepository.findById(destinationId)
                 .orElseThrow(() -> new NotFoundException("해당 목적지가 존재하지 않습니다."));
+
+        if (!isParentUserWithPermission(userId, destination.getUserId())) {
+            throw new DataAccessException("목적지 삭제 권한이 없습니다.");
+        }
+
         destinationRepository.delete(destination);
     }
 }
