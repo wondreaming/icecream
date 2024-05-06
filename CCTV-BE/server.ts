@@ -8,11 +8,32 @@ const server = createServer(app);
 const io = new Server(server);
 // view engine
 app.set("view engine", "ejs");
+// HTML, CSS, JavaScript 파일 포함
+app.use(express.static("public"));
+
+// webpack 설정
+const path = require("path");
+const { InjectManifest } = require("workbox-webpack-plugin");
+
+module.exports = {
+  entry: "./public/index.js",
+  output: {
+    path: path.resolve(__dirname, "public"),
+    filename: "bundle.js",
+  },
+  plugins: [
+    new InjectManifest({
+      swSrc: "./service-worker.js",
+      swDest: "service-worker.js",
+    }),
+  ],
+};
 
 require("dotenv").config(); // .env 파일에서 환경변수 불러오기
+
 const port = process.env.PORT || 1996;
 const roomName = process.env.roomName || "chatRoom";
-
+let cnt = 0;
 // server port
 server.listen(port, "0.0.0.0", () => {
   console.log("port에 서버 연결됨");
@@ -27,6 +48,12 @@ app.get("/", (req, res) => {
   res.send("it is for websocket");
 });
 
+// cctv send
+app.get("/camera", (req, res) => {
+  res.render("camera");
+});
+
+// cctv receive
 app.get("/cctv", (req, res) => {
   // 초기 데이터 설정
   const initialData = {
@@ -34,6 +61,11 @@ app.get("/cctv", (req, res) => {
     CCTVImage: null,
   };
   res.render("cctv", { data: initialData }); // 'data' 객체를 전달
+});
+
+// 서비스 워커 등록
+app.get("/sw.js", (req, res) => {
+  res.sendFile(path.resolve(__dirname, "public", "sw.js"));
 });
 
 // socket.io
@@ -48,6 +80,7 @@ io.on("connect", socket => {
 
     // cctv 이미지 받고 전송
     socket.on("sendCCTVImage", data => {
+      console.log(cnt++);
       io.to(roomName).emit("getCCTVImage", data);
     });
 

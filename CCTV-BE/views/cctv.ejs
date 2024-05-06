@@ -27,7 +27,10 @@
           nameElement.textContent = data.CCTVName;
         }
         if (data.CCTVImage) {
-          imageElement.src = `data:image/png;base64,${data.CCTVImage}`;
+          const base64String = btoa(
+            String.fromCharCode(...new Uint8Array(data.CCTVImage))
+          );
+          imageElement.src = `data:image/jpeg;base64,${base64String}`;
         }
       });
     </script>
