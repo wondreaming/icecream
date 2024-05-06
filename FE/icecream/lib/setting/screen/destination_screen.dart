@@ -1,6 +1,7 @@
 import 'package:day_night_time_picker/day_night_time_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icecream/com/const/color.dart';
@@ -14,7 +15,9 @@ import 'package:intl/intl.dart';
 
 class DestinationScreen extends StatefulWidget {
   final int user_id;
-  const DestinationScreen({super.key, required this.user_id});
+  final String? currentAddress;
+  const DestinationScreen(
+      {super.key, required this.user_id, this.currentAddress});
 
   @override
   State<DestinationScreen> createState() => _DestinationScreenState();
@@ -26,6 +29,9 @@ class _DestinationScreenState extends State<DestinationScreen> {
 
   // 장소 이름 입력
   TextEditingController nameController = TextEditingController();
+
+  // 장소 주소 입력
+  late String address = '주소를 입력해주세요';
 
   @override
   void initState() {
@@ -50,14 +56,17 @@ class _DestinationScreenState extends State<DestinationScreen> {
   void toggleDay(int index) {
     setState(() {
       isClicked[index] = !isClicked[index];
-      // List<bool> newIsClicked = List.from(isClicked); // 새로운 요일 리스트
-      // print('함수 작동 전 ${isClicked[index]}');
-      // newIsClicked[index] = !newIsClicked[index];
-      // print('함수 작동 후 ${isClicked[index]}');
-      // isClicked = newIsClicked;
+      refresh();
     });
   }
 
+  // 하위 위젯에서 상위 위젯를 위한 콜백 함수
+  void refresh() {
+    setState(() {
+      
+    });
+  }
+  
   // 시간 설정
   Time _startTime = Time(hour: 7, minute: 00);
   Time _endTime = Time(hour: 14, minute: 00);
@@ -65,11 +74,13 @@ class _DestinationScreenState extends State<DestinationScreen> {
   // 시간 한국어로 변역
   String formatTime(String time) {
     // Parse the input time string, removing any spaces and ensuring upper case for AM/PM parsing
-    DateTime parsedTime = DateFormat('hh:mma').parse(time.toUpperCase().replaceAll(' ', ''));
+    DateTime parsedTime =
+        DateFormat('hh:mma').parse(time.toUpperCase().replaceAll(' ', ''));
 
     // Format the DateTime object to the desired format with space before AM/PM
     return DateFormat('hh:mm a').format(parsedTime);
   }
+
   // 시작 시간 변경
   void onStartTimeChanged(Time newTime) {
     setState(() {
@@ -152,26 +163,48 @@ class _DestinationScreenState extends State<DestinationScreen> {
             ),
 
             // 장소 이름 입력
-            CustomTextContainer(
-              text: '장소 이름',
-              isFrontIcon: false,
-              isDetail: true,
-              hintText: '10자 이내로 장소를 입력해주세요',
-              controller: nameController,
-              onChanged: (String value) {
-                setState(() {
-                  name = value;
-                });
-              },
+            Column(
+              children: [
+                CustomTextContainer(
+                  text: '장소 이름',
+                  isFrontIcon: false,
+                  isDetail: true,
+                  hintText: '10자 이내로 장소를 입력해주세요',
+                  controller: nameController,
+                  onChanged: (String value) {
+                    setState(() {
+                      name = value;
+                    });
+                  },
+                ),
+                SizedBox(
+                  height: 14.0,
+                  child: Align(
+                    alignment: Alignment.bottomRight,
+                    child: Text(
+                      '${nameController.text.length}/10',
+                      style: TextStyle(
+                        fontSize: 12.0,
+                        fontWeight: FontWeight.w400,
+                        fontFamily: 'GmarketSans',
+                        color: AppColors.input_text_color,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
             CustomTextContainer(
               text: '장소',
               isFrontIcon: false,
               isExplain: true,
-              explainText: '주소를 입력해주세요',
-              onTap: () {
+              explainText: address,
+              onTap: () async {
                 context.goNamed('search');
               },
+            ),
+            SizedBox(
+              height: 14.0,
             ),
             // 요일 입력
             CustomTextContainer(
@@ -253,6 +286,9 @@ class _DestinationScreenState extends State<DestinationScreen> {
                 );
               },
             ),
+            SizedBox(
+              height: 14.0,
+            ),
             CustomTextContainer(
               text: '시작 시간',
               isFrontIcon: false,
@@ -261,11 +297,11 @@ class _DestinationScreenState extends State<DestinationScreen> {
               onTap: () {
                 Navigator.of(context).push(
                   showPicker(
-                      amLabel : '오전',
-                      pmLabel : '오후',
+                      amLabel: '오전',
+                      pmLabel: '오후',
                       backgroundColor: AppColors.background_color,
-                      accentColor:AppColors.text_color,
-                      unselectedColor:AppColors.custom_black,
+                      accentColor: AppColors.text_color,
+                      unselectedColor: AppColors.custom_black,
                       cancelStyle: TextStyle(
                         color: AppColors.text_color,
                         fontFamily: 'GmarketSans',
@@ -287,6 +323,9 @@ class _DestinationScreenState extends State<DestinationScreen> {
                       onChange: onStartTimeChanged),
                 );
               },
+            ),
+            SizedBox(
+              height: 14.0,
             ),
             CustomTextContainer(
               text: '종료 시각',

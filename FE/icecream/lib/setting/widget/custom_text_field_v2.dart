@@ -53,6 +53,8 @@ class CustomTextFieldVersion2 extends StatelessWidget {
             fontFamily: 'GmarketSans',
             color: AppColors.custom_red,
           ),
+          errorBorder: baseBorder,
+          focusedErrorBorder: baseBorder,
           hintText: hintText, // 힌트 텍스트
           hintStyle: TextStyle(
             fontSize: 14.0,
