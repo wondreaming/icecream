@@ -84,7 +84,7 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
           },
           secoundOnTap: () {
             // QR 찍는 페이지로 이동
-            context.push('/c_qrcode');
+            context.push('/qrscan_page');
           },
           thirdOnTap: () {
             showCustomDialog(context, '연결 해제 하시겠습니까?');
