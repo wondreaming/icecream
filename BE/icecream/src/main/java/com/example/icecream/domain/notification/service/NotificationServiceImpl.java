@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Slf4j
+@Transactional(readOnly = true)
 @Service
 public class NotificationServiceImpl implements NotificationService {
 
@@ -81,7 +82,6 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     public void sendMessageToUsers(FcmRequestDto2 fcmRequestDto2) {
         log.info("알림 대상 유저 ID: {}", fcmRequestDto2.getUserIds());
-        long total = fcmRequestDto2.getUserIds().size();
         AtomicInteger success = new AtomicInteger(0);
         AtomicInteger failed = new AtomicInteger(0);
 
