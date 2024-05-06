@@ -1,11 +1,18 @@
 // server framework
 const express = require("express");
 const app = express();
+const cors = require("cors");
+app.use(cors());
 // socket.io
 const { createServer } = require("http");
 const { Server } = require("socket.io");
 const server = createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
 // view engine
 app.set("view engine", "ejs");
 // HTML, CSS, JavaScript 파일 포함
@@ -80,7 +87,7 @@ io.on("connect", socket => {
 
     // cctv 이미지 받고 전송
     socket.on("sendCCTVImage", data => {
-      console.log(cnt++);
+      // console.log(cnt++);
       io.to(roomName).emit("getCCTVImage", data);
     });
 
