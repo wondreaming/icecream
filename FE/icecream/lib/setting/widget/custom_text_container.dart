@@ -7,28 +7,31 @@ class CustomTextContainer extends StatelessWidget {
   final IconData? backIcon;
   final VoidCallback? onPressed;
   final String text;
-  final bool is_frontIcon;
-  final bool is_detail;
+  final bool isFrontIcon;
+  final bool isDetail;
   final String? hintText;
-  final bool is_explain;
+  final bool isExplain;
   final String? explainText;
   final VoidCallback? onTap;
   final ValueChanged<String>? onChanged;
   final TextEditingController? controller;
+  final bool? isUnTitle;
   const CustomTextContainer(
       {super.key,
       required this.text,
       this.frontIcon,
       this.backIcon,
-      this.is_frontIcon = true,
+      this.isFrontIcon = true,
       this.onPressed,
-      this.is_detail = false,
+      this.isDetail = false,
       this.hintText,
-      this.is_explain = false,
+      this.isExplain = false,
       this.explainText,
       this.onTap,
       this.onChanged,
-      this.controller});
+      this.controller,
+      this.isUnTitle = true,
+      });
 
   @override
   Widget build(BuildContext context) {
@@ -36,17 +39,17 @@ class CustomTextContainer extends StatelessWidget {
       width: double.infinity,
       height: 60,
       padding: EdgeInsets.symmetric(horizontal: 15.0),
-      decoration: BoxDecoration(
+      decoration: isUnTitle! ? BoxDecoration(
         border: Border(
           bottom: BorderSide(
             color: AppColors.profile_black.withOpacity(0.5),
           ),
         ),
-      ),
+      ) : null,
       margin: EdgeInsets.only(top: 5.0),
       child: Row(
         children: [
-          if (is_frontIcon)
+          if (isFrontIcon)
             Flexible(
               child: Icon(
                 frontIcon,
@@ -69,7 +72,7 @@ class CustomTextContainer extends StatelessWidget {
             ),
             flex: 6,
           ),
-          if (!is_frontIcon)
+          if (!isFrontIcon)
             Flexible(
               child: IconButton(
                 icon: Icon(
@@ -81,7 +84,7 @@ class CustomTextContainer extends StatelessWidget {
               flex: 1,
               fit: FlexFit.tight,
             ),
-          if (is_detail)
+          if (isDetail)
             Flexible(
               child: CustomTextFieldVersion2(
                 controller: controller,
@@ -91,7 +94,7 @@ class CustomTextContainer extends StatelessWidget {
               flex: 15,
               fit: FlexFit.tight,
             ),
-          if (is_explain)
+          if (isExplain)
             Flexible(
               child: Align(
                 alignment: Alignment.centerRight,

@@ -30,7 +30,7 @@ class Setting extends StatelessWidget {
               child: CustomTextContainer(
                 backIcon: Icons.arrow_forward_ios_rounded,
                 text: '자녀관리',
-                is_frontIcon: false,
+                isFrontIcon: false,
                 onPressed: () {
                   context.goNamed('children');
                 },
