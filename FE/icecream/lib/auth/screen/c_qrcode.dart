@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:icecream/noti/models/notification_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:encrypt/encrypt.dart' as en;
@@ -36,25 +37,38 @@ class _QRCodePageState extends State<QRCodePage> {
 
     // JSON 문자열로 변환
     String jsonString = json.encode(data);
+    debugPrint("data: $data");
+    debugPrint("json: $jsonString");
     String encryptedData = _encryptData(jsonString);
 
     setState(() {
       _qrData = encryptedData;
-      //     '1iongeg/y7LW3w7hP1nN6zIJvtcMcIi6+W+aR0IZP+4xsBX5IZRRb64CrlvALZA94w8TKB3cX6onFONNW7GQIn5aIESr0pbnDpT+5RVVm6OfTdVz2bZr3fZQY0mu5K/Pa26EulcRNhP+Md40cjrmiNPo0iFlJLW2JkPHTHogwlSgNqvXLTjDCv/+OHe+93wYGIPJjFQk48TCdCCvb+NQJwha/iEfm5U8Q1zdWLpnDiz30Kouk5rjI3yfuEsPZrEk6wV22SGT0OKCOZXas7OnMmC0OjgpwAGv//8STlkULU8/dK10KtaXoc7qEoFOI6lI';
       debugPrint(_qrData);
     });
   }
 
-  String _encryptData(String data) {
-    final key = en.Key.fromUtf8('1996100219961002');
-    final iv = en.IV.fromLength(16);
-    final encrypter = en.Encrypter(en.AES(key, mode: en.AESMode.cbc));
+  // String _encryptData(String data) {
+  //   final key = en.Key.fromUtf8('1996100219961002');
+  //   final iv = en.IV.fromLength(16);
+  //   final encrypter = en.Encrypter(en.AES(key, mode: en.AESMode.cbc));
 
-    final encrypted = encrypter.encrypt(data, iv: iv);
-    final decrypted = encrypter.decrypt64(encrypted.base64, iv: iv);
-    debugPrint("복호화된 정보: $decrypted");
-    return encrypted.base64;
-  }
+  //   final encrypted = encrypter.encrypt(data, iv: iv);
+  //   final decrypted = encrypter.decrypt64(encrypted.base64, iv: iv);
+  //   debugPrint("key 정보: ${key.base64}");
+  //   debugPrint("복호화된 정보: $decrypted");
+  //   debugPrint('IV for Decryption: ${iv.base64}'); // IV 출력
+  //   return encrypted.base64;
+  // }
+
+  String _encryptData(String data) {
+  final key = en.Key.fromUtf8('1996100219961002');
+  final iv = en.IV.fromLength(16);  // IV 생성
+  final encrypter = en.Encrypter(en.AES(key, mode: en.AESMode.cbc));
+  final encrypted = encrypter.encrypt(data, iv: iv);
+
+  debugPrint("IV for Encryption: ${iv.base64}"); // IV 출력 및 저장 필요
+  return '${encrypted.base64}::${iv.base64}';  // 암호화된 데이터와 IV를 함께 반환
+}
 
   List<Color> getRandomColors() {
     Random random = Random();
