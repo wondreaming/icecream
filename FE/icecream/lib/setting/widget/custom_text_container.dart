@@ -16,22 +16,24 @@ class CustomTextContainer extends StatelessWidget {
   final ValueChanged<String>? onChanged;
   final TextEditingController? controller;
   final bool? isUnTitle;
-  const CustomTextContainer(
-      {super.key,
-      required this.text,
-      this.frontIcon,
-      this.backIcon,
-      this.isFrontIcon = true,
-      this.onPressed,
-      this.isDetail = false,
-      this.hintText,
-      this.isExplain = false,
-      this.explainText,
-      this.onTap,
-      this.onChanged,
-      this.controller,
-      this.isUnTitle = true,
-      });
+  final String? errorText;
+  const CustomTextContainer({
+    super.key,
+    required this.text,
+    this.frontIcon,
+    this.backIcon,
+    this.isFrontIcon = true,
+    this.onPressed,
+    this.isDetail = false,
+    this.hintText,
+    this.isExplain = false,
+    this.explainText,
+    this.onTap,
+    this.onChanged,
+    this.controller,
+    this.isUnTitle = true,
+    this.errorText,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -39,13 +41,15 @@ class CustomTextContainer extends StatelessWidget {
       width: double.infinity,
       height: 60,
       padding: EdgeInsets.symmetric(horizontal: 15.0),
-      decoration: isUnTitle! ? BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: AppColors.profile_black.withOpacity(0.5),
-          ),
-        ),
-      ) : null,
+      decoration: isUnTitle!
+          ? BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: AppColors.profile_black.withOpacity(0.5),
+                ),
+              ),
+            )
+          : null,
       margin: EdgeInsets.only(top: 5.0),
       child: Row(
         children: [
@@ -70,7 +74,7 @@ class CustomTextContainer extends StatelessWidget {
                 ),
               ),
             ),
-            flex: 6,
+            flex: 7,
           ),
           if (!isFrontIcon)
             Flexible(
@@ -87,6 +91,7 @@ class CustomTextContainer extends StatelessWidget {
           if (isDetail)
             Flexible(
               child: CustomTextFieldVersion2(
+                errorText: errorText,
                 controller: controller,
                 onChanged: onChanged,
                 hintText: hintText,

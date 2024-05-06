@@ -7,7 +7,12 @@ import 'package:kakao_map_plugin/kakao_map_plugin.dart';
 class CustomMap extends StatefulWidget {
   final double latitude;
   final double longitude;
-  const CustomMap({super.key, required this.latitude, required this.longitude});
+  final Function(KakaoMapController)? externalOnMapCreated;
+  const CustomMap(
+      {super.key,
+      required this.latitude,
+      required this.longitude,
+      this.externalOnMapCreated});
 
   @override
   State<CustomMap> createState() => _CustomMapState();
@@ -24,7 +29,7 @@ class _CustomMapState extends State<CustomMap> {
   // 카카오 맵 초기화 및 현재 위치 설정
   late Future<void> _initKakaoMapFuture;
 
-  KakaoMapController? _mapController;
+  KakaoMapController? mapController;
 
   Position? _initialPosition;
 
@@ -43,29 +48,29 @@ class _CustomMapState extends State<CustomMap> {
   }
 
   Set<Circle> circles = {};
- // 원형 추가
+  // 원형 추가
   Set<Marker> markers = {};
- // 마커 추가
+  // 마커 추가
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
       future: _initKakaoMapFuture,
       builder: (context, snapshot) {
-        if (snapshot.connectionState ==
-            ConnectionState.done) {
+        if (snapshot.connectionState == ConnectionState.done) {
           return KakaoMap(
             currentLevel: 4,
-            center:
-            LatLng(widget.latitude, widget.longitude),
+            center: LatLng(widget.latitude, widget.longitude),
             circles: circles.toList(),
             markers: markers.toList(),
             onMapCreated: (controller) async {
-              _mapController = controller;
+              mapController = controller;
+              // 외부에서도 mapController 관리
+              if (widget.externalOnMapCreated != null) {
+                widget.externalOnMapCreated!(controller);
+              }
               // 안전하게 _mapController를 사용하기 위해 null 검사를 추가
-              LatLng center = await _mapController
-                  ?.getCenter() ??
-                  LatLng(widget.latitude,
-                      widget.longitude); // default 값 제공
+              LatLng center = await mapController?.getCenter() ??
+                  LatLng(widget.latitude, widget.longitude); // default 값 제공
               // 지도에 마커 표시
               markers.add(Marker(
                 markerId: UniqueKey().toString(),
@@ -75,8 +80,7 @@ class _CustomMapState extends State<CustomMap> {
               circles.add(
                 Circle(
                   circleId: circles.length.toString(),
-                  center: LatLng(
-                      widget.latitude, widget.longitude),
+                  center: LatLng(widget.latitude, widget.longitude),
                   fillColor: CupertinoColors.activeBlue,
                   fillOpacity: 0.1,
                   radius: 100, // 100m 반영으로 설정
@@ -84,8 +88,8 @@ class _CustomMapState extends State<CustomMap> {
               );
               setState(() {});
               if (_initialPosition != null) {
-                _mapController?.panTo(LatLng(
-                    widget.latitude, widget.longitude));
+                mapController?.panTo(LatLng(
+                    _initialPosition!.latitude, _initialPosition!.longitude));
               }
             },
           );
