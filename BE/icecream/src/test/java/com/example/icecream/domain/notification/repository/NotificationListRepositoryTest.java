@@ -1,4 +1,4 @@
-package com.example.icecream.notification.repository;
+package com.example.icecream.domain.notification.repository;
 
 import com.example.icecream.common.config.MongoConfig;
 import com.example.icecream.domain.notification.document.NotificationList;

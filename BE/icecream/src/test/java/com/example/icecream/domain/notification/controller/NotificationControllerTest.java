@@ -1,4 +1,4 @@
-package com.example.icecream.notification.controller;
+package com.example.icecream.domain.notification.controller;
 
 import com.example.icecream.domain.notification.controller.NotificationController;
 import com.example.icecream.common.dto.ApiResponseDto;
