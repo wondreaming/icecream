@@ -1,24 +1,29 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:camera/camera.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:icecreamcctv/common/default_layout.dart';
 import 'package:icecreamcctv/main.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class WebsocketScreen extends StatefulWidget {
-  const WebsocketScreen({super.key});
 
+  WebsocketScreen({super.key});
+  final GlobalKey previewContainer = GlobalKey();
   @override
   State<WebsocketScreen> createState() => _WebsocketScreenState();
 }
 
 class _WebsocketScreenState extends State<WebsocketScreen>
     with WidgetsBindingObserver {
+  // 숫자 count
+  late int count = 0;
+
   // cctv 이름 설정
   TextEditingController _cctvNameController = TextEditingController();
   late String cctvName = '';
@@ -71,6 +76,7 @@ class _WebsocketScreenState extends State<WebsocketScreen>
       );
     });
   }
+
   // socket 최초 렌더링 때, 함수
   void initSocket() {
     String url = dotenv.get('url'); // socket 연결하는 url
@@ -111,7 +117,7 @@ class _WebsocketScreenState extends State<WebsocketScreen>
   // 카메라 최초 렌더링 때, 함수
   void initCamera() {
     // 뒷면 카메라 실행, 화질 medium 설정
-    controller = CameraController(cameras[0], ResolutionPreset.medium); //
+    controller = CameraController(cameras[0], ResolutionPreset.low); //
     controller.initialize().then((_) {
       if (!mounted) {
         return;
@@ -145,8 +151,18 @@ class _WebsocketScreenState extends State<WebsocketScreen>
       return; // 타이머가 활성화 상태가 아닌 경우에는 재귀 호출을 중단
     }
     try {
-      final image = await controller.takePicture();
-      String bytes = await getFrameBytes(image.path);
+      Stopwatch stopwatch = Stopwatch()..start();
+      RenderRepaintBoundary boundary = widget.previewContainer.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      ui.Image image = await boundary.toImage(pixelRatio: 0.8); // 화질 저하
+      stopwatch.stop();
+      print('이미지 캡쳐에 걸리는 시간 ${stopwatch.elapsedMilliseconds}');
+      stopwatch..reset()..start();
+      String bytes = await getFrameBytes(image);
+      stopwatch.stop();
+      print('이미지 변환에 걸리는 시간 ${stopwatch.elapsedMilliseconds}');
+      count++;
+
+      print(count);
       sendCCTVImage(cctvName ,bytes);
       // 다음 이미지 캡처를 스케줄링
       timer = Timer(Duration(milliseconds: (1000 / 30).round()),
@@ -157,13 +173,16 @@ class _WebsocketScreenState extends State<WebsocketScreen>
     }
   }
 
-  // 프레임 이미지는 blob로 변환
-  Future<String> getFrameBytes(String framePath) async {
-    File frameFile = File(framePath);
-    Uint8List bytes = await frameFile.readAsBytes();
-    final String base64String = base64.encode(bytes);
+  // // 프레임 이미지는 blob로 변환
+  Future<String> getFrameBytes(ui.Image image) async {
+    ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    Uint8List pngBytes = byteData!.buffer.asUint8List();
+
+    // Base64 인코딩
+    String base64String = base64Encode(pngBytes);
     return base64String;
   }
+
 
   void stopTakingPictures() {
     if (timer != null && timer!.isActive) {
@@ -208,9 +227,10 @@ class _WebsocketScreenState extends State<WebsocketScreen>
       // controller가 초기화 안되면 화면 안뜸
       child: (!controller.value.isInitialized)
           ? Container()
-          : Container(
-              height: size.height,
-              width: size.width,
+          : RepaintBoundary(
+        key: widget.previewContainer,
+              // height: size.height,
+              // width: size.width,
               child: CameraPreview(controller),
             ),
       bottomNavigationBar: BottomNavigationBar(

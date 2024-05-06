@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>CCTV 송출</h1>
+    <video id="video" width="800" height="600" autoplay=""></video>
+    <canvas id="mov" width="800" height="600"></canvas>
+    <script src="https://cdn.jsdelivr.net/npm/socket.io@4.7.2/client-dist/socket.io.min.js"></script>
+    <script>
+      const socket = io();
+
+      // 웹캠 접근 요청
+      navigator.mediaDevices
+        .getUserMedia({ video: true })
+        .then(stream => {
+          const video = document.getElementById("video");
+          video.srcObject = stream;
+          video.play();
+          id = "mov";
+
+          // 스트림을 캔버스에 그리고 이미지 데이터를 서버에 전송
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+
+          setInterval(() => {
+            canvas.width = video.width;
+            canvas.height = video.height;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob(blob => {
+              if (!blob) {
+                console.error("canvas.toBlob failed");
+                return;
+              }
+              const reader = new FileReader();
+              reader.readAsArrayBuffer(blob);
+              reader.onloadend = () => {
+                const byteArray = new Uint8Array(reader.result);
+                socket.emit("sendCCTVImage", {
+                  CCTVImage: byteArray,
+                  CCTVName: "CCTV 위치",
+                });
+              };
+            }, "image/jpeg");
+          }, 1000 / 33); // 매 초마다 이미지 전송
+        })
+        .catch(error => {
+          console.error("Camera access denied:", error);
+        });
+
+      socket.on("getCCTVImage", data => {
+        console.log("Received CCTV Image Data", data);
+        const imageElement = document.getElementById("CCTVImage");
+        const nameElement = document.getElementById("CCTVName");
+        if (data.CCTVName) {
+          nameElement.textContent = data.CCTVName;
+        }
+        if (data.CCTVImage) {
+          imageElement.src = `data:image/png;base64,${data.CCTVImage}`;
+        }
+      });
+    </script>
+  </body>
+</html>
