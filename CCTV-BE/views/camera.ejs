@@ -7,11 +7,10 @@
   </head>
   <body>
     <h1>CCTV 송출</h1>
-    <video id="video" width="800" height="600" autoplay=""></video>
-    <canvas id="mov" width="800" height="600"></canvas>
+    <video id="video" autoplay=""></video>
     <script src="https://cdn.jsdelivr.net/npm/socket.io@4.7.2/client-dist/socket.io.min.js"></script>
     <script>
-      const socket = io();
+      const socket = io("http://k10e202.p.ssafy.io:1996");
 
       // 웹캠 접근 요청
       navigator.mediaDevices
@@ -19,8 +18,12 @@
         .then(stream => {
           const video = document.getElementById("video");
           video.srcObject = stream;
+          video.onloadedmetadata = () => {
+            video.width = video.videoWidth;
+            video.height = video.videoHeight;
+            console.log(video.width, video.height);
+          };
           video.play();
-          id = "mov";
 
           // 스트림을 캔버스에 그리고 이미지 데이터를 서버에 전송
           const canvas = document.createElement("canvas");
@@ -50,18 +53,6 @@
         .catch(error => {
           console.error("Camera access denied:", error);
         });
-
-      socket.on("getCCTVImage", data => {
-        console.log("Received CCTV Image Data", data);
-        const imageElement = document.getElementById("CCTVImage");
-        const nameElement = document.getElementById("CCTVName");
-        if (data.CCTVName) {
-          nameElement.textContent = data.CCTVName;
-        }
-        if (data.CCTVImage) {
-          imageElement.src = `data:image/png;base64,${data.CCTVImage}`;
-        }
-      });
     </script>
   </body>
 </html>
