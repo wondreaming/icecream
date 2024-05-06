@@ -23,4 +23,19 @@ public interface DestinationRepository extends JpaRepository<Destination, Intege
                                                         @Param("destinationId") Integer destinationId,
                                                         @Param("startTime") LocalTime startTime,
                                                         @Param("endTime") LocalTime endTime);
+
+    @Query("SELECT d.id FROM Destination d WHERE SUBSTRING(d.day, :dayIndex, 1) = '1'")
+    List<Integer> findActiveDestinationsByDayIndex(@Param("dayIndex") Integer dayIndex);
+
+    @Query(value = "SELECT EXISTS (" +
+            "SELECT 1 FROM destination " +
+            "WHERE id = :destinationId " +
+            "AND ST_DWithin(" +
+            "location, " +
+            "ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)::geography, " +
+            "radius))",
+            nativeQuery = true)
+    boolean isWithinRadius(@Param("destinationId") Integer destinationId,
+                           @Param("latitude") Double latitude,
+                           @Param("longitude") Double longitude);
 }
