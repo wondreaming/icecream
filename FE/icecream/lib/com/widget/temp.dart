@@ -94,6 +94,12 @@ class _TempState extends State<Temp> {
             },
             child: const Text('QRcode 생성페이지'),
           ),
+          ElevatedButton(
+            onPressed: () {
+              context.go('/qrscan_page');
+            },
+            child: const Text('QRcode 스캔페이지'),
+          ),
         ],
       ),
     );
