@@ -1,4 +1,4 @@
-package com.example.icecream.notification.service;
+package com.example.icecream.domain.notification.service;
 
 import com.example.icecream.domain.notification.document.FcmToken;
 import com.example.icecream.domain.notification.document.NotificationList;
