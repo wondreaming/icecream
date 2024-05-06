@@ -1,65 +1,66 @@
-package com.e102.simcheonge_server.domain.auth.config;
+package com.example.icecream.common.config;
 
-import com.e102.simcheonge_server.domain.auth.security.jwt.JwtAuthenticationFilter;
-import com.e102.simcheonge_server.domain.auth.security.jwt.JwtTokenProvider;
+import com.example.icecream.common.auth.filter.JwtAuthenticationFilter;
+import com.example.icecream.common.auth.filter.LoginIdAuthenticationFilter;
+import com.example.icecream.common.auth.handler.CustomAuthenticationSuccessHandler;
+import com.example.icecream.common.auth.service.CustomUserDetailsService;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
-
-import java.util.Arrays;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-//    private final JwtTokenProvider jwtTokenProvider;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomUserDetailsService customUserDetailService;
+    private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity httpSecurity, AuthenticationManager authenticationManager) throws Exception {
+        LoginIdAuthenticationFilter loginIdAuthenticationFilter = new LoginIdAuthenticationFilter(authenticationManager,customAuthenticationSuccessHandler);
+
         return httpSecurity
-                // REST API이므로 basic auth 및 csrf 보안을 사용하지 않음
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
-                // JWT를 사용하기 때문에 세션을 사용하지 않음
                 .sessionManagement(management ->
-                        management.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 정책을 STATELESS로 설정
+                        management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(HttpMethod.GET, "/posts/my")
-                        .authenticated() // /posts/my에 대해 인증 요구
-                        .requestMatchers(HttpMethod.GET, "/posts/**")
+                        .requestMatchers(HttpMethod.POST, "/users")
                         .permitAll()
-                        .requestMatchers(HttpMethod.DELETE, "/users")
-                        .authenticated()
-                        .requestMatchers("/users/signup", "/users/check-nickname", "/users/check-loginId", "/auth/login", "/auth/reissue", "/news/**", "/policy/**", "/economicword/**")
+                        .requestMatchers("/users/check", "/auth/login", "/auth/device/login")
                         .permitAll()
-                        // USER 권한이 있어야 요청할 수 있음
-                        //                .requestMatchers("/members/test").hasRole("USER")
-                        // 이 밖에 모든 요청에 대해서 인증을 필요로 한다는 설정
                         .anyRequest().authenticated())
-                // JWT 인증을 위하여 직접 구현한 필터를 UsernamePasswordAuthenticationFilter 전에 실행
-//                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAt(loginIdAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
-
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // BCrypt Encoder 사용
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+        AuthenticationManagerBuilder authManagerBuilder =  http.getSharedObject(AuthenticationManagerBuilder.class);
+        authManagerBuilder.userDetailsService(customUserDetailService)
+                .passwordEncoder(passwordEncoder());
+        return authManagerBuilder.build();
     }
 }

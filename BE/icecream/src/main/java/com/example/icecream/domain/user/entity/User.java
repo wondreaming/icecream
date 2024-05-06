@@ -1,10 +1,14 @@
 package com.example.icecream.domain.user.entity;
 
+import com.example.icecream.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+
 import lombok.*;
+
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -14,7 +18,7 @@ import java.time.LocalDateTime;
 @Getter
 @Entity
 @Table(name="users")
-public class Users {
+public class User extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,22 +44,31 @@ public class Users {
 
     @Column(name = "is_parent", nullable = false)
     @NotNull
-    private boolean isParent;
+    private Boolean isParent;
 
     @Column(name = "profile_image", columnDefinition = "TEXT")
     private String profileImage;
 
-    @Column(name = "created_at", nullable = false)
-    @CreatedDate
-    @NotNull
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    @LastModifiedDate
-    @NotNull
-    private LocalDateTime updatedAt;
+//    @Column(name = "created_at", nullable = false)
+//    @CreatedDate
+//    @NotNull
+//    private LocalDateTime createdAt;
+//
+//    @Column(name = "updated_at", nullable = false)
+//    @LastModifiedDate
+//    @NotNull
+//    private LocalDateTime updatedAt;
 
     @Column(name = "is_deleted", nullable = false)
     @NotNull
-    private boolean isDeleted = false;
+    private Boolean isDeleted = false;
+
+    public void updateUsername(String newUsername) {
+        this.username = newUsername;
+    }
+
+    public void deleteUser() {
+        this.isDeleted = true;
+    }
+
 }
