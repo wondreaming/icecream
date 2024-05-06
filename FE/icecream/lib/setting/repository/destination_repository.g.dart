@@ -33,7 +33,7 @@ class _DestinationRespository implements DestinationRespository {
     )
             .compose(
               _dio.options,
-              '/destination?user_id=${user_id}',
+              '/destination/2?user_id=${user_id}',
               queryParameters: queryParameters,
               data: _data,
             )
@@ -64,7 +64,36 @@ class _DestinationRespository implements DestinationRespository {
     )
             .compose(
               _dio.options,
-              '/destination?destination_id=${destination_id}',
+              '/destination/2?destination_id=${destination_id}',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = DeleteDestination.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<DeleteDestination> addDestination(
+      AddDestinationModel destination) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(destination.toJson());
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<DeleteDestination>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/destination/2',
               queryParameters: queryParameters,
               data: _data,
             )

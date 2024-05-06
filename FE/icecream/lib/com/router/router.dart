@@ -68,13 +68,11 @@ final router = GoRouter(
                                 path: 'query_parameter',
                                 name: 'search',
                                 builder: (context, state) => SearchScreen(),
-                                routes: [
-                                  GoRoute(
-                                    path: 'map',
-                                    name: 'map',
-                                    builder: (context, state) => MapScreen(),
-                                  ),
-                                ],
+                              ),
+                              GoRoute(
+                                path: 'map',
+                                name: 'map',
+                                builder: (context, state) => MapScreen(),
                               ),
                             ],
                           ),
