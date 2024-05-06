@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icecream/com/widget/default_layout.dart';
-import 'package:icecream/setting/model/all_destination_model.dart';
 import 'package:icecream/setting/model/destination_model.dart';
 import 'package:icecream/setting/repository/destination_repository.dart';
 import 'package:icecream/setting/widget/add_container.dart';
@@ -38,9 +37,11 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
     final String baseUrl = dotenv.env['baseUrl']!;
     final dio = Dio();
     final destinationRepository = DestinationRespository(dio, baseUrl: baseUrl);
+
     try {
       final response =
           await destinationRepository.getDestinaion(user_id: widget.user_id);
+      print('여기 통과함');
       return response.data;
     } catch (e) {
       print(e);
