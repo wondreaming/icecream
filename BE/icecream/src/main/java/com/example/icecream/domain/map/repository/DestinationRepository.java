@@ -28,11 +28,11 @@ public interface DestinationRepository extends JpaRepository<Destination, Intege
     List<Integer> findActiveDestinationsByDayIndex(@Param("dayIndex") Integer dayIndex);
 
     @Query(value = "SELECT EXISTS (" +
-            "SELECT 1 FROM destination " +
+            "SELECT 1 FROM Destination " +
             "WHERE id = :destinationId " +
             "AND ST_DWithin(" +
             "location, " +
-            "ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)::geography, " +
+            "CAST(ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326) AS geography), " +
             "radius))",
             nativeQuery = true)
     boolean isWithinRadius(@Param("destinationId") Integer destinationId,

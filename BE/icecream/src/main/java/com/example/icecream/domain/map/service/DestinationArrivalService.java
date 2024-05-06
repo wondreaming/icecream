@@ -7,6 +7,7 @@ import com.example.icecream.domain.notification.dto.FcmRequestDto;
 import com.example.icecream.domain.notification.repository.FcmTokenRepository;
 import com.example.icecream.domain.notification.service.NotificationService;
 import com.example.icecream.domain.user.entity.User;
+import com.example.icecream.domain.user.repository.ParentChildMappingRepository;
 import com.example.icecream.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -24,6 +25,7 @@ public class DestinationArrivalService {
     private final FcmTokenRepository fcmTokenRepository;
     private final NotificationService notificationService;
     private final UserRepository userRepository;
+    private final ParentChildMappingRepository parentChildMappingRepository;
 
     public void checkAndNotifyArrival(int userId, int destinationId, double latitude, double longitude) throws IOException {
         boolean isArrived = destinationRepository.isWithinRadius(destinationId, latitude, longitude);
@@ -35,10 +37,11 @@ public class DestinationArrivalService {
 
             if (alreadyArrived == null || alreadyArrived == 0) {
                 ops.set(key, 1);
-                FcmToken fcmToken = fcmTokenRepository.findByUserId(userId);
+                int parentId = parentChildMappingRepository.findByChildId(userId).getParent().getId();
+                FcmToken fcmToken = fcmTokenRepository.findByUserId(parentId);
                 User user = userRepository.findById(userId).orElseThrow();
                 Destination destination = destinationRepository.findById(destinationId).orElseThrow();
-                FcmRequestDto fcmRequestDto = new FcmRequestDto(fcmToken.getToken(), "도착 알림", user + "님이 " + destination.getName() + "에 도착했습니다.", null, null, null);
+                FcmRequestDto fcmRequestDto = new FcmRequestDto(fcmToken.getToken(), "도착 알림", user.getUsername() + "님이 " + destination.getName() + "에 도착했습니다.", null, null, null);
                 notificationService.sendMessageTo(fcmRequestDto);
             }
         }
