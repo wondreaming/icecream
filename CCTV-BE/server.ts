@@ -63,10 +63,10 @@ app.get("/cctv", (req, res) => {
   res.render("cctv", { data: initialData }); // 'data' 객체를 전달
 });
 
-// 서비스 워커 등록
-app.get("/sw.js", (req, res) => {
-  res.sendFile(path.resolve(__dirname, "public", "sw.js"));
-});
+// // 서비스 워커 등록
+// app.get("/sw.js", (req, res) => {
+//   res.sendFile(path.resolve(__dirname, "public", "sw.js"));
+// });
 
 // socket.io
 io.on("connect", socket => {
