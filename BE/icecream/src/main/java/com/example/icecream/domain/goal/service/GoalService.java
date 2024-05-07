@@ -5,13 +5,14 @@ import com.example.icecream.domain.goal.dto.GoalStatusDto;
 import com.example.icecream.domain.goal.dto.UpdateGoalDto;
 import com.example.icecream.domain.goal.dto.UpdateGoalStatusDto;
 import com.example.icecream.domain.goal.entity.Goal;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
 import java.util.List;
 
 public interface GoalService {
 
-    void createGoal(CreateGoalDto createGoalDto);
+    void createGoal(CreateGoalDto createGoalDto, Integer parentId);
     void updateGoal(UpdateGoalDto updateGoalDto);
     List<Goal> getGoals(int userId);
     void createGoalStatus(int userId);

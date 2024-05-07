@@ -1,12 +1,12 @@
 package com.example.icecream.domain.user.controller;
 
 import com.example.icecream.common.dto.ApiResponseDto;
-import com.example.icecream.domain.user.dto.CheckPasswordRequestDto;
 import com.example.icecream.domain.user.dto.SignUpChildRequestDto;
 import com.example.icecream.domain.user.dto.SignUpParentRequestDto;
 import com.example.icecream.domain.user.dto.UpdateChildRequestDto;
 import com.example.icecream.domain.user.service.UserService;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.NotBlank;
 
@@ -22,10 +22,11 @@ import org.springframework.web.bind.annotation.*;
 @AllArgsConstructor
 @RequestMapping("/users")
 public class UserController {
+
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<ApiResponseDto<String>> signup(@RequestBody SignUpParentRequestDto signUpParentRequestDto){
+    public ResponseEntity<ApiResponseDto<String>> signup(@RequestBody @Valid SignUpParentRequestDto signUpParentRequestDto){
         userService.saveParent(signUpParentRequestDto);
         return ApiResponseDto.created("회원 가입에 성공했습니다.");
     }
@@ -37,8 +38,8 @@ public class UserController {
     }
 
     @PostMapping("/child")
-    public ResponseEntity<ApiResponseDto<String>> signupChild(@RequestBody SignUpChildRequestDto signUpChildRequestDto){
-        userService.saveChild(signUpChildRequestDto);
+    public ResponseEntity<ApiResponseDto<String>> signupChild(@RequestBody SignUpChildRequestDto signUpChildRequestDto, @AuthenticationPrincipal UserDetails userDetails){
+        userService.saveChild(signUpChildRequestDto, Integer.parseInt(userDetails.getUsername()));
         return ApiResponseDto.created("자녀 등록에 성공했습니다.");
     }
 
