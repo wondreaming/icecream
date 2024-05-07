@@ -2,78 +2,74 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:icecream/goal/model/goal_model.dart';
 
-class DailyGoalWidget extends StatelessWidget {
+class DailyGoalPage extends StatelessWidget {
   final DailyGoal dailyGoal;
-  final double circleRadius = 45.0;
-  final double lineHeight = 48.0; // 원 사이의 선 높이
+
+  const DailyGoalPage({super.key, required this.dailyGoal});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('asset/img/crosswalk.png'),
+                fit: BoxFit.fill,
+              ),
+            ),
+          ),
+          Positioned.fill(
+            child: DailyGoalWidget(dailyGoal: dailyGoal),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class DailyGoalWidget extends StatefulWidget {
+  final DailyGoal dailyGoal;
 
   const DailyGoalWidget({super.key, required this.dailyGoal});
 
   @override
+  _DailyGoalWidgetState createState() => _DailyGoalWidgetState();
+}
+
+class _DailyGoalWidgetState extends State<DailyGoalWidget> {
+  @override
   Widget build(BuildContext context) {
-    Map<String, bool?> fullResult = extendDateRange(dailyGoal.result);
+    Map<String, bool?> fullResult = extendDateRange(widget.dailyGoal.result);
     List<String> dates = fullResult.keys.toList();
     dates.sort();
 
-    // 오늘 날짜의 인덱스를 구합니다.
     String todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    int indexOfToday = dates.indexOf(todayStr);
-
-    // 화면에 표시될 날짜의 범위를 1개월로 설정합니다.
     DateTime startDate = DateTime.now().subtract(const Duration(days: 30));
-    DateTime endDate = DateTime.now().add(const Duration(days: 1)); // 오늘까지 포함
+    DateTime endDate = DateTime.now().add(const Duration(days: 1));
 
-    return ListView.builder(
-      itemCount: endDate.difference(startDate).inDays,
-      itemBuilder: (context, index) {
-        DateTime date = startDate.add(Duration(days: index));
-        String dateStr = DateFormat('yyyy-MM-dd').format(date);
-        bool? isSuccess = fullResult[dateStr];
-        bool isToday = dateStr == todayStr;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(
+          child: ListView.builder(
+            itemCount: endDate.difference(startDate).inDays,
+            itemBuilder: (context, index) {
+              DateTime date = startDate.add(Duration(days: index));
+              String dateStr = DateFormat('yyyy-MM-dd').format(date);
+              bool? isSuccess = fullResult[dateStr];
+              bool isToday = dateStr == todayStr;
 
-        return Stack(
-          alignment: Alignment.topCenter,
-          children: [
-            CustomPaint(
-              size: Size(circleRadius * 2, circleRadius * 2 + lineHeight),
-              painter: CircleLinePainter(
+              return DailyDateCircle(
+                date: date,
+                isSuccess: isSuccess,
                 isToday: isToday,
-                isSuccess: isSuccess ?? false,
-                isUndefined: isSuccess == null,
-                circleRadius: circleRadius,
-                lineHeight: lineHeight,
-              ),
-            ),
-            Positioned(
-              top: lineHeight / 2,
-              child: CircleAvatar(
-                radius: circleRadius,
-                backgroundColor: isSuccess == null
-                    ? Colors.white
-                    : (isSuccess ? Colors.green : Colors.red),
-                child: Text(
-                  DateFormat('MM월 dd일').format(date),
-                  style: TextStyle(
-                    color: isSuccess == null ? Colors.grey : Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-            if (index <
-                endDate.difference(startDate).inDays -
-                    1) // 마지막 원을 제외하고 선을 그립니다.
-              Positioned(
-                top: circleRadius * 2 + lineHeight,
-                child: Container(
-                  height: lineHeight,
-                  width: 2.0,
-                  color: Colors.grey,
-                ),
-              ),
-          ],
-        );
-      },
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -84,7 +80,6 @@ class DailyGoalWidget extends StatelessWidget {
         DateFormat('yyyy-MM-dd').parse(originalResults.keys.reduce(max));
     Map<String, bool?> extendedResults = {};
 
-    // minDate부터 maxDate까지의 날짜를 포함하는 맵을 생성합니다.
     for (DateTime date = minDate;
         date.isBefore(maxDate.add(const Duration(days: 1)));
         date = date.add(const Duration(days: 1))) {
@@ -99,12 +94,58 @@ class DailyGoalWidget extends StatelessWidget {
   String max(String a, String b) => a.compareTo(b) > 0 ? a : b;
 }
 
+class DailyDateCircle extends StatelessWidget {
+  final DateTime date;
+  final bool? isSuccess;
+  final bool isToday;
+
+  const DailyDateCircle({
+    super.key,
+    required this.date,
+    this.isSuccess,
+    required this.isToday,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    bool successStatus = isSuccess ?? false; // null인 경우 false를 기본값으로 사용합니다.
+
+    return Center(
+      child: CustomPaint(
+        painter: CircleLinePainter(
+          isToday: isToday,
+          isSuccess: successStatus,
+          isUndefined: isSuccess == null,
+          circleRadius: 45.0,
+          lineHeight: 48.0,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.only(top: 24.0),
+          child: CircleAvatar(
+            radius: 45.0,
+            backgroundColor: isSuccess == null
+                ? Colors.white
+                : (successStatus ? Colors.green : Colors.red),
+            child: Text(
+              DateFormat('MM월 dd일').format(date),
+              style: TextStyle(
+                color: isSuccess == null ? Colors.grey : Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class CircleLinePainter extends CustomPainter {
-  bool isToday;
-  bool isSuccess;
-  bool isUndefined;
-  double circleRadius;
-  double lineHeight;
+  final bool isToday;
+  final bool isSuccess;
+  final bool isUndefined;
+  final double circleRadius;
+  final double lineHeight;
 
   CircleLinePainter({
     required this.isToday,
@@ -120,29 +161,18 @@ class CircleLinePainter extends CustomPainter {
       ..color = Colors.grey
       ..strokeWidth = 2;
 
-    // 연결선을 그립니다.
-    canvas.drawLine(
-      Offset(size.width / 2, 0),
-      Offset(size.width / 2, lineHeight / 2),
-      paint,
-    );
-    canvas.drawLine(
-      Offset(size.width / 2, circleRadius * 2),
-      Offset(size.width / 2, size.height),
-      paint,
-    );
+    canvas.drawLine(Offset(size.width / 2, 0),
+        Offset(size.width / 2, lineHeight / 2), paint);
+    canvas.drawLine(Offset(size.width / 2, circleRadius * 2),
+        Offset(size.width / 2, size.height), paint);
 
-    // 원의 테두리를 그립니다.
     if (isUndefined) {
       final outlinePaint = Paint()
         ..color = isToday ? Colors.black : Colors.grey
         ..strokeWidth = 2
         ..style = PaintingStyle.stroke;
-      canvas.drawCircle(
-        Offset(size.width / 2, lineHeight / 2 + circleRadius),
-        circleRadius,
-        outlinePaint,
-      );
+      canvas.drawCircle(Offset(size.width / 2, lineHeight / 2 + circleRadius),
+          circleRadius, outlinePaint);
     }
   }
 
