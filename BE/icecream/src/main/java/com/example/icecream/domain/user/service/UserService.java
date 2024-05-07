@@ -72,6 +72,7 @@ public class UserService {
                 .phoneNumber(signUpChildRequestDto.getPhoneNumber())
                 .deviceId(signUpChildRequestDto.getDeviceId())
                 .isParent(false)
+                .isDeleted(false)
                 .build();
         userRepository.save(user);
     }
@@ -101,8 +102,6 @@ public class UserService {
     public void checkLoginIdExists(String loginId) {
         userValidationUtils.isValidLoginId(loginId);
     }
-
-
 
 
 //    @Transactional

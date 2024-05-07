@@ -1,8 +1,5 @@
 package com.example.icecream.domain.user.dto;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
@@ -13,7 +10,6 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Builder
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @NoArgsConstructor
 @AllArgsConstructor
 public class SignUpParentRequestDto {

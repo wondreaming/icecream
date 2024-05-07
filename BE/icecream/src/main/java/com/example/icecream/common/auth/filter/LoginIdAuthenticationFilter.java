@@ -24,10 +24,10 @@ public class LoginIdAuthenticationFilter extends UsernamePasswordAuthenticationF
 
     private final ObjectMapper objectMapper;
 
-    public LoginIdAuthenticationFilter(AuthenticationManager authenticationManager, CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler) {
+    public LoginIdAuthenticationFilter(AuthenticationManager authenticationManager, CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler, ObjectMapper objectMapper) {
         super(authenticationManager);
         super.setAuthenticationSuccessHandler(customAuthenticationSuccessHandler);
-        this.objectMapper = new ObjectMapper();
+        this.objectMapper = objectMapper;
         setFilterProcessesUrl("/auth/login");
     }
 

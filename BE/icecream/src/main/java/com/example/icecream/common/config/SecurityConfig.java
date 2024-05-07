@@ -5,6 +5,7 @@ import com.example.icecream.common.auth.filter.LoginIdAuthenticationFilter;
 import com.example.icecream.common.auth.handler.CustomAuthenticationSuccessHandler;
 import com.example.icecream.common.auth.service.CustomUserDetailsService;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.context.annotation.Bean;
@@ -26,13 +27,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomUserDetailsService customUserDetailService;
     private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
+    private final ObjectMapper objectMapper;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity, AuthenticationManager authenticationManager) throws Exception {
-        LoginIdAuthenticationFilter loginIdAuthenticationFilter = new LoginIdAuthenticationFilter(authenticationManager,customAuthenticationSuccessHandler);
+        LoginIdAuthenticationFilter loginIdAuthenticationFilter = new LoginIdAuthenticationFilter(authenticationManager, customAuthenticationSuccessHandler, objectMapper);
 
         return httpSecurity
                 .formLogin(AbstractHttpConfigurer::disable)
