@@ -1,6 +1,9 @@
 package com.example.icecream.domain.goal.service;
 
+import com.example.icecream.common.exception.BadRequestException;
 import com.example.icecream.common.exception.DataAccessException;
+import com.example.icecream.common.exception.DataConflictException;
+import com.example.icecream.common.exception.NotFoundException;
 import com.example.icecream.common.service.CommonService;
 import com.example.icecream.domain.goal.document.GoalStatus;
 import com.example.icecream.domain.goal.dto.CreateGoalDto;
@@ -11,6 +14,7 @@ import com.example.icecream.domain.goal.entity.Goal;
 import com.example.icecream.domain.goal.error.GoalErrorCode;
 import com.example.icecream.domain.goal.repository.mongodb.GoalStatusRepository;
 import com.example.icecream.domain.goal.repository.postgres.GoalRepository;
+import com.example.icecream.domain.user.entity.User;
 import com.example.icecream.domain.user.repository.ParentChildMappingRepository;
 import com.example.icecream.domain.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -29,7 +33,7 @@ public class GoalServiceImpl extends CommonService implements GoalService {
     public GoalServiceImpl(UserRepository userRepository,
                            ParentChildMappingRepository ParentChildMappingRepository,
                            GoalRepository goalRepository,
-                           GoalStatusRepository goalStatusRepository) {
+                           GoalStatusRepository goalStatusRepository, ParentChildMappingRepository parentChildMappingRepository) {
         super(userRepository, ParentChildMappingRepository);
         this.goalRepository = goalRepository;
         this.goalStatusRepository = goalStatusRepository;
@@ -38,10 +42,19 @@ public class GoalServiceImpl extends CommonService implements GoalService {
     @Override
     @Transactional
     public void createGoal(CreateGoalDto createGoalDto, Integer parentId) {
+
+        List<Goal> goals = goalRepository.findAllByUserId(createGoalDto.getUserId());
+        boolean isActive = false;
+        for (Goal goal : goals) {
+            if (goal.isActive()) {
+                isActive = true;
+                break;
+            }
+        }
         if (!isParentUserWithPermission(parentId, createGoalDto.getUserId())) {
             throw new DataAccessException(GoalErrorCode.REGISTER_GOAL_ACCESS_DENIED.getMessage());
-        } else if (true) {
-            // 활성화된 목표 있는 상태에서 목표를 등록
+        } else if (isActive) {
+            throw new DataConflictException(GoalErrorCode.REGISTER_GOAL_DUPLICATED.getMessage());
         }
         Goal goal = Goal.builder()
                 .userId(createGoalDto.getUserId())
@@ -55,11 +68,14 @@ public class GoalServiceImpl extends CommonService implements GoalService {
 
     @Override
     @Transactional
-    public void updateGoal(UpdateGoalDto updateGoalDto) {
+    public void updateGoal(UpdateGoalDto updateGoalDto, Integer parentId) {
         Goal goal = goalRepository.findById(updateGoalDto.getGoalId()).orElse(null);
         if (goal == null) {
-            // 수정하기
-            throw new IllegalArgumentException("해당 목표가 존재하지 않습니다.");
+            throw new NotFoundException(GoalErrorCode.NOT_FOUND_GOAL.getMessage());
+        } else if (!isParentUserWithPermission(parentId, goal.getUserId())){
+            throw new DataAccessException(GoalErrorCode.UPDATE_GOAL_ACCESS_DENIED.getMessage());
+        } else if (!goal.isActive()) {
+            throw new BadRequestException(GoalErrorCode.UPDATE_IS_NOT_ACTIVED_GOAL.getMessage());
         }
         goal.updateGoal(updateGoalDto.getPeriod(), updateGoalDto.getContent());
         goalRepository.save(goal);
@@ -73,6 +89,9 @@ public class GoalServiceImpl extends CommonService implements GoalService {
     @Override
     @Transactional
     public void createGoalStatus(int userId) {
+        if (goalStatusRepository.findByUserId(userId) != null) {
+            throw new DataConflictException(GoalErrorCode.REGISTER_GOAL_STATUS_DUPLICATED.getMessage());
+        }
         Map<LocalDate, Integer> firstResult = new HashMap<>();
         firstResult.put(LocalDate.now(), 0);
 
@@ -85,6 +104,11 @@ public class GoalServiceImpl extends CommonService implements GoalService {
 
     @Override
     public GoalStatusDto getGoalStatus(int userId, LocalDate date) {
+        if (LocalDate.now().isBefore(date)) {
+            throw new BadRequestException(GoalErrorCode.GET_FUTURE_GOAL_STATUS.getMessage());
+        } else if (goalStatusRepository.findByUserId(userId).getResult().get(date) == null) {
+            throw new NotFoundException(GoalErrorCode.NOT_FOUND_GOAL_STATUS.getMessage());
+        }
         GoalStatus goalStatus = goalStatusRepository.findByUserId(userId);
         Map<LocalDate, Integer> allResult = goalStatus.getResult();
         int allResultSize = allResult.size();
@@ -106,10 +130,12 @@ public class GoalServiceImpl extends CommonService implements GoalService {
 
     @Override
     @Transactional
-    public void updateGoalStatus(UpdateGoalStatusDto updateGoalStatusDto) {
+    public void updateGoalStatus(UpdateGoalStatusDto updateGoalStatusDto, Integer parentId) {
         GoalStatus goalStatus = goalStatusRepository.findByUserId(updateGoalStatusDto.getUserId());
-        if (!goalStatus.getResult().containsKey(updateGoalStatusDto.getDate())) {
-            throw new IllegalArgumentException("해당 사용자의 목표 상태가 존재하지 않습니다.");
+        if (!isParentUserWithPermission(parentId, updateGoalStatusDto.getUserId())) {
+            throw new DataAccessException(GoalErrorCode.UPDATE_GOAL_STATUS_ACCESS_DENIED.getMessage());
+        } else if (!goalStatus.getResult().containsKey(updateGoalStatusDto.getDate())) {
+            throw new NotFoundException(GoalErrorCode.UPDATE_GOAL_STATUS_NOT_FOUND.getMessage());
         }
         goalStatus.updateGoalStatus(updateGoalStatusDto.getDate(), updateGoalStatusDto.getStatus());
         goalStatusRepository.save(goalStatus);

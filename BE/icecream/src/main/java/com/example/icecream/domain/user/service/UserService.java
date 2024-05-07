@@ -42,8 +42,6 @@ public class UserService {
                 .isDeleted(false)
                 .build();
         userRepository.save(user);
-
-        goalService.createGoalStatus(user.getId());
     }
 
     @Transactional
@@ -92,6 +90,8 @@ public class UserService {
                 .build();
 
         parentChildMappingRepository.save(parentChildMapping);
+
+        goalService.createGoalStatus(child.getId());
     }
 
     public void updateChild(int parentId, final UpdateChildRequestDto signUpChildRequestDto) {
