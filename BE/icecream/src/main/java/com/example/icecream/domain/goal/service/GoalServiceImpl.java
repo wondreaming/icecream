@@ -1,40 +1,53 @@
 package com.example.icecream.domain.goal.service;
 
+import com.example.icecream.common.exception.DataAccessException;
+import com.example.icecream.common.service.CommonService;
 import com.example.icecream.domain.goal.document.GoalStatus;
 import com.example.icecream.domain.goal.dto.CreateGoalDto;
 import com.example.icecream.domain.goal.dto.GoalStatusDto;
 import com.example.icecream.domain.goal.dto.UpdateGoalDto;
 import com.example.icecream.domain.goal.dto.UpdateGoalStatusDto;
 import com.example.icecream.domain.goal.entity.Goal;
+import com.example.icecream.domain.goal.error.GoalErrorCode;
 import com.example.icecream.domain.goal.repository.mongodb.GoalStatusRepository;
 import com.example.icecream.domain.goal.repository.postgres.GoalRepository;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
+import com.example.icecream.domain.user.repository.ParentChildMappingRepository;
+import com.example.icecream.domain.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.Period;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
-@RequiredArgsConstructor
-public class GoalServiceImpl implements GoalService {
+public class GoalServiceImpl extends CommonService implements GoalService {
 
     private final GoalRepository goalRepository;
     private final GoalStatusRepository goalStatusRepository;
 
+    public GoalServiceImpl(UserRepository userRepository,
+                           ParentChildMappingRepository ParentChildMappingRepository,
+                           GoalRepository goalRepository,
+                           GoalStatusRepository goalStatusRepository) {
+        super(userRepository, ParentChildMappingRepository);
+        this.goalRepository = goalRepository;
+        this.goalStatusRepository = goalStatusRepository;
+    }
+
     @Override
     @Transactional
-    public void createGoal(CreateGoalDto createGoalDto) {
+    public void createGoal(CreateGoalDto createGoalDto, Integer parentId) {
+        if (!isParentUserWithPermission(parentId, createGoalDto.getUserId())) {
+            throw new DataAccessException(GoalErrorCode.REGISTER_GOAL_ACCESS_DENIED.getMessage());
+        } else if (true) {
+            // 활성화된 목표 있는 상태에서 목표를 등록
+        }
         Goal goal = Goal.builder()
                 .userId(createGoalDto.getUserId())
                 .period(createGoalDto.getPeriod())
                 .content(createGoalDto.getContent())
                 .isActive(true)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .build();
 
         goalRepository.save(goal);
@@ -60,11 +73,12 @@ public class GoalServiceImpl implements GoalService {
     @Override
     @Transactional
     public void createGoalStatus(int userId) {
+        Map<LocalDate, Integer> firstResult = new HashMap<>();
+        firstResult.put(LocalDate.now(), 0);
+
         GoalStatus goalStatus = GoalStatus.builder()
                 .userId(userId)
-                .result(new HashMap<>())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
+                .result(firstResult)
                 .build();
         goalStatusRepository.save(goalStatus);
     }
@@ -73,11 +87,6 @@ public class GoalServiceImpl implements GoalService {
     public GoalStatusDto getGoalStatus(int userId, LocalDate date) {
         GoalStatus goalStatus = goalStatusRepository.findByUserId(userId);
         Map<LocalDate, Integer> allResult = goalStatus.getResult();
-//        allResult.sort((map1, map2) -> {
-//            LocalDate date1 = map1.keySet().iterator().next(); // 첫 번째 맵의 키 추출
-//            LocalDate date2 = map2.keySet().iterator().next(); // 두 번째 맵의 키 추출
-//            return date2.compareTo(date1);
-//        });
         int allResultSize = allResult.size();
 
         LocalDate todayDate = LocalDate.now();

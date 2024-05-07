@@ -1,8 +1,10 @@
 package com.example.icecream.domain.user.service;
 
+import com.example.icecream.domain.goal.service.GoalService;
 import com.example.icecream.domain.user.dto.SignUpChildRequestDto;
 import com.example.icecream.domain.user.dto.SignUpParentRequestDto;
 import com.example.icecream.domain.user.dto.UpdateChildRequestDto;
+import com.example.icecream.domain.user.entity.ParentChildMapping;
 import com.example.icecream.domain.user.entity.User;
 import com.example.icecream.domain.user.repository.ParentChildMappingRepository;
 import com.example.icecream.domain.user.repository.UserRepository;
@@ -24,6 +26,7 @@ public class UserService {
     private final ParentChildMappingRepository parentChildMappingRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserValidationUtils userValidationUtils;
+    private final GoalService goalService;
 
     @Transactional
     public void saveParent(final SignUpParentRequestDto SignUpParentRequestDto){
@@ -39,6 +42,8 @@ public class UserService {
                 .isDeleted(false)
                 .build();
         userRepository.save(user);
+
+        goalService.createGoalStatus(user.getId());
     }
 
     @Transactional
@@ -53,7 +58,8 @@ public class UserService {
         }
 
         parentChildMappingRepository.deleteByParentId(parentId);
-        User parent = userRepository.findById(parentId).get();
+        User parent = userRepository.findById(parentId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저 입니다."));
 
         parent.deleteUser();
         userRepository.save(parent);
@@ -61,20 +67,31 @@ public class UserService {
 
 
     @Transactional
-    public void saveChild(final SignUpChildRequestDto signUpChildRequestDto) {
+    public void saveChild(final SignUpChildRequestDto signUpChildRequestDto, int parentId) {
 
         // FCM 토큰으로 알림 보내는 메서드 호출하기
         //        FcmToken fcmToken = FcmToken.builder()
         //             .userId()
 
-        User user=User.builder()
+        User child=User.builder()
                 .username(signUpChildRequestDto.getUsername())
                 .phoneNumber(signUpChildRequestDto.getPhoneNumber())
                 .deviceId(signUpChildRequestDto.getDeviceId())
                 .isParent(false)
                 .isDeleted(false)
                 .build();
-        userRepository.save(user);
+
+        userRepository.save(child);
+
+        User parent = userRepository.findById(parentId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저 입니다.") );
+
+        ParentChildMapping parentChildMapping = ParentChildMapping.builder()
+                .parent(parent)
+                .child(child)
+                .build();
+
+        parentChildMappingRepository.save(parentChildMapping);
     }
 
     public void updateChild(int parentId, final UpdateChildRequestDto signUpChildRequestDto) {

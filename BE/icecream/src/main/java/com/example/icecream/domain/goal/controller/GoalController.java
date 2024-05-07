@@ -7,8 +7,11 @@ import com.example.icecream.domain.goal.dto.UpdateGoalDto;
 import com.example.icecream.domain.goal.dto.UpdateGoalStatusDto;
 import com.example.icecream.domain.goal.entity.Goal;
 import com.example.icecream.domain.goal.service.GoalService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -22,8 +25,9 @@ public class GoalController {
     private final GoalService goalService;
 
     @PostMapping("/goal")
-    public ResponseEntity<ApiResponseDto<String>> createGoal(@RequestBody CreateGoalDto createGoalDto) {
-        goalService.createGoal(createGoalDto);
+    public ResponseEntity<ApiResponseDto<String>> createGoal(@Valid @RequestBody CreateGoalDto createGoalDto,
+                                                             @AuthenticationPrincipal UserDetails userDetails) {
+        goalService.createGoal(createGoalDto, Integer.parseInt(userDetails.getUsername()));
         return ApiResponseDto.success("목표를 설정하였습니다.", null);
     }
 
