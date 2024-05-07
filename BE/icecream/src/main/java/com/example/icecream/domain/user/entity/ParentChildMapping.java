@@ -5,7 +5,9 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Entity
-@Table(name = "parent_child_mapping")
+@Table(name = "parent_child_mapping", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"parent_id", "child_id"})
+})
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor

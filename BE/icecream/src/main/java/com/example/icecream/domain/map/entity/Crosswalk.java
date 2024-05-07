@@ -3,6 +3,7 @@ package com.example.icecream.domain.map.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
+import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 
 @Entity
@@ -14,7 +15,7 @@ public class Crosswalk {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "crosswalk_area", nullable = false)
+    @Column(name = "crosswalk_area", nullable = false, columnDefinition = "geometry(Polygon, 4326)")
     @NotNull
     private Polygon crosswalkArea;
 
