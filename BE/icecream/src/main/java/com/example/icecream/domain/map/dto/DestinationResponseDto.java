@@ -1,0 +1,26 @@
+package com.example.icecream.domain.map.dto;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+import java.time.LocalTime;
+
+@Getter
+@AllArgsConstructor
+public class DestinationResponseDto {
+
+    private Integer destinationId;
+    private String name;
+    private Integer icon;
+    private Double latitude;
+    private Double longitude;
+
+    @JsonFormat(pattern = "HH:mm")
+    private LocalTime startTime;
+
+    @JsonFormat(pattern = "HH:mm")
+    private LocalTime endTime;
+
+    private String day;
+}
