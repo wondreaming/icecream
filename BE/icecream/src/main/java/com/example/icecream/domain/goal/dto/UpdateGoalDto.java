@@ -10,7 +10,6 @@ import lombok.Getter;
 public class UpdateGoalDto {
 
     @NotNull
-    @JsonProperty("goal_id")
     private Integer goalId;
     @NotNull
     private Integer period;
