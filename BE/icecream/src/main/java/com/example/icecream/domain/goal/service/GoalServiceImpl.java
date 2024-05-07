@@ -63,8 +63,6 @@ public class GoalServiceImpl implements GoalService {
         GoalStatus goalStatus = GoalStatus.builder()
                 .userId(userId)
                 .result(new HashMap<>())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
                 .build();
         goalStatusRepository.save(goalStatus);
     }

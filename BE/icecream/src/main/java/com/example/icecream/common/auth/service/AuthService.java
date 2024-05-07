@@ -2,6 +2,8 @@ package com.example.icecream.common.auth.service;
 
 import com.example.icecream.common.auth.dto.*;
 import com.example.icecream.common.auth.util.JwtUtil;
+import com.example.icecream.domain.notification.dto.LoginRequestDto;
+import com.example.icecream.domain.notification.service.NotificationService;
 import com.example.icecream.domain.user.entity.User;
 import com.example.icecream.domain.user.repository.ParentChildMappingRepository;
 import com.example.icecream.domain.user.repository.UserRepository;
@@ -19,6 +21,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final ParentChildMappingRepository parentChildMappingRepository;
     private final JwtUtil jwtUtil;
+    private final NotificationService notificationService;
 
     public LoginResponseDto deviceLogin(DeviceLoginRequestDto deviceLoginRequestDto) {
 
@@ -31,6 +34,9 @@ public class AuthService {
 
                 JwtTokenDto jwtTokenDto = jwtUtil.generateTokenByController(String.valueOf(user.getId()), "ROLE_PARENT");
 
+                LoginRequestDto loginRequestDto = new LoginRequestDto(user.getId(), deviceLoginRequestDto.getFcmToken());
+                notificationService.saveOrUpdateFcmToken(loginRequestDto);
+
                 return ParentLoginResponseDto.builder()
                         .username(user.getUsername())
                         .loginId(user.getLoginId())
@@ -40,10 +46,15 @@ public class AuthService {
                         .accessToken(jwtTokenDto.getAccessToken())
                         .refreshToken(jwtTokenDto.getRefreshToken())
                         .build();
+
+
             }
         }
 
         JwtTokenDto jwtTokenDto = jwtUtil.generateTokenByController(String.valueOf(user.getId()), "ROLE_CHILD");
+        LoginRequestDto loginRequestDto = new LoginRequestDto(user.getId(), deviceLoginRequestDto.getFcmToken());
+        notificationService.saveOrUpdateFcmToken(loginRequestDto);
+
         return ChildLoginResponseDto.builder()
                 .username(user.getUsername())
                 .phoneNumber(user.getPhoneNumber())

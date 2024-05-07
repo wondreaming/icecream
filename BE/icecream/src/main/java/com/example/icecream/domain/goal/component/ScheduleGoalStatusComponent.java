@@ -2,8 +2,8 @@ package com.example.icecream.domain.goal.component;
 
 import com.example.icecream.domain.goal.document.GoalStatus;
 import com.example.icecream.domain.goal.repository.mongodb.GoalStatusRepository;
-import com.example.icecream.domain.user.entity.Users;
-import com.example.icecream.domain.user.repository.UsersRepository;
+import com.example.icecream.domain.user.entity.User;
+import com.example.icecream.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -16,12 +16,12 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ScheduleGoalStatusComponent {
 
-    private final UsersRepository usersRepository;
+    private final UserRepository usersRepository;
     private final GoalStatusRepository goalStatusRepository;
 
     @Scheduled(cron = "0 30 0 * * *")  // 초, 분, 시, 일, 월, 요일
     public void scheduleGoalStatus() {
-        List<Users> users = usersRepository.findAll();
+        List<User> users = usersRepository.findAll();
         users.forEach(user -> {
             int userId = user.getId();
             GoalStatus goalStatus = goalStatusRepository.findByUserId(userId);
