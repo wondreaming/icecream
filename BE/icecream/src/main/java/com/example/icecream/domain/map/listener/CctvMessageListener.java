@@ -23,11 +23,8 @@ public class CctvMessageListener {
 
     @RabbitListener(queues = "hello")
     public void receiveMessage(CctvMessageDto cctvMessageDto) {
-        cctvMessageListenService.messageListen(cctvMessageDto);
-        System.out.println("Crosswalk : " + cctvMessageListenService.findCrosswalk(cctvMessageDto));
         String CrosswalkName = cctvMessageListenService.findCrosswalk(cctvMessageDto);
         List<Integer> UserArray = redisListenService.getRedisValue(CrosswalkName);
-        System.out.println("UserArray : " + UserArray);
         FcmRequestDto2 fcmRequestDto2 = new FcmRequestDto2(UserArray, "CCTV", "사고 발생", "key1", "key2", "key3");
         notificationService.sendMessageToUsers(fcmRequestDto2);
     }
