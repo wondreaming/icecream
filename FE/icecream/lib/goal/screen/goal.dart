@@ -45,15 +45,19 @@ class _GoalState extends State<Goal> {
     int currentStreak = 4; // 안전 보행 중인 일수
 
     return DefaultLayout(
+      padding: EdgeInsets.zero,
       title: '부모 리워드',
       child: Column(
         children: [
           const SizedBox(
-            height: 15,
+            height: 25,
           ),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const SizedBox(
+                width: 10,
+              ),
               SizedBox(
                 width: MediaQuery.of(context).size.width * 0.3,
                 child: Align(
@@ -143,7 +147,7 @@ class _GoalState extends State<Goal> {
           ),
           SizedBox(
             height: maxHeight,
-            child: DailyGoalWidget(dailyGoal: dailyGoal),
+            child: DailyGoalPage(dailyGoal: dailyGoal),
           ),
           const Divider(
             thickness: 1,

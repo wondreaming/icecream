@@ -5,8 +5,15 @@ class DefaultLayout extends StatelessWidget {
   final Widget child;
   final String title;
   final List<Widget>? action;
-  const DefaultLayout(
-      {super.key, required this.child, required this.title, this.action});
+  final EdgeInsets padding; // 패딩값 추가
+
+  const DefaultLayout({
+    super.key,
+    required this.child,
+    required this.title,
+    this.action,
+    this.padding = const EdgeInsets.symmetric(horizontal: 16.0), // 기본값 설정
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +25,7 @@ class DefaultLayout extends StatelessWidget {
         actions: action,
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        padding: padding, // 패딩값 사용
         child: child,
       ),
     );
