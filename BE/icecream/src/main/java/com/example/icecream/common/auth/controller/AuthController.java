@@ -5,6 +5,7 @@ import com.example.icecream.common.auth.service.AuthService;
 import com.example.icecream.common.auth.util.JwtUtil;
 import com.example.icecream.common.dto.ApiResponseDto;
 import com.example.icecream.common.auth.dto.DeviceLoginRequestDto;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,7 @@ public class AuthController {
     private final JwtUtil jwtUtil;
 
     @PostMapping("/device/login")
-    public ResponseEntity<ApiResponseDto<LoginResponseDto>> login(@RequestBody DeviceLoginRequestDto deviceLoginRequestDto)
+    public ResponseEntity<ApiResponseDto<LoginResponseDto>> login(@RequestBody @Valid DeviceLoginRequestDto deviceLoginRequestDto)
     {
         return ApiResponseDto.success("로그인 되었습니다.", authService.deviceLogin(deviceLoginRequestDto));
     }
