@@ -1,5 +1,6 @@
 package com.example.icecream.domain.map.entity;
 
+import com.example.icecream.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -16,7 +17,7 @@ import java.time.LocalTime;
 @Getter
 @Builder
 @Table(name = "destination")
-public class Destination {
+public class Destination extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -62,13 +63,13 @@ public class Destination {
     @NotNull
     private Double radius = 100.0;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
+//    @Column(name = "created_at", nullable = false, updatable = false)
+//    @CreationTimestamp
+//    private LocalDateTime createdAt;
+//
+//    @Column(name = "updated_at", nullable = false)
+//    @UpdateTimestamp
+//    private LocalDateTime updatedAt;
 
     public void updateDestination(String name, Integer icon, Double latitude, Double longitude,
                                   LocalTime startTime, LocalTime endTime, String day, Point location) {

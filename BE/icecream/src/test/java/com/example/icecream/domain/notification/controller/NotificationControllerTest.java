@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -24,6 +25,7 @@ public class NotificationControllerTest {
 
     @Mock
     private NotificationService notificationService;
+    private UserDetails userDetails;
 
     @InjectMocks
     private NotificationController notificationController;
@@ -47,7 +49,7 @@ public class NotificationControllerTest {
 
         when(notificationService.getNotificationList(userId)).thenReturn(notificationResponseDtos);
 
-        ResponseEntity<ApiResponseDto<List<NotificationResponseDto>>> result = notificationController.getNotificationList(userId);
+        ResponseEntity<ApiResponseDto<List<NotificationResponseDto>>> result = notificationController.getNotificationList(userDetails);
 
         assertNotNull(result);
         assertEquals(HttpStatusCode.valueOf(200), result.getStatusCode());
