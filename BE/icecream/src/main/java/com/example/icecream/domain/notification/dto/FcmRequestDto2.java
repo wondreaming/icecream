@@ -3,12 +3,13 @@ package com.example.icecream.domain.notification.dto;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class FcmRequestDto2 {
 
     @NotNull
@@ -18,9 +19,9 @@ public class FcmRequestDto2 {
     @NotNull
     private String body;
     @NotNull
-    private String key1;
+    private String isOverSpeed;
     @NotNull
-    private String key2;
+    private String isCreated;
     @NotNull
     private String key3;
 }

@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Slf4j
+@Transactional(readOnly = true)
 @Service
 public class NotificationServiceImpl implements NotificationService {
 
@@ -81,7 +82,6 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     public void sendMessageToUsers(FcmRequestDto2 fcmRequestDto2) {
         log.info("알림 대상 유저 ID: {}", fcmRequestDto2.getUserIds());
-        long total = fcmRequestDto2.getUserIds().size();
         AtomicInteger success = new AtomicInteger(0);
         AtomicInteger failed = new AtomicInteger(0);
 
@@ -89,7 +89,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .map(userId -> CompletableFuture.runAsync(() -> {
                     FcmToken fcmToken = fcmTokenRepository.findByUserId(userId);
                     if (fcmToken != null) {
-                        FcmRequestDto fcmRequestDto = new FcmRequestDto(fcmToken.getToken(), fcmRequestDto2.getTitle(), fcmRequestDto2.getBody(), fcmRequestDto2.getKey1(), fcmRequestDto2.getKey2(), fcmRequestDto2.getKey3());
+                        FcmRequestDto fcmRequestDto = new FcmRequestDto(fcmToken.getToken(), fcmRequestDto2.getTitle(), fcmRequestDto2.getBody(), fcmRequestDto2.getIsOverSpeed(), fcmRequestDto2.getIsCreated(), fcmRequestDto2.getKey3());
                         try {
                             sendMessageTo(fcmRequestDto);
                             success.incrementAndGet();
@@ -155,13 +155,11 @@ public class NotificationServiceImpl implements NotificationService {
                 .validateOnly(false)
                 .message(FcmMessageDto.Message.builder()
                         .token(fcmRequestDto.getToken())
-                        .notification(FcmMessageDto.Notification.builder()
+                        .data(FcmMessageDto.Data.builder()
                                 .title(fcmRequestDto.getTitle())
                                 .body(fcmRequestDto.getBody())
-                                .build())
-                        .data(FcmMessageDto.Data.builder()
-                                .key1(fcmRequestDto.getKey1())
-                                .key2(fcmRequestDto.getKey2())
+                                .isOverSpeed(fcmRequestDto.getIsOverSpeed())
+                                .isCreated(fcmRequestDto.getIsCreated())
                                 .key3(fcmRequestDto.getKey3())
                                 .build())
                         .build())
