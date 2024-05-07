@@ -13,9 +13,9 @@ import java.util.List;
 public interface GoalService {
 
     void createGoal(CreateGoalDto createGoalDto, Integer parentId);
-    void updateGoal(UpdateGoalDto updateGoalDto);
+    void updateGoal(UpdateGoalDto updateGoalDto, Integer parentId);
     List<Goal> getGoals(int userId);
     void createGoalStatus(int userId);
     GoalStatusDto getGoalStatus(int userId, LocalDate date);
-    void updateGoalStatus(UpdateGoalStatusDto updateGoalStatusDto);
+    void updateGoalStatus(UpdateGoalStatusDto updateGoalStatusDto, Integer parentId);
 }

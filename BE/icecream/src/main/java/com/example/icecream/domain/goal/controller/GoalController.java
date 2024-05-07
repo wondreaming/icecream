@@ -32,8 +32,9 @@ public class GoalController {
     }
 
     @PatchMapping("/goal")
-    public ResponseEntity<ApiResponseDto<String>> updateGoal(@RequestBody UpdateGoalDto updateGoalDto) {
-        goalService.updateGoal(updateGoalDto);
+    public ResponseEntity<ApiResponseDto<String>> updateGoal(@Valid @RequestBody UpdateGoalDto updateGoalDto,
+                                                             @AuthenticationPrincipal UserDetails userDetails) {
+        goalService.updateGoal(updateGoalDto, Integer.parseInt(userDetails.getUsername()));
         return ApiResponseDto.success("목표를 수정하였습니다.", null);
     }
 
@@ -52,8 +53,9 @@ public class GoalController {
     }
 
     @PatchMapping("/goal/status")
-    public ResponseEntity<ApiResponseDto<String>> updateGoalStatus(@RequestBody UpdateGoalStatusDto updateGoalStatusDto) {
-        goalService.updateGoalStatus(updateGoalStatusDto);
+    public ResponseEntity<ApiResponseDto<String>> updateGoalStatus(@RequestBody UpdateGoalStatusDto updateGoalStatusDto,
+                                                                   @AuthenticationPrincipal UserDetails userDetails) {
+        goalService.updateGoalStatus(updateGoalStatusDto, Integer.parseInt(userDetails.getUsername()));
         return ApiResponseDto.success("목표 상태를 수정하였습니다.", null);
     }
 }
