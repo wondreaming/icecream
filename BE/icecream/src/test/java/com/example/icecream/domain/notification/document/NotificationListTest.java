@@ -1,4 +1,4 @@
-package com.example.icecream.notification.document;
+package com.example.icecream.domain.notification.document;
 
 import com.example.icecream.domain.notification.document.NotificationList;
 import org.junit.jupiter.api.Test;
