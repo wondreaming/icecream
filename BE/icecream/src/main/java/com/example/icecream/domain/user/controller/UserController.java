@@ -29,11 +29,11 @@ public class UserController {
         return ApiResponseDto.created("회원 가입에 성공했습니다.");
     }
 
-//    @DeleteMapping
-//    public ResponseEntity<ApiResponseDto<String>> deleteParent(@AuthenticationPrincipal UserDetails userDetails){
-//        userService.deleteParent(userDetails.getUserId());
-//        return ApiResponseDto.success("회원이 탈퇴 되었습니다");
-//    }
+    @DeleteMapping
+    public ResponseEntity<ApiResponseDto<String>> deleteParent(@AuthenticationPrincipal UserDetails userDetails){
+        userService.deleteParent(Integer.parseInt(userDetails.getUsername()));
+        return ApiResponseDto.success("회원이 탈퇴 되었습니다");
+    }
 
     @PostMapping("/child")
     public ResponseEntity<ApiResponseDto<String>> signupChild(@RequestBody SignUpChildRequestDto signUpChildRequestDto){
@@ -41,18 +41,18 @@ public class UserController {
         return ApiResponseDto.created("자녀 등록에 성공했습니다.");
     }
 
-//    @PatchMapping("/child")
-//    public ResponseEntity<ApiResponseDto<String>> updateChild(@RequestBody UpdateChildRequestDto updateChildRequestDto, @AuthenticationPrincipal UserDetails userDetails){
-//        userService.updateChild(userDetails.getUserId(), updateChildRequestDto);
-//        return ApiResponseDto.success("자녀 이름이 변경되었습니다");
-//
-//    }
+    @PatchMapping("/child")
+    public ResponseEntity<ApiResponseDto<String>> updateChild(@RequestBody UpdateChildRequestDto updateChildRequestDto, @AuthenticationPrincipal UserDetails userDetails){
+        userService.updateChild(Integer.parseInt(userDetails.getUsername()), updateChildRequestDto);
+        return ApiResponseDto.success("자녀 이름이 변경되었습니다");
 
-//    @DeleteMapping ("/child")
-//    public ResponseEntity<ApiResponseDto<String>> deleteChild(@RequestParam @NotNull Integer childId, @AuthenticationPrincipal UserDetails userDetails){
-//        userService.deleteChild(userDetails.getUserId(), childId);
-//        return ApiResponseDto.success("자녀가 성공적으로 해제(탈퇴)되었습니다");
-//    }
+    }
+
+    @DeleteMapping ("/child")
+    public ResponseEntity<ApiResponseDto<String>> deleteChild(@RequestParam @NotNull Integer childId, @AuthenticationPrincipal UserDetails userDetails){
+        userService.deleteChild(Integer.parseInt(userDetails.getUsername()), childId);
+        return ApiResponseDto.success("자녀가 성공적으로 해제(탈퇴)되었습니다");
+    }
 
     @GetMapping("/check")
     public ResponseEntity<ApiResponseDto<String>> checkLoginId(@RequestParam @NotBlank String loginId){

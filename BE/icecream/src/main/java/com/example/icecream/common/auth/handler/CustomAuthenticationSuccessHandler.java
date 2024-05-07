@@ -3,19 +3,17 @@ package com.example.icecream.common.auth.handler;
 import com.example.icecream.common.auth.dto.JwtTokenDto;
 import com.example.icecream.common.auth.dto.ParentLoginResponseDto;
 import com.example.icecream.common.auth.util.JwtUtil;
+import com.example.icecream.common.dto.ApiResponseDto;
 import com.example.icecream.domain.user.entity.User;
 import com.example.icecream.domain.user.repository.ParentChildMappingRepository;
 import com.example.icecream.domain.user.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -49,9 +47,11 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
                 .refreshToken(jwtToken.getRefreshToken())
                 .build();
 
+        ApiResponseDto<ParentLoginResponseDto> apiResponse = new ApiResponseDto<>(200, "로그인 되었습니다.", parentLoginResponseDto);
+
         response.setStatus(HttpServletResponse.SC_OK);
-        response.setContentType("application/json");
-        response.getWriter().write(objectMapper.writeValueAsString(parentLoginResponseDto));
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
         response.getWriter().flush();
     }
 }
