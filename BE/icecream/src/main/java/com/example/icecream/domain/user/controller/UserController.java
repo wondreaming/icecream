@@ -1,6 +1,7 @@
 package com.example.icecream.domain.user.controller;
 
 import com.example.icecream.common.dto.ApiResponseDto;
+import com.example.icecream.domain.user.dto.PasswordRequestDto;
 import com.example.icecream.domain.user.dto.SignUpChildRequestDto;
 import com.example.icecream.domain.user.dto.SignUpParentRequestDto;
 import com.example.icecream.domain.user.dto.UpdateChildRequestDto;
@@ -10,6 +11,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.NotBlank;
 
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
@@ -51,20 +53,29 @@ public class UserController {
     }
 
     @DeleteMapping ("/child")
-    public ResponseEntity<ApiResponseDto<String>> deleteChild(@RequestParam @NotNull Integer childId, @AuthenticationPrincipal UserDetails userDetails){
+    public ResponseEntity<ApiResponseDto<String>> deleteChild(@RequestParam("child_id") @NotNull Integer childId, @AuthenticationPrincipal UserDetails userDetails){
         userService.deleteChild(Integer.parseInt(userDetails.getUsername()), childId);
         return ApiResponseDto.success("자녀가 성공적으로 해제(탈퇴)되었습니다");
     }
 
     @GetMapping("/check")
-    public ResponseEntity<ApiResponseDto<String>> checkLoginId(@RequestParam @NotBlank String loginId){
+    public ResponseEntity<ApiResponseDto<String>> checkLoginId(@RequestParam("login_id")
+                                                                   @NotBlank
+                                                                   @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*\\d)[a-zA-Z0-9]{6,20}$", message = "로그인 ID는 영문과 숫자를 포함한 6~20자리 이어야 합니다.")
+                                                                   String loginId){
         userService.checkLoginIdExists(loginId);
         return ApiResponseDto.success("사용 가능한 ID 입니다.");
     }
 
-//    @PatchMapping("/password")
-//    public ResponseEntity<ApiResponseDto<String>> updatePassword(@RequestBody CheckPasswordRequestDto checkPasswordRequestDto, @AuthenticationPrincipal UserDetails userDetails) {
-//        userService.updatePassword(checkPasswordRequestDto.get,user.getUserId());
-//        return ApiResponseDto.success("비밀 번호가 확인되었습니다.");
-//    }
+    @PostMapping("/password")
+    public ResponseEntity<ApiResponseDto<String>> checkPassword(@RequestBody @Valid PasswordRequestDto passwordRequestDto, @AuthenticationPrincipal UserDetails userDetails){
+        userService.checkPassword(passwordRequestDto.getPassword(), Integer.parseInt(userDetails.getUsername()));
+        return ApiResponseDto.success("비밀 번호가 확인 되었습니다.");
+    }
+
+    @PatchMapping("/password")
+    public ResponseEntity<ApiResponseDto<String>> updatePassword(@RequestBody @Valid PasswordRequestDto passwordRequestDto, @AuthenticationPrincipal UserDetails userDetails) {
+        userService.updatePassword(passwordRequestDto.getPassword(), Integer.parseInt(userDetails.getUsername()));
+        return ApiResponseDto.success("비밀 번호가 수정 되었습니다.");
+    }
 }
