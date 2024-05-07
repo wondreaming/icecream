@@ -12,7 +12,6 @@ import java.time.LocalDate;
 public class UpdateGoalStatusDto {
 
     @NotNull
-    @JsonProperty(namespace = "user_id")
     private Integer userId;
     @NotNull
     private LocalDate date;
