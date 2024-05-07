@@ -10,8 +10,8 @@ class Noti extends StatelessWidget {
   Widget build(BuildContext context) {
     // 임시 데이터
     List<Map<String, dynamic>> tempData = [
-      {"date": "2024-04-29 10:29:24", "content": "오늘 내용"},
-      {"date": "2024-04-28 10:29:24", "content": "알림 내용"},
+      {"date": "2024-05-03 10:29:24", "content": "오늘 내용"},
+      {"date": "2024-05-02 10:29:24", "content": "알림 내용"},
       {"date": "2024-04-28 14:29:24", "content": "어제 내용"},
       {"date": "2024-04-25 10:29:24", "content": "알림 내용"},
       {"date": "2024-04-25 08:29:24", "content": "알림 내용"},

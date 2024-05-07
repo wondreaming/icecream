@@ -5,13 +5,16 @@ class DefaultLayout extends StatelessWidget {
   final Widget child;
   final String title;
   final List<Widget>? action;
+  final EdgeInsets padding; // 패딩값 추가
   final bool isMap;
   final Widget? floatingActionButton;
+
   const DefaultLayout({
     super.key,
     required this.child,
     required this.title,
     this.action,
+    this.padding = const EdgeInsets.symmetric(horizontal: 16.0), // 기본값 설정
     this.isMap = false,
     this.floatingActionButton,
   });
@@ -25,7 +28,7 @@ class DefaultLayout extends StatelessWidget {
         title: Text(title),
         actions: action,
       ),
-      body: Padding(
+      body: Padding( // 패딩값 사용
         padding: isMap
             ? EdgeInsets.symmetric(horizontal: 0.0)
             : EdgeInsets.symmetric(horizontal: 16.0),

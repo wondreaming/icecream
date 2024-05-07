@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:icecream/com/const/color.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 
 class RewardModal extends StatefulWidget {
@@ -28,49 +29,65 @@ class _RewardModalState extends State<RewardModal> {
             Row(
               children: [
                 SizedBox(
-                  width: 140,
-                  child: DropdownButtonFormField2<int>(
-                    isExpanded: true,
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(vertical: 10),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
+                    width: 80,
+                    child: DropdownButtonHideUnderline(
+                      child: Container(
+                        alignment: Alignment.center, // 컨테이너를 사용하여 텍스트를 중앙 정렬
+                        child: DropdownButtonFormField2<int>(
+                          isExpanded: true,
+                          decoration: InputDecoration(
+                            contentPadding:
+                                const EdgeInsets.symmetric(vertical: 10),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                          ),
+                          hint: const Text('Days',
+                              style: TextStyle(fontSize: 14)),
+                          value: selectedDays,
+                          items: daysItems
+                              .map((int item) => DropdownMenuItem<int>(
+                                    value: item,
+                                    child: Center(
+                                      child: Text('$item',
+                                          style: const TextStyle(fontSize: 14)),
+                                    ),
+                                  ))
+                              .toList(),
+                          onChanged: (int? value) {
+                            if (value != null) {
+                              setState(() => selectedDays = value);
+                            }
+                          },
+                          dropdownStyleData: DropdownStyleData(
+                            maxHeight: 200,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                          ),
+                          menuItemStyleData: const MenuItemStyleData(
+                            padding: EdgeInsets.symmetric(horizontal: 16),
+                          ),
+                          iconStyleData: const IconStyleData(
+                            icon: Icon(
+                              Icons.arrow_drop_down,
+                              color: Colors.black45,
+                            ),
+                            iconSize: 30,
+                          ),
+                          selectedItemBuilder: (BuildContext context) {
+                            return daysItems.map((int item) {
+                              return Center(
+                                child: Text('$item',
+                                    style: const TextStyle(fontSize: 14)),
+                              );
+                            }).toList();
+                          },
+                        ),
                       ),
-                    ),
-                    hint: const Text('Days', style: TextStyle(fontSize: 14)),
-                    value: selectedDays,
-                    items: daysItems
-                        .map((int item) => DropdownMenuItem<int>(
-                              value: item,
-                              child: Text('$item',
-                                  style: const TextStyle(fontSize: 14)),
-                            ))
-                        .toList(),
-                    onChanged: (int? value) {
-                      if (value != null) {
-                        setState(() => selectedDays = value);
-                      }
-                    },
-                    dropdownStyleData: DropdownStyleData(
-                      maxHeight: 200, // 드롭다운의 최대 높이 설정
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                    ),
-                    menuItemStyleData: const MenuItemStyleData(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                    ),
-                    iconStyleData: const IconStyleData(
-                      icon: Icon(
-                        Icons.arrow_drop_down,
-                        color: Colors.black45,
-                      ),
-                      iconSize: 30,
-                    ),
-                  ),
-                ),
+                    )),
                 const SizedBox(width: 10),
-                const Text('일 달성시', style: TextStyle(fontSize: 16)),
+                const Text('일 달성 시', style: TextStyle(fontSize: 22)),
               ],
             ),
             const SizedBox(
@@ -103,27 +120,48 @@ class _RewardModalState extends State<RewardModal> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                const SizedBox(
+                  width: 1,
+                ),
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
                   style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 35, vertical: 12),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30)),
+                        borderRadius: BorderRadius.circular(15)),
+                    textStyle: const TextStyle(fontSize: 20),
+                    backgroundColor: AppColors.input_text_color,
+                    shadowColor: Colors.grey,
+                    elevation: 1, // 버튼에 그림자 추가
                   ),
-                  child: const Text('닫기', style: TextStyle(color: Colors.red)),
+                  child: const Text('닫기',
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.w600)),
+                ),
+                const SizedBox(
+                  width: 2,
                 ),
                 ElevatedButton(
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    backgroundColor: Theme.of(context).primaryColor,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 35, vertical: 12),
+                    backgroundColor: AppColors.custom_green,
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30)),
+                        borderRadius: BorderRadius.circular(15)),
+                    textStyle: const TextStyle(fontSize: 20),
+                    elevation: 1,
                   ),
-                  child: const Text('확인'),
+                  child: const Text('저장',
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.w600)),
                 ),
+                const SizedBox(
+                  width: 1,
+                )
               ],
             ),
           ],
