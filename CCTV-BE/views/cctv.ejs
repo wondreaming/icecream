@@ -13,7 +13,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/socket.io@4.7.2/client-dist/socket.io.min.js"></script>
     <script>
-      const socket = io("http://k10e202.p.ssafy.io:1996");
+      const socket = io();
       socket.on("getCCTVImage", data => {
         console.log("Received CCTV Image Data", data);
         const imageElement = document.getElementById("CCTVImage");
