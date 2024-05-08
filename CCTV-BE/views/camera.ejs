@@ -14,7 +14,11 @@
 
       // 웹캠 접근 요청
       navigator.mediaDevices
-        .getUserMedia({ video: { facingMode: "environment" } })
+        .getUserMedia({ video: {
+          facingMode: "environment",
+          width: { ideal: 480 },
+          height: { ideal: 640 }
+        }})
         .then(stream => {
           const video = document.getElementById("video");
           video.srcObject = stream;
