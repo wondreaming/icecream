@@ -19,9 +19,5 @@ public class FcmRequestDto2 {
     @NotNull
     private String body;
     @NotNull
-    private String isOverSpeed;
-    @NotNull
-    private String isCreated;
-    @NotNull
-    private String key3;
+    private String content;
 }

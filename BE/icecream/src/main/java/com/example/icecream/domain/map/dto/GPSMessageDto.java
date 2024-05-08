@@ -9,18 +9,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-@NoArgsConstructor
 @Getter
+@NoArgsConstructor
 public class GPSMessageDto {
 
-    @NotNull
     private Integer userId;
-    @NotNull
     private Integer destinationId;
-    @NotNull
     private Double latitude;
-    @NotNull
     private Double longitude;
-    @NotBlank
     private String timestamp;
 }

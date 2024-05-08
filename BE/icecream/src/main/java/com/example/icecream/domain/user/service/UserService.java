@@ -28,7 +28,6 @@ public class UserService {
     private final UserValidationUtils userValidationUtils;
     private final GoalService goalService;
 
-    @Transactional
     public void saveParent(final SignUpParentRequestDto SignUpParentRequestDto){
         userValidationUtils.isValidatePasswordCheck(SignUpParentRequestDto.getPassword(), SignUpParentRequestDto.getPasswordCheck());
 
@@ -66,23 +65,20 @@ public class UserService {
 
     @Transactional
     public void saveChild(final SignUpChildRequestDto signUpChildRequestDto, int parentId) {
-
-        // FCM 토큰으로 알림 보내는 메서드 호출하기
-        //        FcmToken fcmToken = FcmToken.builder()
-        //             .userId()
-
-        User child=User.builder()
-                .username(signUpChildRequestDto.getUsername())
-                .phoneNumber(signUpChildRequestDto.getPhoneNumber())
-                .deviceId(signUpChildRequestDto.getDeviceId())
-                .isParent(false)
-                .isDeleted(false)
-                .build();
-
-        userRepository.save(child);
+        User child = userRepository.findByDeviceId(signUpChildRequestDto.getDeviceId())
+                .orElseGet(() -> {
+                    User newUser = User.builder()
+                            .username(signUpChildRequestDto.getUsername())
+                            .phoneNumber(signUpChildRequestDto.getPhoneNumber())
+                            .deviceId(signUpChildRequestDto.getDeviceId())
+                            .isParent(false)
+                            .isDeleted(false)
+                            .build();
+                    return userRepository.save(newUser);
+                });
 
         User parent = userRepository.findById(parentId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저 입니다.") );
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저 입니다."));
 
         ParentChildMapping parentChildMapping = ParentChildMapping.builder()
                 .parent(parent)
@@ -92,13 +88,19 @@ public class UserService {
         parentChildMappingRepository.save(parentChildMapping);
 
         goalService.createGoalStatus(child.getId());
+        //FCM으로 자녀 등록 됏다는 알림 자녀에게 보내는 메서드 호출
+        //~~~~
     }
 
     public void updateChild(int parentId, final UpdateChildRequestDto signUpChildRequestDto) {
-        userValidationUtils.isValidChild(parentId, signUpChildRequestDto.getUserId());
-
         User child = userRepository.findById(signUpChildRequestDto.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저 입니다."));
+                .orElseThrow(() -> new IllegalArgumentException("자녀가 회원이 아닙니다."));
+
+        if (child.getIsParent()) {
+            throw new IllegalArgumentException("이름을 변경하려는 대상이 부모 유저 입니다.");
+        }
+
+        userValidationUtils.isValidChild(parentId, signUpChildRequestDto.getUserId());
 
         child.updateUsername(signUpChildRequestDto.getUsername());
         userRepository.save(child);
@@ -120,23 +122,24 @@ public class UserService {
         userValidationUtils.isValidLoginId(loginId);
     }
 
+    public void checkPassword(String currentPassword, int userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다."));
 
-//    @Transactional
-//    public void updatePassword(final UpdatePasswordRequest userPassword, final int userId) {
-//
-//        String currentPassword = userPassword.getCurrentPassword();
-//        String newPassword = userPassword.getNewPassword();
-//
-//        User user = userRepository.findByUserId(userId)
-//                .orElseThrow(() -> new DataNotFoundException("해당 사용자가 존재하지 않습니다."));
-//
-//        if (!passwordEncoder.matches(currentPassword, user.getUserPassword())) {
-//            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
-//        }
-//
-//        String encodedNewPassword = passwordEncoder.encode(newPassword);
-//
-//        user.updatePassword(encodedNewPassword);
-//        userRepository.save(user);
-//    }
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
+        }
+    }
+
+    public void updatePassword(String newPassword, int userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다."));
+
+        if (passwordEncoder.matches(newPassword, user.getPassword())) {
+            throw new IllegalArgumentException("현재와 동일한 비밀번호 입니다.");
+        }
+
+        user.updatePassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
 }
