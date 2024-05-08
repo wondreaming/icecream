@@ -2,8 +2,11 @@ package com.example.icecream.common.handler;
 
 import com.example.icecream.common.dto.ApiResponseDto;
 import com.example.icecream.common.exception.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
@@ -32,5 +35,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ApiResponseDto<String>> handleBadRequestException(BadRequestException e) {
         return ApiResponseDto.badRequest(e.getMessage());
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponseDto<String>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        return ApiResponseDto.badRequest(e.getBindingResult().getAllErrors().get(0).getDefaultMessage());
     }
 }
