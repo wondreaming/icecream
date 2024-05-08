@@ -13,10 +13,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CreateGoalDto {
 
-    @NotNull
+    @NotNull(message = "자녀가 선택되어있지 않습니다.")
     private Integer userId;
-    @NotNull
+    @NotNull(message = "기간이 선택되어있지 않습니다.")
     private Integer period;
-    @NotNull
+    @NotNull(message = "목표 내용이 작성되어있지 않습니다.")
     private String content;
 }
