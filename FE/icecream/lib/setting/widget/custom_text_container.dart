@@ -17,6 +17,7 @@ class CustomTextContainer extends StatelessWidget {
   final TextEditingController? controller;
   final bool? isUnTitle;
   final String? errorText;
+  final bool? isDone;
   const CustomTextContainer({
     super.key,
     required this.text,
@@ -33,6 +34,7 @@ class CustomTextContainer extends StatelessWidget {
     this.controller,
     this.isUnTitle = true,
     this.errorText,
+    this.isDone = false,
   });
 
   @override
@@ -108,10 +110,10 @@ class CustomTextContainer extends StatelessWidget {
                   child: Text(
                     explainText!,
                     style: TextStyle(
-                      fontSize: 14.0,
+                      fontSize: isDone! ? 18.0 : 14.0,
                       fontWeight: FontWeight.w400,
                       fontFamily: 'GmarketSans',
-                      color: AppColors.input_text_color,
+                      color: isDone! ? AppColors.text_color : AppColors.input_text_color,
                     ),
                   ),
                 ),

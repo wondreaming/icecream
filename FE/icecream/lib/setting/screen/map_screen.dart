@@ -57,6 +57,8 @@ class _MapScreenState extends State<MapScreen> {
 
   // 역 지오코딩
   String currentAddress = '주소 정보가 여기에 표시됩니다'; // 주소 값을 받을 변수
+  late double latitude; // 위도
+  late double longitude; // 경도
 
   Future<void> getAddress(double latitude, double longitude) async {
     String url = 'https://dapi.kakao.com/v2/local/geo/coord2address.json';
@@ -64,7 +66,6 @@ class _MapScreenState extends State<MapScreen> {
     final dio = Dio();
     dio.options.headers['Authorization'] = 'KakaoAK $apiKey';
     try{
-      print('1111111111');
       // 카카오 api 요청
       Response response = await dio.get(url, queryParameters: {
         'x':longitude,
@@ -85,7 +86,7 @@ class _MapScreenState extends State<MapScreen> {
       print('주소 찾기 실패: $e');
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return DefaultLayout(
@@ -99,7 +100,10 @@ class _MapScreenState extends State<MapScreen> {
             latitude: currentLocation!.latitude,
             externalOnMapCreated: (controller) {
               mapController = controller;
-              // 추가 작업이 필요하다면 여기에 구현
+              setState(() {
+                longitude = currentLocation!.longitude;
+                latitude = currentLocation!.latitude;
+              });
             },
           ),
           Positioned(
@@ -143,7 +147,7 @@ class _MapScreenState extends State<MapScreen> {
                   ),),
                   CustomElevatedButton(
                     onPressed: () {
-                      context.pop(currentAddress);
+                      context.pop();
                     },
                     child: '이 위치로 주소 등록',
                   ),
