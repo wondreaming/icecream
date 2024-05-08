@@ -100,6 +100,18 @@ class _TempState extends State<Temp> {
             },
             child: const Text('QRcode 스캔페이지'),
           ),
+          ElevatedButton(
+            onPressed: () {
+              context.go('/signup');
+            },
+            child: const Text('부모 회원가입'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              context.go('/p_login');
+            },
+            child: const Text('부모 로그인'),
+          ),
         ],
       ),
     );
