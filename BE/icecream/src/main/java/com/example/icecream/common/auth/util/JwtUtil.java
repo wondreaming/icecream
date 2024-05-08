@@ -5,7 +5,6 @@ import com.example.icecream.domain.user.repository.UserRepository;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -19,7 +18,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.ObjectUtils;
-
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -107,11 +105,11 @@ public class JwtUtil {
 
         Claims claims = parseClaims(accessToken);
 
-        if (claims.get("authorities") == null) {
+        if (claims.get("authority") == null) {
             throw new RuntimeException("권한 정보가 없는 토큰입니다.");
         }
 
-        Collection<? extends GrantedAuthority> authorities = Arrays.stream(claims.get("authorities").toString().split(","))
+        Collection<? extends GrantedAuthority> authorities = Arrays.stream(claims.get("authority").toString().split(","))
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
 
