@@ -16,12 +16,12 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ScheduleGoalStatusComponent {
 
-    private final UserRepository usersRepository;
+    private final UserRepository userRepository;
     private final GoalStatusRepository goalStatusRepository;
 
     @Scheduled(cron = "0 30 0 * * *")  // 초, 분, 시, 일, 월, 요일
     public void scheduleGoalStatus() {
-        List<User> users = usersRepository.findAll();
+        List<User> users = userRepository.findAll();
         users.forEach(user -> {
             int userId = user.getId();
             GoalStatus goalStatus = goalStatusRepository.findByUserId(userId);
