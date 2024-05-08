@@ -60,7 +60,7 @@ final router = GoRouter(
                             path: 'destination',
                             name: 'destination',
                             builder: (context, state) =>
-                                const DestinationScreen(
+                                DestinationScreen(
                               user_id: 1,
                             ),
                             routes: [

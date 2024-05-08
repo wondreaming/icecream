@@ -16,6 +16,7 @@ abstract class DestinationRespository {
   Future<AllDestination<DestinationModel>> getDestinaion({
     @Path() required int user_id,
 });
+
   @DELETE('/destination/2?destination_id={destination_id}')
   Future<DeleteDestination> deleteDestination({
     @Path() required int destination_id,

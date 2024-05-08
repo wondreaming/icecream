@@ -6,12 +6,13 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icecream/com/const/color.dart';
 import 'package:icecream/com/widget/default_layout.dart';
+import 'package:icecream/setting/service/buildDays.dart';
+import 'package:icecream/setting/widget/custom_day_picker.dart';
 import 'package:icecream/setting/widget/custom_elevated_button.dart';
 import 'package:icecream/setting/widget/custom_modal.dart';
+import 'package:icecream/setting/widget/custom_show_picker.dart';
 import 'package:icecream/setting/widget/custom_text_container.dart';
-import 'package:icecream/setting/widget/day_container.dart';
 import 'package:icecream/setting/widget/location_Icons.dart';
-import 'package:intl/intl.dart';
 
 class DestinationScreen extends StatefulWidget {
   final int user_id;
@@ -31,8 +32,7 @@ class _DestinationScreenState extends State<DestinationScreen> {
   TextEditingController nameController = TextEditingController();
 
   // 장소 주소 입력
-  late String address = '주소를 입력해주세요';
-
+  late bool isDoneAddress = false;
   @override
   void initState() {
     // TODO: implement initState
@@ -40,62 +40,115 @@ class _DestinationScreenState extends State<DestinationScreen> {
     nameController.text = name;
   }
 
+  // 주소 입력 받을 폼
+  late String address = '주소를 입력해주세요';
+  late String latitude;
+  late String longitude;
+
   // 안심 보행 아이콘 선택
+  late int icon; // 서버에 넘겨줄 값
   late int isSelected = 0; // 초기 값
 
   void toggleIcon(int index) {
     setState(() {
       isSelected = index;
     });
+    icon = isSelected;
   }
 
   // 요일 선택
-  late List<bool> isClicked = List.filled(7, false); // 요일 선택 전
-  final List<String> days = ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일'];
-  // 요일 선택 토글
-  void toggleDay(int index) {
+  late bool isDoneDays = false;
+  late List<bool> _dataFromChild;
+  late List<String> dayList = List<String>.filled(7, '0');
+  late List<bool> dayListFromP = List.filled(7, false);
+  late String day = '0000000'; // 서버에게 줄 값
+  late String explainDay = '매일';
+  final List<String> dayNames = ['월', '화', '수', '목', '금', '토', '일'];
+  late List<String> selectedDayNames = [];
+
+  void updateData(List<bool> newData) {
     setState(() {
-      isClicked[index] = !isClicked[index];
-      refresh();
+      _dataFromChild = newData;
     });
   }
 
-  // 하위 위젯에서 상위 위젯를 위한 콜백 함수
-  void refresh() {
+  void switchStringFromList() {
+    selectedDayNames = [];
+    for (int i=0; i <_dataFromChild.length; i++){
+      if (_dataFromChild[i]) {
+        dayListFromP[i] = _dataFromChild[i];
+        dayList[i] = '1';
+        selectedDayNames.add(dayNames[i]);
+      }
+    }
+    day = dayList.join('');
     setState(() {
-      
+      isDoneDays = true;
+      if (_dataFromChild.every((element) => element)){
+        explainDay = '매일';
+      } else {
+      explainDay = selectedDayNames.join(' ');}
     });
   }
-  
+
   // 시간 설정
+  late Time start_time; // 서버에 넘겨줄 시간 값
+  late Time end_time;
   Time _startTime = Time(hour: 7, minute: 00);
   Time _endTime = Time(hour: 14, minute: 00);
+  late bool isDoneAtStartTime = false; // 시작 시간이 입력되었는 지 확인
+  late bool isDoneAtEndTime = false; // 종료 시간이 입력되었는 지 확인
+  late String timeError = '';
 
-  // 시간 한국어로 변역
-  String formatTime(String time) {
-    // Parse the input time string, removing any spaces and ensuring upper case for AM/PM parsing
-    DateTime parsedTime =
-        DateFormat('hh:mma').parse(time.toUpperCase().replaceAll(' ', ''));
+  // 시작 시간이 종료 시간이 넘지 않는지 검증
+  void checkStartTimeAndEndTime(Time _startTime, Time _endTime, String word) {
+    // Time 객체를 DateTime 객체로 변환
+    DateTime startDateTime =
+        DateTime(2024, 5, 7, _startTime.hour, _startTime.minute);
+    DateTime endDateTime = DateTime(2024, 5, 7, _endTime.hour, _endTime.minute);
 
-    // Format the DateTime object to the desired format with space before AM/PM
-    return DateFormat('hh:mm a').format(parsedTime);
+    if (startDateTime.isAfter(endDateTime) ||
+        startDateTime.isAtSameMomentAs(endDateTime)) {
+      setState(() {
+        timeError = '종료 시간이 시작 시간보다 앞섭니다';
+      });
+      // 모든 프레임이 그려지고 난 뒤에 그려지는 작업
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) {
+          if (word == 'end') {
+            Navigator.of(context).push(
+                CustomShowPicker(value: _endTime, onChange: onEndTimeChanged));
+          } else {
+            Navigator.of(context).push(
+                CustomShowPicker(value: _startTime, onChange: onStartTimeChanged));
+          }
+        },
+      );
+    } else {
+      setState(() {
+        timeError = '';
+      });
+    }
   }
 
   // 시작 시간 변경
   void onStartTimeChanged(Time newTime) {
     setState(() {
       _startTime = newTime;
-      print(_startTime);
-      print(_startTime.runtimeType);
+      isDoneAtStartTime = true;
     });
+    checkStartTimeAndEndTime(_startTime, _endTime, 'start');
+    start_time = _startTime;
   }
 
   // 종료 시간 변경
   void onEndTimeChanged(Time newTime) {
     setState(() {
       _endTime = newTime;
-      print(_endTime);
+      isDoneAtEndTime = true;
     });
+    checkStartTimeAndEndTime(_startTime, _endTime, 'end');
+    end_time = _endTime;
   }
 
   @override
@@ -198,6 +251,7 @@ class _DestinationScreenState extends State<DestinationScreen> {
               text: '장소',
               isFrontIcon: false,
               isExplain: true,
+              isDone: isDoneAddress,
               explainText: address,
               onTap: () async {
                 context.goNamed('search');
@@ -211,72 +265,20 @@ class _DestinationScreenState extends State<DestinationScreen> {
               text: '요일',
               isFrontIcon: false,
               isExplain: true,
-              explainText: '매일',
+              isDone: isDoneDays,
+              explainText: explainDay,
               onTap: () {
                 showCustomModal(
                   context,
                   '요일 설정',
                   Column(
                     children: [
-                      GestureDetector(
-                          onTap: () {
-                            // ...isClicked.map((isClicked) => isClicked = 1);
-                          },
-                          child: SizedBox(height: 16.0)),
-                      Row(
-                        children: [
-                          DayContainer(day: '매일'),
-                          ...days
-                              .take(3)
-                              .map(
-                                (day) => GestureDetector(
-                                  onTap: () => toggleDay(
-                                    days.indexOf(day),
-                                  ),
-                                  child: DayContainer(
-                                    key: ValueKey(
-                                        '${day}_${isClicked[days.indexOf(day)]}'),
-                                    day: day,
-                                    isClicked: isClicked[day.indexOf(day)],
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                        ],
-                      ),
-                      SizedBox(
-                        height: 10.0,
-                      ),
-                      Row(
-                        children: [
-                          ...days
-                              .skip(3)
-                              .take(4)
-                              .map(
-                                (day) => GestureDetector(
-                                  onTap: () {
-                                    toggleDay(
-                                      days.indexOf(day),
-                                    );
-                                    print('index 알아보기 ${days.indexOf(day)}');
-                                    print(isClicked);
-                                    print(
-                                        '부모가 주는 ${isClicked[day.indexOf(day)]}');
-                                  },
-                                  child: DayContainer(
-                                    key: ValueKey(
-                                        '${day}_${isClicked[days.indexOf(day)]}'),
-                                    day: day,
-                                    isClicked: isClicked[day.indexOf(day)],
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                        ],
-                      ),
+                      SizedBox(height: 16.0),
+                      CustomDayPicker(onDataChanged: updateData, data : dayListFromP),
                       SizedBox(height: 16.0),
                       CustomElevatedButton(
                           onPressed: () {
+                            switchStringFromList();
                             context.pop();
                           },
                           child: '저장'),
@@ -294,33 +296,10 @@ class _DestinationScreenState extends State<DestinationScreen> {
               isFrontIcon: false,
               isExplain: true,
               explainText: _startTime.format(context),
+              isDone: isDoneAtStartTime,
               onTap: () {
                 Navigator.of(context).push(
-                  showPicker(
-                      amLabel: '오전',
-                      pmLabel: '오후',
-                      backgroundColor: AppColors.background_color,
-                      accentColor: AppColors.text_color,
-                      unselectedColor: AppColors.custom_black,
-                      cancelStyle: TextStyle(
-                        color: AppColors.text_color,
-                        fontFamily: 'GmarketSans',
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.w400,
-                      ),
-                      okStyle: TextStyle(
-                        color: AppColors.text_color,
-                        fontFamily: 'GmarketSans',
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.w400,
-                      ),
-                      cancelText: '취소',
-                      okText: '저장',
-                      value: _startTime,
-                      sunrise: TimeOfDay(hour: 6, minute: 0), // optional
-                      sunset: TimeOfDay(hour: 18, minute: 0), // optional
-                      duskSpanInMinutes: 120,
-                      onChange: onStartTimeChanged),
+                  CustomShowPicker(value: _startTime, onChange: onStartTimeChanged),
                 );
               },
             ),
@@ -332,14 +311,26 @@ class _DestinationScreenState extends State<DestinationScreen> {
               isFrontIcon: false,
               isExplain: true,
               explainText: _endTime.format(context),
+              isDone: isDoneAtEndTime,
               onTap: () {
-                Navigator.of(context).push(showPicker(
-                    value: _endTime,
-                    sunrise: TimeOfDay(hour: 6, minute: 0), // optional
-                    sunset: TimeOfDay(hour: 18, minute: 0), // optional
-                    duskSpanInMinutes: 120,
-                    onChange: onEndTimeChanged));
+                Navigator.of(context).push(
+                  CustomShowPicker(value: _endTime, onChange: onEndTimeChanged),
+                );
               },
+            ),
+            SizedBox(
+              child: Align(
+                alignment: Alignment.bottomRight,
+                child: Text(
+                  '${timeError}',
+                  style: TextStyle(
+                    fontSize: 12.0,
+                    fontWeight: FontWeight.w400,
+                    fontFamily: 'GmarketSans',
+                    color: AppColors.input_text_color,
+                  ),
+                ),
+              ),
             ),
             Spacer(),
             CustomElevatedButton(

@@ -15,13 +15,14 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  String postCode = '-';
-  String roadAddress = '-';
-  String jibunAddress = '-';
-  String latitude = '-';
-  String longitude = '-';
-  String kakaoLatitude = '-';
-  String kakaoLongitude = '-';
+  // provider할 정보
+  late String address;
+  late double latitude;
+  late double longitude;
+
+  // 주소 값 받을 text
+  late String searchAddress;
+  TextEditingController addressController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -42,33 +43,30 @@ class _SearchScreenState extends State<SearchScreen> {
             height: 10.0,
           ),
           CustomTextField(
+            controller : addressController,
+            onChanged: (String value){
+              setState(() {
+                searchAddress = value;
+              });
+            },
             hintText: '지번, 도로명, 건물명으로 검색',
             suffixIcon: IconButton(
               icon: Icon(Icons.search),
-              onPressed: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => KpostalView(
-                      // useLocalServer: true,
-                      // localPort: 1024,
-                      kakaoKey: dotenv.env['KAKAO_API_KEY']!, // null safety
+              onPressed: () {
+                print('준다 $searchAddress');
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) {
+                    return KpostalView(
+                      initialSearch: searchAddress,
                       callback: (Kpostal result) {
                         setState(() {
-                          this.postCode = result.postCode;
-                          this.roadAddress = result.address;
-                          this.jibunAddress = result.jibunAddress;
-                          this.latitude = result.latitude.toString();
-                          this.longitude = result.longitude.toString();
-                          this.kakaoLatitude = result.kakaoLatitude.toString();
-                          this.kakaoLongitude =
-                              result.kakaoLongitude.toString();
-                          print(kakaoLatitude);
-                          print(kakaoLongitude);
+                          this.address = result.address;
+                          this.latitude = result.latitude!.toDouble();
+                          this.longitude = result.longitude!.toDouble();
                         });
                       },
-                    ),
-                  ),
+                    );
+                  })
                 );
               },
             ),
