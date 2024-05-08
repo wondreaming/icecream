@@ -27,12 +27,12 @@ class _QRCodePageState extends State<QRCodePage> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String deviceId = prefs.getString('deviceId') ?? 'No device ID';
     String fcmToken = prefs.getString('fcmToken') ?? 'No FCM token';
-    String phoneNum = '01012345678';
+    // String phoneNum = '01012345678';
 
     Map<String, String> data = {
       'Device ID': deviceId,
       'FCM Token': fcmToken,
-      'phoneNum': phoneNum
+      // 'phoneNum': phoneNum
     };
 
     // JSON 문자열로 변환
