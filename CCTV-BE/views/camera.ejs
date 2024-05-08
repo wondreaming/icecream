@@ -16,8 +16,8 @@
       navigator.mediaDevices
         .getUserMedia({ video: {
           facingMode: "environment",
-          width: { ideal: 480 },
-          height: { ideal: 640 }
+          width: { exact: 480 },
+          height: { exact: 640 }
         }})
         .then(stream => {
           const video = document.getElementById("video");
