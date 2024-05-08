@@ -95,6 +95,7 @@ io.on("connect", socket => {
     socket.on("disconnect", data => {
       roomCapacity[roomName]--;
       console.log("user가 websocket에서 나갔습니다");
+      console.log("현재 방에 참여한 인원", roomCapacity[roomName]);
     });
   } else {
     socket.emit("error", "방이 가득찼습니다");
