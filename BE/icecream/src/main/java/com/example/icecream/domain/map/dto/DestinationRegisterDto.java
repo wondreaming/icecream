@@ -8,7 +8,6 @@ import java.time.LocalTime;
 
 @Getter
 @AllArgsConstructor
-@NoArgsConstructor
 public class DestinationRegisterDto {
 
     private Integer userId;
