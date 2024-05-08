@@ -14,11 +14,6 @@ public class CctvMessageListenService {
 
     private final CrosswalkCCTVMappingRepository crosswalkCCTVMappingRepository;
 
-    public void messageListen(CctvMessageDto cctvMessageDto) {
-        System.out.println("CCTV이름 : " + cctvMessageDto.getCctvName());
-        System.out.println("속도 : " + cctvMessageDto.getSpeed());
-    }
-
     public String findCrosswalk(CctvMessageDto cctvMessageDto) {
         CrosswalkCCTVMapping crosswalkCCTVMapping = crosswalkCCTVMappingRepository.findCrosswalkCCTVMappingByCctvName(cctvMessageDto.getCctvName());
         return crosswalkCCTVMapping.getCrosswalkName();

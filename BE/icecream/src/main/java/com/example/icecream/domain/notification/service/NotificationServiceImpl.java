@@ -89,7 +89,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .map(userId -> CompletableFuture.runAsync(() -> {
                     FcmToken fcmToken = fcmTokenRepository.findByUserId(userId);
                     if (fcmToken != null) {
-                        FcmRequestDto fcmRequestDto = new FcmRequestDto(fcmToken.getToken(), fcmRequestDto2.getTitle(), fcmRequestDto2.getBody(), fcmRequestDto2.getIsOverSpeed(), fcmRequestDto2.getIsCreated(), fcmRequestDto2.getKey3());
+                        FcmRequestDto fcmRequestDto = new FcmRequestDto(fcmToken.getToken(), fcmRequestDto2.getTitle(), fcmRequestDto2.getBody(), fcmRequestDto2.getContent());
                         try {
                             sendMessageTo(fcmRequestDto);
                             success.incrementAndGet();
@@ -158,9 +158,7 @@ public class NotificationServiceImpl implements NotificationService {
                         .data(FcmMessageDto.Data.builder()
                                 .title(fcmRequestDto.getTitle())
                                 .body(fcmRequestDto.getBody())
-                                .isOverSpeed(fcmRequestDto.getIsOverSpeed())
-                                .isCreated(fcmRequestDto.getIsCreated())
-                                .key3(fcmRequestDto.getKey3())
+                                .content(fcmRequestDto.getContent())
                                 .build())
                         .build())
                 .build();

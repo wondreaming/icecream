@@ -49,15 +49,6 @@ public class User extends BaseEntity {
     @Column(name = "profile_image", columnDefinition = "TEXT")
     private String profileImage;
 
-//    @Column(name = "created_at", nullable = false)
-//    @CreatedDate
-//    @NotNull
-//    private LocalDateTime createdAt;
-//
-//    @Column(name = "updated_at", nullable = false)
-//    @LastModifiedDate
-//    @NotNull
-//    private LocalDateTime updatedAt;
 
     @Column(name = "is_deleted", nullable = false)
     @NotNull
@@ -66,6 +57,7 @@ public class User extends BaseEntity {
     public void updateUsername(String newUsername) {
         this.username = newUsername;
     }
+    public void updatePassword(String newPassword) { this.password = newPassword; }
 
     public void deleteUser() {
         this.isDeleted = true;

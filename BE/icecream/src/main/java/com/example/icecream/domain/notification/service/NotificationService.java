@@ -7,6 +7,7 @@ import com.example.icecream.domain.notification.dto.FcmRequestDto2;
 import com.example.icecream.domain.notification.dto.LoginRequestDto;
 import com.example.icecream.domain.notification.dto.NotificationResponseDto;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.firebase.auth.FirebaseAuthException;
 
 import java.io.IOException;
 import java.util.List;
