@@ -14,10 +14,7 @@
 
       // 웹캠 접근 요청
       navigator.mediaDevices
-        .getUserMedia({ video: {
-          width: { exact: 480 },
-          height: { exact: 640 }
-        }})
+        .getUserMedia({ video: true })
         .then(stream => {
           const video = document.getElementById("video");
           video.srcObject = stream;
