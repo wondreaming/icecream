@@ -9,6 +9,7 @@ class CustomTextField extends StatelessWidget {
   final String? hintText;
   final String? errorText;
   final Widget? suffixIcon;
+  final TextEditingController? controller;
   const CustomTextField(
       {super.key,
       this.maxLines,
@@ -16,7 +17,7 @@ class CustomTextField extends StatelessWidget {
       this.obscureText = false,
       this.autofocus = false,
       this.hintText,
-      this.errorText, this.suffixIcon});
+      this.errorText, this.suffixIcon, this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +28,7 @@ class CustomTextField extends StatelessWidget {
       ),
     );
     return TextField(
+      controller: controller,
       maxLines: maxLines, // 최대 출력되는 라인 수
       onChanged: onChanged,
       obscureText: obscureText, // 비밀번호 감추기 때, 사용
