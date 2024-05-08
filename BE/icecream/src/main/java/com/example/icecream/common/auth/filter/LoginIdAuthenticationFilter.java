@@ -38,6 +38,7 @@ public class LoginIdAuthenticationFilter extends UsernamePasswordAuthenticationF
             throw new AuthenticationServiceException("Authentication method not supported: " + request.getMethod());
         }
         try {
+
             LoginRequestDto loginRequestDto = objectMapper.readValue(request.getInputStream(), LoginRequestDto.class);
             request.setAttribute("fcmToken", loginRequestDto.getFcmToken());
             UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =

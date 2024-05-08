@@ -1,5 +1,6 @@
 package com.example.icecream.domain.notification.dto;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,10 +10,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class FcmRequestDto {
 
+    @NotNull
     private String token;
+    @NotNull
     private String title;
+    @NotNull
     private String body;
-    private String isOverSpeed;
-    private String isCreated;
-    private String key3;
+    @NotNull
+    private String content;
 }
