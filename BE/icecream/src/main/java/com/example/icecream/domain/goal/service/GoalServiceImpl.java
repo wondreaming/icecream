@@ -29,6 +29,7 @@ public class GoalServiceImpl extends CommonService implements GoalService {
 
     private final GoalRepository goalRepository;
     private final GoalStatusRepository goalStatusRepository;
+    private final UserRepository userRepository;
 
     public GoalServiceImpl(UserRepository userRepository,
                            ParentChildMappingRepository ParentChildMappingRepository,
@@ -37,6 +38,7 @@ public class GoalServiceImpl extends CommonService implements GoalService {
         super(userRepository, ParentChildMappingRepository);
         this.goalRepository = goalRepository;
         this.goalStatusRepository = goalStatusRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -82,7 +84,10 @@ public class GoalServiceImpl extends CommonService implements GoalService {
     }
 
     @Override
-    public List<Goal> getGoals(int userId) {
+    public List<Goal> getGoals(int userId, Integer selfId) {
+        if (!isParentUserWithPermission(selfId, userId) && !selfId.equals(userId)) {
+            throw new DataAccessException(GoalErrorCode.GET_GOAL_ACCESS_DENIED.getMessage());
+        }
         return goalRepository.findAllByUserId(userId);
     }
 
