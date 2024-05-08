@@ -35,7 +35,7 @@ class _QRScanPageState extends State<QRScanPage> {
     try {
       final data = json.decode(jsonData);
       if (data is Map<String, dynamic>) {
-        return data.containsKey('Device ID') && data.containsKey('FCM Token') && data.containsKey('phoneNum');
+        return data.containsKey('Device ID') && data.containsKey('FCM Token');
       }
       return false;
     } catch (e) {
@@ -52,7 +52,6 @@ class _QRScanPageState extends State<QRScanPage> {
         builder: (context) => ChildRegisterPage(
           deviceId: data['Device ID'],
           fcmToken: data['FCM Token'],
-          phoneNum: data['phoneNum'],
         ),
       ),
     ).then((_) => controller?.resumeCamera());
