@@ -48,8 +48,6 @@ public class AuthService {
                         .accessToken(jwtTokenDto.getAccessToken())
                         .refreshToken(jwtTokenDto.getRefreshToken())
                         .build();
-
-
             }
         }
 
@@ -58,6 +56,7 @@ public class AuthService {
         notificationService.saveOrUpdateFcmToken(loginRequestDto);
 
         return ChildLoginResponseDto.builder()
+                .userId(user.getId())
                 .username(user.getUsername())
                 .phoneNumber(user.getPhoneNumber())
                 .profileImage(user.getProfileImage())

@@ -1,14 +1,14 @@
 package com.example.icecream.domain.map.listener;
 
-import com.example.icecream.domain.map.repository.CrosswalkCCTVMappingRepository;
 import com.example.icecream.domain.map.service.CctvMessageListenService;
 import com.example.icecream.domain.map.dto.CctvMessageDto;
 import com.example.icecream.domain.map.service.RedisListenService;
 import com.example.icecream.domain.notification.dto.FcmRequestDto2;
 import com.example.icecream.domain.notification.service.NotificationService;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

@@ -1,11 +1,13 @@
 package com.example.icecream.domain.user.service;
 
+import com.example.icecream.common.exception.NotFoundException;
 import com.example.icecream.domain.goal.service.GoalService;
 import com.example.icecream.domain.user.dto.SignUpChildRequestDto;
 import com.example.icecream.domain.user.dto.SignUpParentRequestDto;
 import com.example.icecream.domain.user.dto.UpdateChildRequestDto;
 import com.example.icecream.domain.user.entity.ParentChildMapping;
 import com.example.icecream.domain.user.entity.User;
+import com.example.icecream.domain.user.error.UserErrorCode;
 import com.example.icecream.domain.user.repository.ParentChildMappingRepository;
 import com.example.icecream.domain.user.repository.UserRepository;
 
@@ -56,7 +58,7 @@ public class UserService {
 
         parentChildMappingRepository.deleteByParentId(parentId);
         User parent = userRepository.findById(parentId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저 입니다."));
+                .orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND.getMessage()));
 
         parent.deleteUser();
         userRepository.save(parent);
@@ -78,7 +80,7 @@ public class UserService {
                 });
 
         User parent = userRepository.findById(parentId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저 입니다."));
+                .orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND.getMessage()));
 
         ParentChildMapping parentChildMapping = ParentChildMapping.builder()
                 .parent(parent)
@@ -94,7 +96,7 @@ public class UserService {
 
     public void updateChild(int parentId, final UpdateChildRequestDto signUpChildRequestDto) {
         User child = userRepository.findById(signUpChildRequestDto.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("자녀가 회원이 아닙니다."));
+                .orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND.getMessage()));
 
         if (child.getIsParent()) {
             throw new IllegalArgumentException("이름을 변경하려는 대상이 부모 유저 입니다.");
@@ -112,7 +114,7 @@ public class UserService {
         parentChildMappingRepository.deleteByParentIdAndChildId(parentId, childId);
 
         User child = userRepository.findById(childId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저 입니다."));
+                .orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND.getMessage()));
 
         child.deleteUser();
         userRepository.save(child);
@@ -124,7 +126,7 @@ public class UserService {
 
     public void checkPassword(String currentPassword, int userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND.getMessage()));
 
         if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
             throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
@@ -133,7 +135,7 @@ public class UserService {
 
     public void updatePassword(String newPassword, int userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND.getMessage()));
 
         if (passwordEncoder.matches(newPassword, user.getPassword())) {
             throw new IllegalArgumentException("현재와 동일한 비밀번호 입니다.");

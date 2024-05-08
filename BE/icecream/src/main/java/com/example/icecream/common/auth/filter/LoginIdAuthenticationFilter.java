@@ -1,7 +1,9 @@
 package com.example.icecream.common.auth.filter;
 
 import com.example.icecream.common.auth.dto.LoginRequestDto;
+import com.example.icecream.common.auth.error.AuthErrorCode;
 import com.example.icecream.common.auth.handler.CustomAuthenticationSuccessHandler;
+import com.example.icecream.common.exception.BadRequestException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -35,8 +37,9 @@ public class LoginIdAuthenticationFilter extends UsernamePasswordAuthenticationF
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         if (!request.getMethod().equals("POST")) {
-            throw new AuthenticationServiceException("Authentication method not supported: " + request.getMethod());
+            throw new BadRequestException(AuthErrorCode.INVALID_HTTP_METHOD.getMessage());
         }
+
         try {
             LoginRequestDto loginRequestDto = objectMapper.readValue(request.getInputStream(), LoginRequestDto.class);
             request.setAttribute("fcmToken", loginRequestDto.getFcmToken());

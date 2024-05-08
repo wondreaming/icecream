@@ -1,6 +1,7 @@
 package com.example.icecream.common.auth.util;
 
 import com.example.icecream.common.auth.dto.JwtTokenDto;
+import com.example.icecream.common.auth.error.AuthErrorCode;
 import com.example.icecream.domain.user.repository.UserRepository;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -106,7 +108,7 @@ public class JwtUtil {
         Claims claims = parseClaims(accessToken);
 
         if (claims.get("authority") == null) {
-            throw new RuntimeException("권한 정보가 없는 토큰입니다.");
+            throw new BadCredentialsException(AuthErrorCode.INVALID_TOKEN.getMessage());
         }
 
         Collection<? extends GrantedAuthority> authorities = Arrays.stream(claims.get("authority").toString().split(","))
