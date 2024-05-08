@@ -39,8 +39,9 @@ public class GoalController {
     }
 
     @GetMapping("/goal")
-    public ResponseEntity<ApiResponseDto<List<Goal>>> getGoal(@RequestParam(name = "user_id") int userId) {
-        List<Goal> goals = goalService.getGoals(userId);
+    public ResponseEntity<ApiResponseDto<List<Goal>>> getGoal(@RequestParam(name = "user_id") int userId,
+                                                              @AuthenticationPrincipal UserDetails userDetails) {
+        List<Goal> goals = goalService.getGoals(userId, Integer.parseInt(userDetails.getUsername()));
         return ApiResponseDto.success("목표를 불러왔습니다.", goals);
     }
 

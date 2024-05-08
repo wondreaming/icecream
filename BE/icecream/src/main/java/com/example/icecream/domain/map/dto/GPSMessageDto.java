@@ -9,7 +9,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 @NoArgsConstructor
 @Getter
 public class GPSMessageDto {

@@ -7,6 +7,7 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -25,7 +26,7 @@ public class DestinationScheduler {
         ValueOperations<String, Integer> ops = redisTemplate.opsForValue();
         destinationIds.forEach(destinationId -> {
             String key = "arrival:" + destinationId;
-            ops.set(key, 0, 86400);
+            ops.set(key, 0, Duration.ofSeconds(86400));
         });
     }
 }
