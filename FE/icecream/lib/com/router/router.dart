@@ -1,5 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:icecream/auth/screen/c_qrcode.dart';
+import 'package:icecream/auth/screen/p_login_page.dart';
+import 'package:icecream/auth/screen/p_signup.dart';
 import 'package:icecream/auth/screen/qrscan_page.dart';
 import 'package:icecream/com/widget/temp.dart';
 import 'package:icecream/home/screen/c_home.dart';
@@ -23,6 +25,12 @@ final router = GoRouter(
           GoRoute(
               path: 'c_qrcode',
               builder: (context, state) => const QRCodePage()),
+          GoRoute(
+              path: 'p_login',
+              builder: (context, state) => const LoginPage()),
+          GoRoute(
+              path: 'signup',
+              builder: (context, state) => const SignUpPage()),
           GoRoute(path: 'qrscan_page',
               builder: (context, state) => const QRScanPage()),
           GoRoute(path: 'child', builder: (context, state) => const CHome()),
