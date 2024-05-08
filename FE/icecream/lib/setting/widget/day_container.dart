@@ -1,18 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:icecream/com/const/color.dart';
 
-class DayContainer extends StatelessWidget {
+class DayContainer extends StatefulWidget {
   final String day;
-  final bool isClicked;
-  const DayContainer({super.key, required this.day, this.isClicked = false});
+  final bool initialClicked;
+  final Color color;
+  DayContainer({super.key, required this.day, this.initialClicked = false, required this.color});
+
+  @override
+  State<DayContainer> createState() => _DayContainerState();
+}
+
+class _DayContainerState extends State<DayContainer> {
+  late bool isClicked;
+
+  @override
+  void initState() {
+    super.initState();
+    isClicked = widget.initialClicked;
+  }
 
   @override
   Widget build(BuildContext context) {
-    print('자식 냠냠 $isClicked');
+
     return Container(
           child: Center(
             child: Text(
-              day,
+              widget.day,
               style: TextStyle(
                 fontFamily: 'GmarketSans',
                 fontSize: 20.0,
