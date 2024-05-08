@@ -14,7 +14,7 @@
 
       // 웹캠 접근 요청
       navigator.mediaDevices
-        .getUserMedia({ video: { facingMode: "environment" } })
+        .getUserMedia({ video: true })
         .then(stream => {
           const video = document.getElementById("video");
           video.srcObject = stream;
@@ -48,7 +48,7 @@
                 });
               };
             }, "image/jpeg");
-          }, 1000 / 15); // 매 초마다 이미지 전송
+          }, 1000 / 30); // 매 초마다 이미지 전송
         })
         .catch(error => {
           console.error("Camera access denied:", error);
