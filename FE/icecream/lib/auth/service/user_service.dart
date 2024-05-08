@@ -27,25 +27,30 @@ class UserService {
   }
 
   // 자녀 등록
-  Future<Response> registerChild({
-    required String username,
-    required String phoneNumber,
-    required String deviceId,
-    required String fcmToken,
-  }) async {
-    try {
-      final response =
-          await _dio.post("http://k10e202.p.ssafy.io:8080/api/users/child", data: {
-        'username': username,
-        'phone_number': phoneNumber,
-        'device_id': deviceId,
-        'fcm_token': fcmToken,
-      });
-      return response;
-    } catch (e) {
-      throw Exception('Registration failed: $e');
+Future<Response> registerChild(Map<String, dynamic> userData) async {
+    // 액세스 토큰을 SharedPreferences에서 가져옵니다.
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? accessToken = prefs.getString('accessToken');
+
+    if (accessToken == null) {
+        throw Exception("No access token found");
     }
-  }
+
+    try {
+        final response = await _dio.post(
+            "http://k10e202.p.ssafy.io:8080/api/users/child",
+            data: userData,
+            options: Options(
+                headers: {
+                    "Authorization": "Bearer $accessToken",  // 헤더에 액세스 토큰 추가
+                }
+            )
+        );
+        return response;
+    } catch (e) {
+        throw Exception('Registration failed: $e');
+    }
+}
 
   // 부모 로그인
   Future<void> loginUser(
