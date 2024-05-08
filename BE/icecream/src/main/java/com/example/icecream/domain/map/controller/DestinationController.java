@@ -5,6 +5,7 @@ import com.example.icecream.domain.map.dto.DestinationModifyDto;
 import com.example.icecream.domain.map.dto.DestinationRegisterDto;
 import com.example.icecream.domain.map.dto.DestinationResponseDto;
 import com.example.icecream.domain.map.service.DestinationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -29,7 +30,7 @@ public class DestinationController {
 
     @PostMapping
     public ResponseEntity<ApiResponseDto<String>> registerDestination(@AuthenticationPrincipal UserDetails userDetails,
-                                                                      @RequestBody DestinationRegisterDto destinationRegisterDto) {
+                                                                      @RequestBody @Valid DestinationRegisterDto destinationRegisterDto) {
         destinationService.registerDestination(Integer.parseInt(userDetails.getUsername()), destinationRegisterDto);
         return ApiResponseDto.created("목적지 등록에 성공하였습니다.");
     }
