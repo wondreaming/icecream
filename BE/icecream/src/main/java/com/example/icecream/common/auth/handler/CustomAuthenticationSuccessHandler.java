@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.regex.Pattern;
 
 @Component
 @RequiredArgsConstructor
@@ -41,6 +42,15 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         JwtTokenDto jwtToken = jwtUtil.generateTokenByFilterChain(authentication, user.getId());
 
         String fcmToken = (String) request.getAttribute("fcmToken");
+
+        if (fcmToken == null || !Pattern.compile("^[a-zA-Z0-9\\-_:]{100,}$").matcher(fcmToken).matches()) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"error\": \"올바른 FCM 토큰 형식이 아닙니다.\"}");
+            response.getWriter().flush();
+            return;
+        }
+
         LoginRequestDto loginRequestDto = new LoginRequestDto(user.getId(), fcmToken);
         notificationService.saveOrUpdateFcmToken(loginRequestDto);
 

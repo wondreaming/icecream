@@ -9,7 +9,6 @@ import java.time.LocalTime;
 
 @Getter
 @AllArgsConstructor
-@NoArgsConstructor
 public class DestinationRegisterDto {
 
     @NotNull(message = "user_id is required")
