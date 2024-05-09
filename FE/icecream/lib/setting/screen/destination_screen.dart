@@ -1,12 +1,18 @@
 import 'package:day_night_time_picker/day_night_time_picker.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icecream/com/const/color.dart';
+import 'package:icecream/com/const/dio_interceptor.dart';
 import 'package:icecream/com/widget/default_layout.dart';
+import 'package:icecream/setting/model/add_destination_model.dart';
+import 'package:icecream/setting/model/response_destination_model.dart';
 import 'package:icecream/setting/provider/destination_provider.dart';
+import 'package:icecream/setting/repository/destination_repository.dart';
 import 'package:icecream/setting/service/buildDays.dart';
 import 'package:icecream/setting/widget/custom_day_picker.dart';
 import 'package:icecream/setting/widget/custom_elevated_button.dart';
@@ -95,8 +101,8 @@ class _DestinationScreenState extends State<DestinationScreen> {
   }
 
   // 시간 설정
-  late Time start_time; // 서버에 넘겨줄 시간 값
-  late Time end_time;
+  late String start_time; // 서버에 넘겨줄 시간 값
+  late String end_time;
   Time _startTime = Time(hour: 7, minute: 00);
   Time _endTime = Time(hour: 14, minute: 00);
   late bool isDoneAtStartTime = false; // 시작 시간이 입력되었는 지 확인
@@ -134,6 +140,13 @@ class _DestinationScreenState extends State<DestinationScreen> {
     }
   }
 
+  // 문자로 출력
+  String formatTimeOfDay(TimeOfDay tod) {
+    final hour = tod.hour.toString().padLeft(2, '0');
+    final minute = tod.minute.toString().padLeft(2, '0');
+    return "$hour:$minute";
+  }
+
   // 시작 시간 변경
   void onStartTimeChanged(Time newTime) {
     setState(() {
@@ -141,7 +154,9 @@ class _DestinationScreenState extends State<DestinationScreen> {
       isDoneAtStartTime = true;
     });
     checkStartTimeAndEndTime(_startTime, _endTime, 'start');
-    start_time = _startTime;
+    String formatStartTime= formatTimeOfDay(_startTime);
+    print(formatStartTime);
+    start_time = formatStartTime;
   }
 
   // 종료 시간 변경
@@ -151,7 +166,40 @@ class _DestinationScreenState extends State<DestinationScreen> {
       isDoneAtEndTime = true;
     });
     checkStartTimeAndEndTime(_startTime, _endTime, 'end');
-    end_time = _endTime;
+    String formatEndTime= formatTimeOfDay(_endTime);
+    print(formatEndTime);
+    end_time = formatEndTime;
+  }
+
+  // 안심 보행 목적지 등록
+  void addDestination() async {
+    final dio = CustomDio().createDio();
+    final destinationRepository = DestinationRespository(dio);
+
+    AddDestinationModel newDestination = AddDestinationModel(
+        user_id: widget.user_id,
+        name: name,
+        icon: isSelected,
+        latitude: latitude,
+        longitude: longitude,
+        start_time: start_time,
+        end_time: end_time,
+        day: day);
+    try {
+      print(newDestination.user_id);
+      print(newDestination.name);
+      print(newDestination.icon);
+      print(newDestination.latitude);
+      print(newDestination.longitude);
+      print(newDestination.start_time);
+      print(newDestination.end_time);
+      print(newDestination.day);
+      ResponseDestination response = await destinationRepository.addDestination(
+          destination: newDestination);
+      print("추가 성공: ${response.toJson()}");
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override
@@ -350,7 +398,10 @@ class _DestinationScreenState extends State<DestinationScreen> {
             ),
             Spacer(),
             CustomElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                addDestination();
+                context.pop();
+              },
               child: '저장',
             ),
           ],
