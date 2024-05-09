@@ -110,7 +110,7 @@ class CustomTextContainer extends StatelessWidget {
                   child: Text(
                     explainText!,
                     style: TextStyle(
-                      fontSize: isDone! ? 18.0 : 14.0,
+                      fontSize: isDone! ? 16.0 : 14.0,
                       fontWeight: FontWeight.w400,
                       fontFamily: 'GmarketSans',
                       color: isDone! ? AppColors.text_color : AppColors.input_text_color,
