@@ -1,10 +1,10 @@
 package com.example.icecream.domain.goal.dto;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDate;
 
@@ -14,10 +14,12 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class UpdateGoalStatusDto {
 
-    @NotNull
+    @NotNull(message = "user_id is required")
     private Integer userId;
-    @NotNull
+
+    @NotNull(message = "date is required")
     private LocalDate date;
-    @NotNull
+
+    @NotNull(message = "status is required")
     private Integer status;
 }
