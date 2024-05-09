@@ -11,6 +11,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -58,8 +59,10 @@ public class User extends BaseEntity {
         this.username = newUsername;
     }
     public void updatePassword(String newPassword) { this.password = newPassword; }
-
     public void deleteUser() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        String timestamp = LocalDateTime.now().format(formatter);
+        this.loginId = timestamp + "_" + this.loginId;
         this.isDeleted = true;
     }
 

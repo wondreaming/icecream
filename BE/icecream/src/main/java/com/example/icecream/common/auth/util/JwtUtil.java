@@ -2,6 +2,7 @@ package com.example.icecream.common.auth.util;
 
 import com.example.icecream.common.auth.dto.JwtTokenDto;
 import com.example.icecream.common.auth.error.AuthErrorCode;
+import com.example.icecream.common.exception.NotFoundException;
 import com.example.icecream.domain.user.repository.UserRepository;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -129,16 +130,9 @@ public class JwtUtil {
                     .build()
                     .parseClaimsJws(token);
             return true;
-        } catch (SecurityException e) {
-            log.info("Invalid JWT Token", e);
-        } catch (ExpiredJwtException e) {
-            log.info("Expired JWT Token", e);
-        } catch (UnsupportedJwtException e) {
-            log.info("Unsupported JWT Token", e);
-        } catch (IllegalArgumentException e) {
-            log.info("JWT claims string is empty.", e);
+        } catch (Exception e) {
+            throw new BadCredentialsException(AuthErrorCode.INVALID_TOKEN.getMessage());
         }
-        return false;
     }
 
     public JwtTokenDto reissueToken(String refreshToken) {
@@ -149,7 +143,7 @@ public class JwtUtil {
         String authority = claims.get("authority", String.class);
 
         com.example.icecream.domain.user.entity.User user = userRepository.findById(Integer.parseInt(userId))
-                .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundException(AuthErrorCode.USER_NOT_FOUND.getMessage()));
 
         String redisRefreshToken = findRefreshTokenInRedis(userId);
 

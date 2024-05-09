@@ -145,5 +145,4 @@ public class GoalServiceImpl extends CommonService implements GoalService {
         goalStatus.updateGoalStatus(updateGoalStatusDto.getDate(), updateGoalStatusDto.getStatus());
         goalStatusRepository.save(goalStatus);
     }
-
 }
