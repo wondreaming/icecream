@@ -27,6 +27,9 @@ public class DestinationRegisterDto {
     @NotNull(message = "longitude is required")
     private Double longitude;
 
+    @NotNull(message = "address is required")
+    private String address;
+
     @NotNull(message = "start_time is required")
     private LocalTime startTime;
 

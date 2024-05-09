@@ -54,6 +54,7 @@ public class DestinationServiceImpl extends CommonService implements Destination
                         destination.getIcon(),
                         destination.getLatitude(),
                         destination.getLongitude(),
+                        destination.getAddress(),
                         destination.getStartTime(),
                         destination.getEndTime(),
                         destination.getDay()
@@ -83,6 +84,7 @@ public class DestinationServiceImpl extends CommonService implements Destination
                 .icon(destinationRegisterDto.getIcon())
                 .latitude(destinationRegisterDto.getLatitude())
                 .longitude(destinationRegisterDto.getLongitude())
+                .address(destinationRegisterDto.getAddress())
                 .startTime(destinationRegisterDto.getStartTime())
                 .endTime(destinationRegisterDto.getEndTime())
                 .day(destinationRegisterDto.getDay())
@@ -113,7 +115,7 @@ public class DestinationServiceImpl extends CommonService implements Destination
                         destinationModifyDto.getLatitude()));
 
         destination.updateDestination(destinationModifyDto.getName(), destinationModifyDto.getIcon(),
-                destinationModifyDto.getLatitude(), destinationModifyDto.getLongitude(),
+                destinationModifyDto.getLatitude(), destinationModifyDto.getLongitude(), destinationModifyDto.getAddress(),
                 destinationModifyDto.getStartTime(), destinationModifyDto.getEndTime(),
                 destinationModifyDto.getDay(), location);
 
