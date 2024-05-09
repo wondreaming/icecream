@@ -7,8 +7,11 @@ import com.example.icecream.domain.goal.dto.UpdateGoalDto;
 import com.example.icecream.domain.goal.dto.UpdateGoalStatusDto;
 import com.example.icecream.domain.goal.entity.Goal;
 import com.example.icecream.domain.goal.service.GoalService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -22,20 +25,23 @@ public class GoalController {
     private final GoalService goalService;
 
     @PostMapping("/goal")
-    public ResponseEntity<ApiResponseDto<String>> createGoal(@RequestBody CreateGoalDto createGoalDto) {
-        goalService.createGoal(createGoalDto);
+    public ResponseEntity<ApiResponseDto<String>> createGoal(@Valid @RequestBody CreateGoalDto createGoalDto,
+                                                             @AuthenticationPrincipal UserDetails userDetails) {
+        goalService.createGoal(createGoalDto, Integer.parseInt(userDetails.getUsername()));
         return ApiResponseDto.success("목표를 설정하였습니다.", null);
     }
 
     @PatchMapping("/goal")
-    public ResponseEntity<ApiResponseDto<String>> updateGoal(@RequestBody UpdateGoalDto updateGoalDto) {
-        goalService.updateGoal(updateGoalDto);
+    public ResponseEntity<ApiResponseDto<String>> updateGoal(@Valid @RequestBody UpdateGoalDto updateGoalDto,
+                                                             @AuthenticationPrincipal UserDetails userDetails) {
+        goalService.updateGoal(updateGoalDto, Integer.parseInt(userDetails.getUsername()));
         return ApiResponseDto.success("목표를 수정하였습니다.", null);
     }
 
     @GetMapping("/goal")
-    public ResponseEntity<ApiResponseDto<List<Goal>>> getGoal(@RequestParam(name = "user_id") int userId) {
-        List<Goal> goals = goalService.getGoals(userId);
+    public ResponseEntity<ApiResponseDto<List<Goal>>> getGoal(@RequestParam(name = "user_id") int userId,
+                                                              @AuthenticationPrincipal UserDetails userDetails) {
+        List<Goal> goals = goalService.getGoals(userId, Integer.parseInt(userDetails.getUsername()));
         return ApiResponseDto.success("목표를 불러왔습니다.", goals);
     }
 
@@ -48,8 +54,9 @@ public class GoalController {
     }
 
     @PatchMapping("/goal/status")
-    public ResponseEntity<ApiResponseDto<String>> updateGoalStatus(@RequestBody UpdateGoalStatusDto updateGoalStatusDto) {
-        goalService.updateGoalStatus(updateGoalStatusDto);
+    public ResponseEntity<ApiResponseDto<String>> updateGoalStatus(@RequestBody UpdateGoalStatusDto updateGoalStatusDto,
+                                                                   @AuthenticationPrincipal UserDetails userDetails) {
+        goalService.updateGoalStatus(updateGoalStatusDto, Integer.parseInt(userDetails.getUsername()));
         return ApiResponseDto.success("목표 상태를 수정하였습니다.", null);
     }
 }

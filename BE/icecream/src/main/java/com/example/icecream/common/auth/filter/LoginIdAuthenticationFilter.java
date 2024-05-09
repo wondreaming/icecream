@@ -42,6 +42,7 @@ public class LoginIdAuthenticationFilter extends UsernamePasswordAuthenticationF
         }
 
         try {
+
             LoginRequestDto loginRequestDto = objectMapper.readValue(request.getInputStream(), LoginRequestDto.class);
             request.setAttribute("fcmToken", loginRequestDto.getFcmToken());
             UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =

@@ -26,8 +26,6 @@ public class FcmMessageDto {
     public static class Data {
         private String title;
         private String body;
-        private String isOverSpeed;
-        private String isCreated;
-        private String key3;
+        private String content;
     }
 }
