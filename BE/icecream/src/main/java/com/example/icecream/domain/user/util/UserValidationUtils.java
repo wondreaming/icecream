@@ -1,6 +1,7 @@
 package com.example.icecream.domain.user.util;
 
 import com.example.icecream.common.auth.error.AuthErrorCode;
+import com.example.icecream.common.exception.DataAccessException;
 import com.example.icecream.common.exception.DataConflictException;
 import com.example.icecream.common.exception.NotFoundException;
 import com.example.icecream.domain.user.entity.User;
@@ -43,7 +44,7 @@ public class UserValidationUtils {
 
     public void isValidChild(int parentId,int childId){
         if (!parentChildMappingRepository.existsByParentIdAndChildId(parentId, childId)) {
-            throw new IllegalArgumentException("현재 부모에 등록된 자녀가 아닙니다.");
+            throw new DataAccessException(UserErrorCode.CHILD_NOT_ASSOCIATED.getMessage());
         }
     }
 }

@@ -4,6 +4,7 @@ import com.example.icecream.common.auth.dto.LoginRequestDto;
 import com.example.icecream.common.auth.error.AuthErrorCode;
 import com.example.icecream.common.auth.handler.CustomAuthenticationSuccessHandler;
 import com.example.icecream.common.exception.BadRequestException;
+import com.example.icecream.common.exception.InternalServerException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -48,7 +49,7 @@ public class LoginIdAuthenticationFilter extends UsernamePasswordAuthenticationF
             return  getAuthenticationManager().authenticate(usernamePasswordAuthenticationToken);
 
         } catch (IOException ex) {
-            throw new Error("로그인 정보를 역직렬화 하는데 실패했습니다.");
+            throw new InternalServerException(AuthErrorCode.INPUT_SERIALIZE_FAIL.getMessage());
         }
     }
 
