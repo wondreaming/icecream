@@ -34,19 +34,24 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         String requestURI = httpRequest.getRequestURI();
         List<String> skipUrls = List.of("/api/users/check", "/api/auth/login", "/api/auth/device/login", "/api/auth/reissue");
+        System.out.println("test111111111111111111111111111111111111111111111111");
+
         boolean skip = skipUrls.stream().anyMatch(requestURI::equals);
         if ("/api/users".equals(requestURI) && "POST".equalsIgnoreCase(httpRequest.getMethod())) {
             skip = true;
+            System.out.println("test22222222222222222222222222222222222222222222222222222222222");
         }
         if (skip) {
+            System.out.println("test333333333333333333333333333333333333333333333333333333333333");
             chain.doFilter(request, response);
             return;
         }
+        System.out.println("test44444444444444444444444444444444444444444");
 
         //access_token 검증
         String token = resolveToken((HttpServletRequest) request);
         try {
-            if (token != null && jwtutil.validateToken(token)) {
+            if (token != null && jwtutil.validateAccessToken(token)) {
                 Authentication authentication = jwtutil.getAuthentication(token);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
@@ -58,6 +63,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
             httpResponse.getWriter().write(objectMapper.writeValueAsString(apiResponse));
             return;
         }
+        System.out.println("test55555555555555555555555555555555555555555555555555");
 
         chain.doFilter(request, response);
     }
