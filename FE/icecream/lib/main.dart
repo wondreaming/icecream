@@ -8,6 +8,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:icecream/auth/service/user_service.dart';
+import 'package:icecream/setting/provider/destination_provider.dart';
+import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'package:icecream/com/router/router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -220,7 +222,9 @@ void main() async {
   UserService userService = UserService();
   await userService.autoLogin();
 
-  runApp(const MyApp());
+  runApp(MultiProvider(providers: [
+    ChangeNotifierProvider(create: (context) => Destination())
+  ], child: MyApp(),),);
 }
 
 void handleNotificationResponse(NotificationResponse response) async {
