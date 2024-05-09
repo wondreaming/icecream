@@ -1,5 +1,6 @@
 package com.example.icecream.domain.user.service;
 
+import com.example.icecream.common.exception.BadRequestException;
 import com.example.icecream.common.exception.NotFoundException;
 import com.example.icecream.domain.goal.service.GoalService;
 import com.example.icecream.domain.user.dto.SignUpChildRequestDto;
@@ -15,6 +16,7 @@ import com.example.icecream.domain.user.util.UserValidationUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -91,7 +93,7 @@ public class UserService {
 
         goalService.createGoalStatus(child.getId());
         //FCM으로 자녀 등록 됏다는 알림 자녀에게 보내는 메서드 호출
-        //~~~~
+
     }
 
     public void updateChild(int parentId, final UpdateChildRequestDto signUpChildRequestDto) {
@@ -99,7 +101,7 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND.getMessage()));
 
         if (child.getIsParent()) {
-            throw new IllegalArgumentException("이름을 변경하려는 대상이 부모 유저 입니다.");
+            throw new BadRequestException(UserErrorCode.NOT_CHILD.getMessage());
         }
 
         userValidationUtils.isValidChild(parentId, signUpChildRequestDto.getUserId());
@@ -124,12 +126,13 @@ public class UserService {
         userValidationUtils.isValidLoginId(loginId);
     }
 
+
     public void checkPassword(String currentPassword, int userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND.getMessage()));
 
         if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
-            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
+            throw new BadCredentialsException(UserErrorCode.INVALID_CURRENT_PASSWORD.getMessage());
         }
     }
 
@@ -138,7 +141,7 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND.getMessage()));
 
         if (passwordEncoder.matches(newPassword, user.getPassword())) {
-            throw new IllegalArgumentException("현재와 동일한 비밀번호 입니다.");
+            throw new BadRequestException(UserErrorCode.NO_NEW_PASSWORD_PROVIDED.getMessage());
         }
 
         user.updatePassword(passwordEncoder.encode(newPassword));

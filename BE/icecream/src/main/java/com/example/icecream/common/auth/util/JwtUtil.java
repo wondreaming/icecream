@@ -154,10 +154,10 @@ public class JwtUtil {
         String redisRefreshToken = findRefreshTokenInRedis(userId);
 
         if (ObjectUtils.isEmpty(redisRefreshToken)) {
-            throw new IllegalArgumentException(("reissue: 로그아웃 상태입니다: redis에 refresh token이 존재하지 않습니다"));
+            throw new BadCredentialsException(AuthErrorCode.NO_TOKEN_IN_REDIS.getMessage());
         }
         if (!redisRefreshToken.equals(refreshToken)) {
-            throw new IllegalArgumentException("reissue: refresh token이 redis에 저장된 refresh token과 다릅니다");
+            throw new BadCredentialsException(AuthErrorCode.NO_TOKEN_IN_REDIS.getMessage());
         }
 
         return generateTokenByController(userId,authority);
