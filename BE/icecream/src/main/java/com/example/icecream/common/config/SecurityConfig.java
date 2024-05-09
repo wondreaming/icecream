@@ -6,6 +6,7 @@ import com.example.icecream.common.auth.handler.CustomAuthenticationEntryPoint;
 import com.example.icecream.common.auth.handler.CustomAuthenticationSuccessHandler;
 import com.example.icecream.common.auth.service.CustomUserDetailsService;
 
+import com.example.icecream.common.auth.util.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

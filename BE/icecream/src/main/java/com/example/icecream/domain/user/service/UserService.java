@@ -1,11 +1,11 @@
 package com.example.icecream.domain.user.service;
 
 import com.example.icecream.common.exception.BadRequestException;
+import com.example.icecream.common.exception.DataConflictException;
+import com.example.icecream.common.exception.InternalServerException;
 import com.example.icecream.common.exception.NotFoundException;
 import com.example.icecream.domain.goal.service.GoalService;
-import com.example.icecream.domain.notification.document.FcmToken;
 import com.example.icecream.domain.notification.dto.FcmRequestDto;
-import com.example.icecream.domain.notification.repository.FcmTokenRepository;
 import com.example.icecream.domain.notification.service.NotificationService;
 import com.example.icecream.domain.user.dto.SignUpChildRequestDto;
 import com.example.icecream.domain.user.dto.SignUpParentRequestDto;
@@ -20,6 +20,7 @@ import com.example.icecream.domain.user.util.UserValidationUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,6 @@ public class UserService {
     private final UserValidationUtils userValidationUtils;
     private final GoalService goalService;
     private final NotificationService notificationService;
-    private final FcmTokenRepository fcmTokenRepository;
 
     public void saveParent(final SignUpParentRequestDto SignUpParentRequestDto){
         userValidationUtils.isValidatePasswordCheck(SignUpParentRequestDto.getPassword(), SignUpParentRequestDto.getPasswordCheck());
@@ -51,7 +51,11 @@ public class UserService {
                 .isParent(true)
                 .isDeleted(false)
                 .build();
-        userRepository.save(user);
+//        try {
+            userRepository.save(user);
+//        }catch (DataIntegrityViolationException e) {
+//            throw new DataConflictException(UserErrorCode.DUPLICATE_VALUE.getMessage());
+//        }
     }
 
     @Transactional
@@ -105,7 +109,7 @@ public class UserService {
         try {
             notificationService.sendMessageTo(fcmRequestDto);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new InternalServerException(UserErrorCode.FAILED_NOTIFICATION.getMessage());
         }
     }
 
