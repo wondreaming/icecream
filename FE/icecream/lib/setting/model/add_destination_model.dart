@@ -1,3 +1,4 @@
+import 'package:day_night_time_picker/day_night_time_picker.dart';
 import 'package:json_annotation/json_annotation.dart';
 part 'add_destination_model.g.dart';
 

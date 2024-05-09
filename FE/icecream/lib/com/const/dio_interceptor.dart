@@ -11,6 +11,7 @@ class CustomDio {
     // 인터셉터 추가
     dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
+        print('Sending request to ${options.uri.toString()}');
         // SharedPreferences에서 토큰 불러오기
         final prefs = await SharedPreferences.getInstance();
         final String? accessToken = prefs.getString('accessToken');
