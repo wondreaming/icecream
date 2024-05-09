@@ -1,5 +1,6 @@
 package com.example.icecream.domain.goal.entity;
 
+import com.example.icecream.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -14,13 +15,13 @@ import java.time.LocalDateTime;
 @Getter
 @Entity
 @Table(name="goal")
-public class Goal {
+public class Goal extends BaseEntity {
 
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         private int id;
 
-        @Column(name = "user_id", nullable = false, unique = true)
+        @Column(name = "user_id", nullable = false)
         @NotNull
         private int userId;
 
@@ -40,19 +41,9 @@ public class Goal {
         @NotNull
         private boolean isActive = true;
 
-        @Column(name = "created_at", nullable = false)
-        @CreatedDate
-        @NotNull
-        private LocalDateTime createdAt;
-
-        @Column(name = "updated_at", nullable = false)
-        @LastModifiedDate
-        @NotNull
-        private LocalDateTime updatedAt;
 
         public void updateGoal(int period, String content) {
                 this.period = period;
                 this.content = content;
-                this.updatedAt = LocalDateTime.now();
         }
 }

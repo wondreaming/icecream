@@ -8,20 +8,22 @@ import com.example.icecream.domain.notification.service.NotificationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/notification")
 public class NotificationController {
 
     private final NotificationService notificationService;
 
-    // TODO: 시큐리티 적용 후 userId 관련 로직 수정 필요
-    @GetMapping("/notification/{userId}")
-    public ResponseEntity<ApiResponseDto<List<NotificationResponseDto>>> getNotificationList(@PathVariable int userId) {
-        List<NotificationResponseDto> notificationList = notificationService.getNotificationList(userId);
+    @GetMapping
+    public ResponseEntity<ApiResponseDto<List<NotificationResponseDto>>> getNotificationList(@AuthenticationPrincipal UserDetails userDetails) {
+        List<NotificationResponseDto> notificationList = notificationService.getNotificationList(Integer.parseInt(userDetails.getUsername()));
         return ApiResponseDto.success("알림 목록 조회에 성공하였습니다.", notificationList);
     }
 

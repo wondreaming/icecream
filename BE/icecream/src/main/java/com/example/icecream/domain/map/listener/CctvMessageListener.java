@@ -25,7 +25,13 @@ public class CctvMessageListener {
     public void receiveMessage(CctvMessageDto cctvMessageDto) {
         String CrosswalkName = cctvMessageListenService.findCrosswalk(cctvMessageDto);
         List<Integer> UserArray = redisListenService.getRedisValue(CrosswalkName);
-        FcmRequestDto2 fcmRequestDto2 = new FcmRequestDto2(UserArray, "CCTV", "사고 발생", "key1", "key2", "key3");
+        String message = "overspeed-1";
+        if (cctvMessageDto.getSpeed() >= 45) {
+            message = "overspeed-3";
+        } else if (cctvMessageDto.getSpeed() >= 35) {
+            message = "overspeed-2";
+        }
+        FcmRequestDto2 fcmRequestDto2 = new FcmRequestDto2(UserArray, "\\uD83D\\uDEA8 위험 알림 \\uD83D\\uDEA8", "근처에 과속 차량이 있어요. 주의하세요", message);
         notificationService.sendMessageToUsers(fcmRequestDto2);
     }
 }

@@ -41,7 +41,7 @@ public class DestinationArrivalService {
                 FcmToken fcmToken = fcmTokenRepository.findByUserId(parentId);
                 User user = userRepository.findById(userId).orElseThrow();
                 Destination destination = destinationRepository.findById(destinationId).orElseThrow();
-                FcmRequestDto fcmRequestDto = new FcmRequestDto(fcmToken.getToken(), "도착 알림", user.getUsername() + "님이 " + destination.getName() + "에 도착했습니다.", null, null, null);
+                FcmRequestDto fcmRequestDto = new FcmRequestDto(fcmToken.getToken(), "도착 알림", user.getUsername() + "님이 " + destination.getName() + "에 도착했습니다.", "arrival");
                 notificationService.sendMessageTo(fcmRequestDto);
             }
         }
