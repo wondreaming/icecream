@@ -6,7 +6,6 @@ import com.example.icecream.domain.user.entity.User;
 import com.example.icecream.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.scheduling.annotation.Scheduled;

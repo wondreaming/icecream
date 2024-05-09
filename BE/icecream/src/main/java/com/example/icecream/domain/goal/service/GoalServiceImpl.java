@@ -14,7 +14,6 @@ import com.example.icecream.domain.goal.entity.Goal;
 import com.example.icecream.domain.goal.error.GoalErrorCode;
 import com.example.icecream.domain.goal.repository.mongodb.GoalStatusRepository;
 import com.example.icecream.domain.goal.repository.postgres.GoalRepository;
-import com.example.icecream.domain.user.entity.User;
 import com.example.icecream.domain.user.repository.ParentChildMappingRepository;
 import com.example.icecream.domain.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -29,16 +28,14 @@ public class GoalServiceImpl extends CommonService implements GoalService {
 
     private final GoalRepository goalRepository;
     private final GoalStatusRepository goalStatusRepository;
-    private final UserRepository userRepository;
 
     public GoalServiceImpl(UserRepository userRepository,
                            ParentChildMappingRepository ParentChildMappingRepository,
                            GoalRepository goalRepository,
-                           GoalStatusRepository goalStatusRepository, ParentChildMappingRepository parentChildMappingRepository) {
+                           GoalStatusRepository goalStatusRepository) {
         super(userRepository, ParentChildMappingRepository);
         this.goalRepository = goalRepository;
         this.goalStatusRepository = goalStatusRepository;
-        this.userRepository = userRepository;
     }
 
     @Override
