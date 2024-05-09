@@ -61,6 +61,7 @@ class _QRScanPageState extends State<QRScanPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('잘못된 QR 코드입니다. 올바른 QR 코드를 스캔하세요.'))
     );
+    controller?.resumeCamera();  // SnackBar가 사라진 후 카메라 재개
   }
 
   String _decryptData(String? encryptedData) {
