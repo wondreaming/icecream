@@ -3,6 +3,10 @@ package com.example.icecream.domain.user.service;
 import com.example.icecream.common.exception.BadRequestException;
 import com.example.icecream.common.exception.NotFoundException;
 import com.example.icecream.domain.goal.service.GoalService;
+import com.example.icecream.domain.notification.document.FcmToken;
+import com.example.icecream.domain.notification.dto.FcmRequestDto;
+import com.example.icecream.domain.notification.repository.FcmTokenRepository;
+import com.example.icecream.domain.notification.service.NotificationService;
 import com.example.icecream.domain.user.dto.SignUpChildRequestDto;
 import com.example.icecream.domain.user.dto.SignUpParentRequestDto;
 import com.example.icecream.domain.user.dto.UpdateChildRequestDto;
@@ -20,6 +24,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -31,6 +36,8 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserValidationUtils userValidationUtils;
     private final GoalService goalService;
+    private final NotificationService notificationService;
+    private final FcmTokenRepository fcmTokenRepository;
 
     public void saveParent(final SignUpParentRequestDto SignUpParentRequestDto){
         userValidationUtils.isValidatePasswordCheck(SignUpParentRequestDto.getPassword(), SignUpParentRequestDto.getPasswordCheck());
@@ -92,8 +99,14 @@ public class UserService {
         parentChildMappingRepository.save(parentChildMapping);
 
         goalService.createGoalStatus(child.getId());
-        //FCM으로 자녀 등록 됏다는 알림 자녀에게 보내는 메서드 호출
 
+        FcmRequestDto fcmRequestDto = new FcmRequestDto(signUpChildRequestDto.getFcmToken(), "자녀 등록 알림", "자녀 등록 알림", "created");
+
+        try {
+            notificationService.sendMessageTo(fcmRequestDto);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void updateChild(int parentId, final UpdateChildRequestDto signUpChildRequestDto) {
