@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class JwtUtil {
 
-    @Value("${com.icecream.auth.secretKey}")
+    @Value("${com.icecream.auth.access.secretKey}")
     private String secretKey;
     private final RedisTemplate<String, String> redisTemplate;
     private final UserRepository userRepository;

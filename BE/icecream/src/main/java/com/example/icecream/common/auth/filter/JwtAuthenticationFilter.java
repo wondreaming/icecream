@@ -18,6 +18,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -28,6 +29,21 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+
+        //permitAll() 요청 url에 대해서는 해당 필터의 동작 없이 다음 필터로 요청을 넘기기 위한 로직
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
+        String requestURI = httpRequest.getRequestURI();
+        List<String> skipUrls = List.of("/api/users/check", "/api/auth/login", "/api/auth/device/login", "/api/auth/reissue");
+        boolean skip = skipUrls.stream().anyMatch(requestURI::equals);
+        if ("/api/users".equals(requestURI) && "POST".equalsIgnoreCase(httpRequest.getMethod())) {
+            skip = true;
+        }
+        if (skip) {
+            chain.doFilter(request, response);
+            return;
+        }
+
+        //access_token 검증
         String token = resolveToken((HttpServletRequest) request);
         try {
             if (token != null && jwtutil.validateToken(token)) {
