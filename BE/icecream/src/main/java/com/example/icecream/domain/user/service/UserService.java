@@ -1,11 +1,18 @@
 package com.example.icecream.domain.user.service;
 
+import com.example.icecream.common.exception.BadRequestException;
+import com.example.icecream.common.exception.NotFoundException;
 import com.example.icecream.domain.goal.service.GoalService;
+import com.example.icecream.domain.notification.document.FcmToken;
+import com.example.icecream.domain.notification.dto.FcmRequestDto;
+import com.example.icecream.domain.notification.repository.FcmTokenRepository;
+import com.example.icecream.domain.notification.service.NotificationService;
 import com.example.icecream.domain.user.dto.SignUpChildRequestDto;
 import com.example.icecream.domain.user.dto.SignUpParentRequestDto;
 import com.example.icecream.domain.user.dto.UpdateChildRequestDto;
 import com.example.icecream.domain.user.entity.ParentChildMapping;
 import com.example.icecream.domain.user.entity.User;
+import com.example.icecream.domain.user.error.UserErrorCode;
 import com.example.icecream.domain.user.repository.ParentChildMappingRepository;
 import com.example.icecream.domain.user.repository.UserRepository;
 
@@ -13,9 +20,11 @@ import com.example.icecream.domain.user.util.UserValidationUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -27,6 +36,8 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserValidationUtils userValidationUtils;
     private final GoalService goalService;
+    private final NotificationService notificationService;
+    private final FcmTokenRepository fcmTokenRepository;
 
     public void saveParent(final SignUpParentRequestDto SignUpParentRequestDto){
         userValidationUtils.isValidatePasswordCheck(SignUpParentRequestDto.getPassword(), SignUpParentRequestDto.getPasswordCheck());
@@ -56,7 +67,7 @@ public class UserService {
 
         parentChildMappingRepository.deleteByParentId(parentId);
         User parent = userRepository.findById(parentId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저 입니다."));
+                .orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND.getMessage()));
 
         parent.deleteUser();
         userRepository.save(parent);
@@ -78,7 +89,7 @@ public class UserService {
                 });
 
         User parent = userRepository.findById(parentId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저 입니다."));
+                .orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND.getMessage()));
 
         ParentChildMapping parentChildMapping = ParentChildMapping.builder()
                 .parent(parent)
@@ -88,16 +99,22 @@ public class UserService {
         parentChildMappingRepository.save(parentChildMapping);
 
         goalService.createGoalStatus(child.getId());
-        //FCM으로 자녀 등록 됏다는 알림 자녀에게 보내는 메서드 호출
-        //~~~~
+
+        FcmRequestDto fcmRequestDto = new FcmRequestDto(signUpChildRequestDto.getFcmToken(), "자녀 등록 알림", "자녀 등록 알림", "created");
+
+        try {
+            notificationService.sendMessageTo(fcmRequestDto);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void updateChild(int parentId, final UpdateChildRequestDto signUpChildRequestDto) {
         User child = userRepository.findById(signUpChildRequestDto.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("자녀가 회원이 아닙니다."));
+                .orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND.getMessage()));
 
         if (child.getIsParent()) {
-            throw new IllegalArgumentException("이름을 변경하려는 대상이 부모 유저 입니다.");
+            throw new BadRequestException(UserErrorCode.NOT_CHILD.getMessage());
         }
 
         userValidationUtils.isValidChild(parentId, signUpChildRequestDto.getUserId());
@@ -112,7 +129,7 @@ public class UserService {
         parentChildMappingRepository.deleteByParentIdAndChildId(parentId, childId);
 
         User child = userRepository.findById(childId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저 입니다."));
+                .orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND.getMessage()));
 
         child.deleteUser();
         userRepository.save(child);
@@ -122,21 +139,22 @@ public class UserService {
         userValidationUtils.isValidLoginId(loginId);
     }
 
+
     public void checkPassword(String currentPassword, int userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND.getMessage()));
 
         if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
-            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
+            throw new BadCredentialsException(UserErrorCode.INVALID_CURRENT_PASSWORD.getMessage());
         }
     }
 
     public void updatePassword(String newPassword, int userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND.getMessage()));
 
         if (passwordEncoder.matches(newPassword, user.getPassword())) {
-            throw new IllegalArgumentException("현재와 동일한 비밀번호 입니다.");
+            throw new BadRequestException(UserErrorCode.NO_NEW_PASSWORD_PROVIDED.getMessage());
         }
 
         user.updatePassword(passwordEncoder.encode(newPassword));
