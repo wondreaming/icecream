@@ -54,7 +54,7 @@ public class GoalController {
     }
 
     @PatchMapping("/goal/status")
-    public ResponseEntity<ApiResponseDto<String>> updateGoalStatus(@RequestBody UpdateGoalStatusDto updateGoalStatusDto,
+    public ResponseEntity<ApiResponseDto<String>> updateGoalStatus(@Valid @RequestBody UpdateGoalStatusDto updateGoalStatusDto,
                                                                    @AuthenticationPrincipal UserDetails userDetails) {
         goalService.updateGoalStatus(updateGoalStatusDto, Integer.parseInt(userDetails.getUsername()));
         return ApiResponseDto.success("목표 상태를 수정하였습니다.", null);
