@@ -23,7 +23,7 @@ abstract class DestinationRespository {
 
   @POST('/destination')
   Future<ResponseDestination> addDestination({
-    @Body() AddDestinationModel destination
+    @Body() required AddDestinationModel destination
     });
 
 }
