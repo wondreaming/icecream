@@ -32,12 +32,10 @@ dependencies {
 	implementation 'com.google.firebase:firebase-admin:9.2.0'
 	implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '5.0.0-alpha.3'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.4'
+	
 	// MQ 추가
 	implementation 'org.springframework.boot:spring-boot-starter-amqp'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-
-	// 실험 다하고 나면 지우기
-	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.postgresql:postgresql'
