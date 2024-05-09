@@ -28,7 +28,7 @@ public class GPSMessageListener {
             destinationArrivalService.checkAndNotifyArrival(gpsMessageDto.getUserId(), gpsMessageDto.getDestinationId(), gpsMessageDto.getLatitude(), gpsMessageDto.getLongitude());
             jaywalkingCheckService.checkJaywalking(gpsMessageDto.getUserId(), gpsMessageDto.getLatitude(), gpsMessageDto.getLongitude());
         } catch (Exception e) {
-            log.error("Error processing message: {}", e.getMessage());
+//            log.error("Error processing message: {}", e.getMessage());
         }
     }
 }

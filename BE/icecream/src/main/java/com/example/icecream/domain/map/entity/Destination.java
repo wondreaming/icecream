@@ -4,11 +4,8 @@ import com.example.icecream.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.locationtech.jts.geom.Point;
 
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Entity
@@ -62,14 +59,6 @@ public class Destination extends BaseEntity {
     @Column(name = "radius", nullable = false)
     @NotNull
     private Double radius = 100.0;
-
-//    @Column(name = "created_at", nullable = false, updatable = false)
-//    @CreationTimestamp
-//    private LocalDateTime createdAt;
-//
-//    @Column(name = "updated_at", nullable = false)
-//    @UpdateTimestamp
-//    private LocalDateTime updatedAt;
 
     public void updateDestination(String name, Integer icon, Double latitude, Double longitude,
                                   LocalTime startTime, LocalTime endTime, String day, Point location) {

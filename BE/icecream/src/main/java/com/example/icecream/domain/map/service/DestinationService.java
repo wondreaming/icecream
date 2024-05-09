@@ -1,6 +1,5 @@
 package com.example.icecream.domain.map.service;
 
-import com.example.icecream.common.service.CommonService;
 import com.example.icecream.domain.map.dto.DestinationModifyDto;
 import com.example.icecream.domain.map.dto.DestinationRegisterDto;
 import com.example.icecream.domain.map.dto.DestinationResponseDto;

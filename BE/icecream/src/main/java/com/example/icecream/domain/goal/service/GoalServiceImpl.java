@@ -14,7 +14,6 @@ import com.example.icecream.domain.goal.entity.Goal;
 import com.example.icecream.domain.goal.error.GoalErrorCode;
 import com.example.icecream.domain.goal.repository.mongodb.GoalStatusRepository;
 import com.example.icecream.domain.goal.repository.postgres.GoalRepository;
-import com.example.icecream.domain.user.entity.User;
 import com.example.icecream.domain.user.repository.ParentChildMappingRepository;
 import com.example.icecream.domain.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -29,16 +28,14 @@ public class GoalServiceImpl extends CommonService implements GoalService {
 
     private final GoalRepository goalRepository;
     private final GoalStatusRepository goalStatusRepository;
-    private final UserRepository userRepository;
 
     public GoalServiceImpl(UserRepository userRepository,
                            ParentChildMappingRepository ParentChildMappingRepository,
                            GoalRepository goalRepository,
-                           GoalStatusRepository goalStatusRepository, ParentChildMappingRepository parentChildMappingRepository) {
+                           GoalStatusRepository goalStatusRepository) {
         super(userRepository, ParentChildMappingRepository);
         this.goalRepository = goalRepository;
         this.goalStatusRepository = goalStatusRepository;
-        this.userRepository = userRepository;
     }
 
     @Override
@@ -48,7 +45,7 @@ public class GoalServiceImpl extends CommonService implements GoalService {
         List<Goal> goals = goalRepository.findAllByUserId(createGoalDto.getUserId());
         boolean isActive = false;
         for (Goal goal : goals) {
-            if (goal.isActive()) {
+            if (goal.getIsActive()) {
                 isActive = true;
                 break;
             }
@@ -76,8 +73,10 @@ public class GoalServiceImpl extends CommonService implements GoalService {
             throw new NotFoundException(GoalErrorCode.NOT_FOUND_GOAL.getMessage());
         } else if (!isParentUserWithPermission(parentId, goal.getUserId())){
             throw new DataAccessException(GoalErrorCode.UPDATE_GOAL_ACCESS_DENIED.getMessage());
-        } else if (!goal.isActive()) {
+        } else if (!goal.getIsActive()) {
             throw new BadRequestException(GoalErrorCode.UPDATE_IS_NOT_ACTIVED_GOAL.getMessage());
+        } else if (updateGoalDto.getPeriod() <= goal.getRecord()) {
+            throw new BadRequestException(GoalErrorCode.UPDATE_GOAL_OVER_RECORD.getMessage());
         }
         goal.updateGoal(updateGoalDto.getPeriod(), updateGoalDto.getContent());
         goalRepository.save(goal);
