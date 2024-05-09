@@ -40,6 +40,10 @@ public class Destination extends BaseEntity {
     @NotNull
     private Double longitude;
 
+    @Column(name = "address", nullable = false, length = 100)
+    @NotNull
+    private String address;
+
     @Column(name = "start_time", nullable = false)
     @NotNull
     private LocalTime startTime;
@@ -60,12 +64,13 @@ public class Destination extends BaseEntity {
     @NotNull
     private Double radius = 100.0;
 
-    public void updateDestination(String name, Integer icon, Double latitude, Double longitude,
+    public void updateDestination(String name, Integer icon, Double latitude, Double longitude, String address,
                                   LocalTime startTime, LocalTime endTime, String day, Point location) {
         this.name = name;
         this.icon = icon;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.address = address;
         this.startTime = startTime;
         this.endTime = endTime;
         this.day = day;
