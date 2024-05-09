@@ -17,7 +17,8 @@ public enum GoalErrorCode {
     NOT_FOUND_GOAL_STATUS("해당 목표 상태가 존재하지 않습니다."),
     GET_FUTURE_GOAL_STATUS("미래 날짜의 목표 상태를 조회할 수 없습니다."),
     UPDATE_GOAL_STATUS_ACCESS_DENIED("목표 상태 수정 권한이 없습니다."),
-    UPDATE_GOAL_STATUS_NOT_FOUND("해당 목표 상태가 존재하지 않습니다.");
+    UPDATE_GOAL_STATUS_NOT_FOUND("해당 목표 상태가 존재하지 않습니다."),
+    UPDATE_GOAL_OVER_RECORD("목표 달성 기록을 초과할 수 없습니다.");
 
     ;
 

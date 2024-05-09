@@ -9,6 +9,7 @@ import java.time.LocalTime;
 
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class DestinationRegisterDto {
 
     @NotNull(message = "user_id is required")
@@ -25,6 +26,9 @@ public class DestinationRegisterDto {
 
     @NotNull(message = "longitude is required")
     private Double longitude;
+
+    @NotNull(message = "address is required")
+    private String address;
 
     @NotNull(message = "start_time is required")
     private LocalTime startTime;

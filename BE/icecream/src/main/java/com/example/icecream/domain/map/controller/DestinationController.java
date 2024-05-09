@@ -37,7 +37,7 @@ public class DestinationController {
 
     @PatchMapping
     public ResponseEntity<ApiResponseDto<String>> modifyDestination(@AuthenticationPrincipal UserDetails userDetails,
-                                                                    @RequestBody DestinationModifyDto destinationModifyDto) {
+                                                                    @RequestBody @Valid DestinationModifyDto destinationModifyDto) {
         destinationService.modifyDestination(Integer.parseInt(userDetails.getUsername()), destinationModifyDto);
         return ApiResponseDto.success("목적지 수정에 성공하였습니다.");
     }
