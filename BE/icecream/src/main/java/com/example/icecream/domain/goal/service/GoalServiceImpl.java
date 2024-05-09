@@ -45,7 +45,7 @@ public class GoalServiceImpl extends CommonService implements GoalService {
         List<Goal> goals = goalRepository.findAllByUserId(createGoalDto.getUserId());
         boolean isActive = false;
         for (Goal goal : goals) {
-            if (goal.isActive()) {
+            if (goal.getIsActive()) {
                 isActive = true;
                 break;
             }
@@ -73,8 +73,10 @@ public class GoalServiceImpl extends CommonService implements GoalService {
             throw new NotFoundException(GoalErrorCode.NOT_FOUND_GOAL.getMessage());
         } else if (!isParentUserWithPermission(parentId, goal.getUserId())){
             throw new DataAccessException(GoalErrorCode.UPDATE_GOAL_ACCESS_DENIED.getMessage());
-        } else if (!goal.isActive()) {
+        } else if (!goal.getIsActive()) {
             throw new BadRequestException(GoalErrorCode.UPDATE_IS_NOT_ACTIVED_GOAL.getMessage());
+        } else if (updateGoalDto.getPeriod() <= goal.getRecord()) {
+            throw new BadRequestException(GoalErrorCode.UPDATE_GOAL_OVER_RECORD.getMessage());
         }
         goal.updateGoal(updateGoalDto.getPeriod(), updateGoalDto.getContent());
         goalRepository.save(goal);

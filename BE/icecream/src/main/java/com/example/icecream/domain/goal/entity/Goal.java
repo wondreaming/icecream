@@ -46,4 +46,8 @@ public class Goal extends BaseEntity {
         public void updateRecord(int record) {
                 this.record = record;
         }
+
+        public void deactivateGoal() {
+                this.isActive = false;
+        }
 }

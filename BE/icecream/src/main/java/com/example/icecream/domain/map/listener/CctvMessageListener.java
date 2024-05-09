@@ -29,7 +29,7 @@ public class CctvMessageListener {
         } else if (cctvMessageDto.getSpeed() >= 35) {
             message = "overspeed-2";
         }
-        FcmRequestDto2 fcmRequestDto2 = new FcmRequestDto2(UserArray, "\\uD83D\\uDEA8 위험 알림 \\uD83D\\uDEA8", "근처에 과속 차량이 있어요. 주의하세요", message);
+        FcmRequestDto2 fcmRequestDto2 = new FcmRequestDto2(UserArray, "\\uD83D\\uDEA8 위험 알림 \\uD83D\\uDEA8", "근처에 과속 차량이 있어요. 주의하세요!", message);
         notificationService.sendMessageToUsers(fcmRequestDto2);
     }
 }
