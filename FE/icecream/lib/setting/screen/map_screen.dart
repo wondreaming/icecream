@@ -6,10 +6,12 @@ import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icecream/com/const/color.dart';
 import 'package:icecream/com/widget/default_layout.dart';
+import 'package:icecream/setting/provider/destination_provider.dart';
 import 'package:icecream/setting/service/location.dart';
 import 'package:icecream/setting/widget/custom_elevated_button.dart';
 import 'package:icecream/setting/widget/custom_map.dart';
 import 'package:kakao_map_plugin/kakao_map_plugin.dart';
+import 'package:provider/provider.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -48,7 +50,8 @@ class _MapScreenState extends State<MapScreen> {
   // 현재 위치로 이동
   void moveToCurrentLocation() async {
     if (mapController != null) {
-      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
       mapController!.panTo(LatLng(position.latitude, position.longitude));
     } else {
       print('mapController가 null입니다.');
@@ -65,13 +68,16 @@ class _MapScreenState extends State<MapScreen> {
     String apiKey = dotenv.env['REST_API_KEY']!;
     final dio = Dio();
     dio.options.headers['Authorization'] = 'KakaoAK $apiKey';
-    try{
+    try {
       // 카카오 api 요청
-      Response response = await dio.get(url, queryParameters: {
-        'x':longitude,
-        'y':latitude,
-        'input_coord': 'WGS84'
-      },);
+      Response response = await dio.get(
+        url,
+        queryParameters: {
+          'x': longitude,
+          'y': latitude,
+          'input_coord': 'WGS84'
+        },
+      );
       print('22222222');
       print(response.data);
       if (response.statusCode == 200) {
@@ -82,7 +88,8 @@ class _MapScreenState extends State<MapScreen> {
         });
       } else {
         throw Exception('주소 찾기에 실패했습니다');
-      } } catch (e) {
+      }
+    } catch (e) {
       print('주소 찾기 실패: $e');
     }
   }
@@ -95,17 +102,17 @@ class _MapScreenState extends State<MapScreen> {
       child: Stack(
         children: [
           if (currentLocation != null)
-          CustomMap(
-            longitude: currentLocation!.longitude,
-            latitude: currentLocation!.latitude,
-            externalOnMapCreated: (controller) {
-              mapController = controller;
-              setState(() {
-                longitude = currentLocation!.longitude;
-                latitude = currentLocation!.latitude;
-              });
-            },
-          ),
+            CustomMap(
+              longitude: currentLocation!.longitude,
+              latitude: currentLocation!.latitude,
+              externalOnMapCreated: (controller) {
+                mapController = controller;
+                setState(() {
+                  longitude = currentLocation!.longitude;
+                  latitude = currentLocation!.latitude;
+                });
+              },
+            ),
           Positioned(
               bottom: 150.0,
               right: 10.0,
@@ -140,13 +147,18 @@ class _MapScreenState extends State<MapScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(currentAddress, style: TextStyle(
-                    fontFamily: 'GmarketSans',
-                    fontSize: 24.0,
-                    fontWeight: FontWeight.w400,
-                  ),),
+                  Text(
+                    currentAddress,
+                    style: TextStyle(
+                      fontFamily: 'GmarketSans',
+                      fontSize: 24.0,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
                   CustomElevatedButton(
                     onPressed: () {
+                      Provider.of<Destination>(context, listen: false)
+                          .changeTheValue(currentAddress, latitude, longitude);
                       context.pop();
                     },
                     child: '이 위치로 주소 등록',

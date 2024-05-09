@@ -1,11 +1,14 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icecream/com/const/color.dart';
 import 'package:icecream/com/widget/default_layout.dart';
+import 'package:icecream/setting/provider/destination_provider.dart';
 import 'package:icecream/setting/widget/custom_elevated_button.dart';
-import 'package:icecream/setting/widget/custom_text_field.dart';
+import 'package:icecream/setting/widget/custom_text_container_v2.dart';
 import 'package:kpostal/kpostal.dart';
+import 'package:provider/provider.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -42,34 +45,25 @@ class _SearchScreenState extends State<SearchScreen> {
           SizedBox(
             height: 10.0,
           ),
-          CustomTextField(
-            controller : addressController,
-            onChanged: (String value){
-              setState(() {
-                searchAddress = value;
-              });
-            },
-            hintText: '지번, 도로명, 건물명으로 검색',
-            suffixIcon: IconButton(
-              icon: Icon(Icons.search),
-              onPressed: () {
-                print('준다 $searchAddress');
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) {
-                    return KpostalView(
-                      initialSearch: searchAddress,
-                      callback: (Kpostal result) {
-                        setState(() {
-                          this.address = result.address;
-                          this.latitude = result.latitude!.toDouble();
-                          this.longitude = result.longitude!.toDouble();
-                        });
-                      },
-                    );
-                  })
+          GestureDetector(
+            onTap: () {
+              print('실행됨');
+              Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                return KpostalView(
+                  callback: (Kpostal result) {
+                    setState(() {
+                      this.address = result.address;
+                      this.latitude = result.latitude!.toDouble();
+                      this.longitude = result.longitude!.toDouble();
+                    });
+                    Provider.of<Destination>(context, listen: false)
+                        .changeTheValue(result.address, result.latitude!,
+                            result.longitude!);
+                  },
                 );
-              },
-            ),
+              }));
+            },
+            child: CustomTextContainerV2(),
           ),
           SizedBox(
             height: 8.0,

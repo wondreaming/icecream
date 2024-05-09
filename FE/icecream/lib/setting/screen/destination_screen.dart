@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icecream/com/const/color.dart';
 import 'package:icecream/com/widget/default_layout.dart';
+import 'package:icecream/setting/provider/destination_provider.dart';
 import 'package:icecream/setting/service/buildDays.dart';
 import 'package:icecream/setting/widget/custom_day_picker.dart';
 import 'package:icecream/setting/widget/custom_elevated_button.dart';
@@ -13,6 +14,7 @@ import 'package:icecream/setting/widget/custom_modal.dart';
 import 'package:icecream/setting/widget/custom_show_picker.dart';
 import 'package:icecream/setting/widget/custom_text_container.dart';
 import 'package:icecream/setting/widget/location_Icons.dart';
+import 'package:provider/provider.dart';
 
 class DestinationScreen extends StatefulWidget {
   final int user_id;
@@ -41,9 +43,9 @@ class _DestinationScreenState extends State<DestinationScreen> {
   }
 
   // 주소 입력 받을 폼
-  late String address = '주소를 입력해주세요';
-  late String latitude;
-  late String longitude;
+  late String address;
+  late double latitude;
+  late double longitude;
 
   // 안심 보행 아이콘 선택
   late int icon; // 서버에 넘겨줄 값
@@ -74,7 +76,7 @@ class _DestinationScreenState extends State<DestinationScreen> {
 
   void switchStringFromList() {
     selectedDayNames = [];
-    for (int i=0; i <_dataFromChild.length; i++){
+    for (int i = 0; i < _dataFromChild.length; i++) {
       if (_dataFromChild[i]) {
         dayListFromP[i] = _dataFromChild[i];
         dayList[i] = '1';
@@ -84,10 +86,11 @@ class _DestinationScreenState extends State<DestinationScreen> {
     day = dayList.join('');
     setState(() {
       isDoneDays = true;
-      if (_dataFromChild.every((element) => element)){
+      if (_dataFromChild.every((element) => element)) {
         explainDay = '매일';
       } else {
-      explainDay = selectedDayNames.join(' ');}
+        explainDay = selectedDayNames.join(' ');
+      }
     });
   }
 
@@ -119,8 +122,8 @@ class _DestinationScreenState extends State<DestinationScreen> {
             Navigator.of(context).push(
                 CustomShowPicker(value: _endTime, onChange: onEndTimeChanged));
           } else {
-            Navigator.of(context).push(
-                CustomShowPicker(value: _startTime, onChange: onStartTimeChanged));
+            Navigator.of(context).push(CustomShowPicker(
+                value: _startTime, onChange: onStartTimeChanged));
           }
         },
       );
@@ -247,14 +250,25 @@ class _DestinationScreenState extends State<DestinationScreen> {
                 ),
               ],
             ),
-            CustomTextContainer(
-              text: '장소',
-              isFrontIcon: false,
-              isExplain: true,
-              isDone: isDoneAddress,
-              explainText: address,
-              onTap: () async {
-                context.goNamed('search');
+            Consumer<Destination>(
+              builder: (context, destination, child) {
+                if (destination.address != '주소를 입력해주세요') {
+                  isDoneAddress = true;
+                  address = destination.address;
+                  latitude = destination!.latitude;
+                  longitude = destination!.longitude;
+                  print('$address $latitude $longitude');
+                }
+                return CustomTextContainer(
+                  text: '장소',
+                  isFrontIcon: false,
+                  isExplain: true,
+                  isDone: isDoneAddress,
+                  explainText: destination.address,
+                  onTap: () async {
+                    context.goNamed('search');
+                  },
+                );
               },
             ),
             SizedBox(
@@ -274,7 +288,8 @@ class _DestinationScreenState extends State<DestinationScreen> {
                   Column(
                     children: [
                       SizedBox(height: 16.0),
-                      CustomDayPicker(onDataChanged: updateData, data : dayListFromP),
+                      CustomDayPicker(
+                          onDataChanged: updateData, data: dayListFromP),
                       SizedBox(height: 16.0),
                       CustomElevatedButton(
                           onPressed: () {
@@ -299,7 +314,8 @@ class _DestinationScreenState extends State<DestinationScreen> {
               isDone: isDoneAtStartTime,
               onTap: () {
                 Navigator.of(context).push(
-                  CustomShowPicker(value: _startTime, onChange: onStartTimeChanged),
+                  CustomShowPicker(
+                      value: _startTime, onChange: onStartTimeChanged),
                 );
               },
             ),
