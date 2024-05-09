@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
+import 'package:icecream/com/const/dio_interceptor.dart';
 import 'package:icecream/com/widget/default_layout.dart';
 import 'package:icecream/setting/model/destination_model.dart';
 import 'package:icecream/setting/repository/destination_repository.dart';
@@ -34,9 +35,8 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
 
   // 안심 보행 목적지 조회
   Future<List<DestinationModel>> getDestination() async {
-    final String baseUrl = dotenv.env['baseUrl']!;
-    final dio = Dio();
-    final destinationRepository = DestinationRespository(dio, baseUrl: baseUrl);
+    final dio = CustomDio().createDio();
+    final destinationRepository = DestinationRespository(dio);
 
     try {
       final response =

@@ -61,7 +61,7 @@ final router = GoRouter(
                         path: 'child',
                         name: 'child',
                         builder: (context, state) => const ChildDetailScreen(
-                          user_id: 1,
+                          user_id: 15,
                         ),
                         routes: [
                           GoRoute(
@@ -69,7 +69,7 @@ final router = GoRouter(
                             name: 'destination',
                             builder: (context, state) =>
                                 DestinationScreen(
-                              user_id: 1,
+                              user_id: 15,
                             ),
                             routes: [
                               GoRoute(
