@@ -8,5 +8,8 @@ import java.util.List;
 
 @Repository
 public interface GoalRepository extends JpaRepository<Goal, Integer> {
+
     List<Goal> findAllByUserId(int userId);
+
+    Goal findByUserIdAndIsActive(int userId, boolean isActive);
 }

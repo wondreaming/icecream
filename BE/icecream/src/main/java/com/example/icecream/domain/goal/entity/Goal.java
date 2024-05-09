@@ -4,10 +4,6 @@ import com.example.icecream.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-
-import java.time.LocalDateTime;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -39,11 +35,15 @@ public class Goal extends BaseEntity {
 
         @Column(name = "is_active", nullable = false)
         @NotNull
-        private boolean isActive = true;
+        private Boolean isActive = true;
 
 
         public void updateGoal(int period, String content) {
                 this.period = period;
                 this.content = content;
+        }
+
+        public void updateRecord(int record) {
+                this.record = record;
         }
 }

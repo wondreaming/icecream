@@ -1,6 +1,5 @@
 package com.example.icecream.domain.goal.document;
 
-import jakarta.persistence.Id;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
