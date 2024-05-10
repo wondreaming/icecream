@@ -17,9 +17,11 @@ class MyPage extends StatelessWidget {
       title: '마이 페이지',
       action: [
         CustomPopupButton(
+          isFourth: true,
           first: '비밀번호 변경',
-          secound: '로그아웃',
-          third: '회원 탈퇴',
+          secound: '전화번호 변경',
+          third: '로그아웃',
+          fourth: '회원 탈퇴',
           firstOnTap: () {
             showCustomModal(
               context,
@@ -41,9 +43,28 @@ class MyPage extends StatelessWidget {
             );
           },
           secoundOnTap: () {
-            showCustomDialog(context, '로그아웃하시겠습니까?');
+            showCustomModal(
+              context,
+              '전화번호 변경',
+              Column(
+                children: [
+                  SizedBox(height: 16.0),
+                  CustomTextField(
+                    hintText: '현재 전화번호를 입력해주세요',
+                  ),
+                  SizedBox(height: 16.0),
+                  CustomElevatedButton(onPressed: () {
+                    context.pop();
+                  }, child: '저장'),
+                ],
+              ),
+              160.0,
+            );
           },
           thirdOnTap: () {
+            showCustomDialog(context, '로그아웃하시겠습니까?');
+          },
+          fourthOnTap: (){
             showCustomDialog(context, '회원 탈퇴하시겠습니까?');
           },
         ),
