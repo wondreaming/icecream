@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:icecream/child/widget/history_modal.dart';
 import 'package:icecream/child/widget/reward_modal.dart';
-import 'package:icecream/goal/widget/daily_goal.dart';
+import 'package:icecream/child/widget/child_daily_goal.dart';
 import 'package:icecream/goal/model/goal_model.dart';
 
 class ChildReward extends StatelessWidget {
@@ -87,7 +87,7 @@ class ChildReward extends StatelessWidget {
           ),
           SizedBox(
             height: maxHeight,
-            child: DailyGoalPage(dailyGoal: dailyGoal),
+            child: DailyGoalWidget(dailyGoal: dailyGoal),
           ),
           const Divider(
             thickness: 1,

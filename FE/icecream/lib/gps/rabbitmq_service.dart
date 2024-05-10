@@ -37,7 +37,7 @@ class RabbitMQService {
   }
 
   Future<void> sendLocation(
-      double latitude, double longitude, int userId) async {
+      double latitude, double longitude, int userId, int destinationId) async {
     if (_exchange == null) {
       throw Exception('RabbitMQ not initialized.');
     }
@@ -45,6 +45,7 @@ class RabbitMQService {
       var locationData = {
         'user_id': userId,
         'latitude': latitude,
+        'destination_id': destinationId,
         'longitude': longitude,
         'timestamp': DateTime.now().toIso8601String()
       };
@@ -59,9 +60,10 @@ class RabbitMQService {
     _client?.close();
   }
 
-  void startSendingLocation(double latitude, double longitude, int userId) {
+  void startSendingLocation(
+      double latitude, double longitude, int userId, int destinationId) {
     Timer.periodic(const Duration(seconds: 1), (timer) {
-      sendLocation(latitude, longitude, userId);
+      sendLocation(latitude, longitude, userId, destinationId);
     });
   }
 }
