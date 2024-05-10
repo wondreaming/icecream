@@ -99,7 +99,7 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
     response = await patchChild();
 
     if (response.status == 200) {
-      username = '';
+      usernameController.clear();
       context.pop();
     } else{
       final String message = response.message;
@@ -121,22 +121,28 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
             showCustomModal(
               context,
               '이름 변경',
-              Column(
-                children: [
-                  SizedBox(height: 16.0),
-                  CustomTextField(
-                    controller: usernameController,
-                    onChanged: (String value){
-                      username = value;
-                      print(username);
-                    },
-                    hintText: '변경할 이름을 입력해주세요',
-                  ),
-                  SizedBox(height: 16.0),
-                  CustomElevatedButton(onPressed: () {
-                    saveUsername();
-                  }, child: '저장'),
-                ],
+              PopScope(
+                canPop: true,
+                onPopInvoked: (bool didPop) async {
+                  usernameController.clear();
+                },
+                child: Column(
+                  children: [
+                    SizedBox(height: 16.0),
+                    CustomTextField(
+                      controller: usernameController,
+                      onChanged: (String value){
+                        username = value;
+                        print(username);
+                      },
+                      hintText: '변경할 이름을 입력해주세요',
+                    ),
+                    SizedBox(height: 16.0),
+                    CustomElevatedButton(onPressed: () {
+                      saveUsername();
+                    }, child: '저장'),
+                  ],
+                ),
               ),
               160.0,
             );
