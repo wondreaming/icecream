@@ -1,47 +1,30 @@
 class NotificationModel {
   int? status;
   String? message;
-  List<Data>? data;
+  List<NotificationData>? data;
 
   NotificationModel({this.status, this.message, this.data});
 
-  NotificationModel.fromJson(Map<String, dynamic> json) {
-    status = json['status'];
-    message = json['message'];
-    if (json['data'] != null) {
-      data = <Data>[];
-      json['data'].forEach((v) {
-        data!.add(Data.fromJson(v));
-      });
-    }
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['status'] = status;
-    data['message'] = message;
-    if (this.data != null) {
-      data['data'] = this.data!.map((v) => v.toJson()).toList();
-    }
-    return data;
+  factory NotificationModel.fromJson(Map<String, dynamic> json) {
+    return NotificationModel(
+      status: json['status'],
+      message: json['message'],
+      data: List<NotificationData>.from(
+          json['data'].map((x) => NotificationData.fromJson(x))),
+    );
   }
 }
 
-class Data {
-  String? date;
+class NotificationData {
+  String? datetime;
   String? content;
 
-  Data({this.date, this.content});
+  NotificationData({this.datetime, this.content});
 
-  Data.fromJson(Map<String, dynamic> json) {
-    date = json['date'];
-    content = json['content'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['date'] = date;
-    data['content'] = content;
-    return data;
+  factory NotificationData.fromJson(Map<String, dynamic> json) {
+    return NotificationData(
+      datetime: json['datetime'],
+      content: json['content'],
+    );
   }
 }
