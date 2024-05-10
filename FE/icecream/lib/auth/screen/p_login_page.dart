@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../service/user_service.dart';
+import 'package:icecream/provider/user_provider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -27,6 +29,8 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _login() async {
     final String loginId = _loginIdController.text.trim();
     final String password = _passwordController.text.trim();
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
     if (loginId.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('로그인 ID와 비밀번호를 입력하세요')));
       return;
@@ -35,7 +39,7 @@ class _LoginPageState extends State<LoginPage> {
     debugPrint('password: $password');
     debugPrint('fcmToken: $_fcmToken');
     try {
-      await _userService.loginUser(loginId, password, _fcmToken);
+      await _userService.loginUser(loginId, password, _fcmToken, userProvider);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('로그인 성공')));
     } catch (e) {
       debugPrint("$e");
