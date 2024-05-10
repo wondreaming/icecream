@@ -1,9 +1,9 @@
 import 'package:json_annotation/json_annotation.dart';
-part 'add_destination_model.g.dart';
+part 'patch_destination_model.g.dart';
 
 @JsonSerializable()
-class AddDestinationModel {
-  final int user_id;
+class PatchDestinationModel {
+  final int destination_id;
   final String name;
   final int icon;
   final String address;
@@ -13,9 +13,9 @@ class AddDestinationModel {
   final String end_time;
   final String day;
 
-  AddDestinationModel(
+  PatchDestinationModel(
       {
-        required this.user_id,
+        required this.destination_id,
         required this.name,
         required this.icon,
         required this.address,
@@ -25,8 +25,8 @@ class AddDestinationModel {
         required this.end_time,
         required this.day});
 
-  factory AddDestinationModel.fromJson(Map<String, dynamic> json) =>
-      _$AddDestinationModelFromJson(json);
+  factory PatchDestinationModel.fromJson(Map<String, dynamic> json) =>
+      _$PatchDestinationModelFromJson(json);
 
-  Map<String, dynamic> toJson() => _$AddDestinationModelToJson(this);
+  Map<String, dynamic> toJson() => _$PatchDestinationModelToJson(this);
 }

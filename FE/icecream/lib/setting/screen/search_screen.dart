@@ -4,11 +4,8 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icecream/com/const/color.dart';
 import 'package:icecream/com/widget/default_layout.dart';
-import 'package:icecream/setting/provider/destination_provider.dart';
 import 'package:icecream/setting/widget/custom_elevated_button.dart';
 import 'package:icecream/setting/widget/custom_text_container_v2.dart';
-import 'package:kpostal/kpostal.dart';
-import 'package:provider/provider.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -47,21 +44,7 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
           GestureDetector(
             onTap: () {
-              print('실행됨');
-              Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                return KpostalView(
-                  callback: (Kpostal result) {
-                    setState(() {
-                      this.address = result.address;
-                      this.latitude = result.latitude!.toDouble();
-                      this.longitude = result.longitude!.toDouble();
-                    });
-                    Provider.of<Destination>(context, listen: false)
-                        .changeTheValue(result.address, result.latitude!,
-                            result.longitude!);
-                  },
-                );
-              }));
+              context.goNamed('kpostal');
             },
             child: CustomTextContainerV2(),
           ),
