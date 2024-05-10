@@ -1,8 +1,10 @@
 package com.example.icecream.common.auth.dto;
 
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+@Getter
 @RequiredArgsConstructor
 public class ChildrenResponseDto {
     private final int user_id;
