@@ -127,7 +127,9 @@ public class NotificationServiceImpl implements NotificationService {
 
         try (Response response = client.newCall(request).execute()) {
             if (response.body() != null) {
-                saveNotificationList(fcmTokenRepository.findByToken(fcmRequestDto.getToken()).getUserId(), fcmRequestDto.getBody());
+                if (fcmRequestDto.getContent().equals("arrival") || fcmRequestDto.getContent().equals("goal")) {
+                    saveNotificationList(fcmTokenRepository.findByToken(fcmRequestDto.getToken()).getUserId(), fcmRequestDto.getBody());
+                }
             } else {
                 throw new IOException("Failed to send message to FCM");
             }
