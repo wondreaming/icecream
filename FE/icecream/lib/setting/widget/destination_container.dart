@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icecream/com/const/color.dart';
-import 'package:icecream/setting/model/delete_destination_model.dart';
+import 'package:icecream/com/const/dio_interceptor.dart';
+import 'package:icecream/setting/model/response_destination_model.dart';
 import 'package:icecream/setting/model/destination_model.dart';
 import 'package:icecream/setting/repository/destination_repository.dart';
 import 'package:icecream/setting/service/buildDays.dart';
@@ -60,21 +61,20 @@ class _DestinationContainerState extends State<DestinationContainer> {
   bool isExpanded = false;
 
   // 목적지 삭제
-  Future<DeleteDestination> deleteDestination() async {
+  Future<ResponseDestination> deleteDestination() async {
     //주소
-    final String baseUrl = dotenv.env['baseUrl']!;
-    final dio = Dio();
-    final destinationRepository = DestinationRespository(dio, baseUrl: baseUrl);
+    final dio = CustomDio().createDio();
+    final destinationRepository = DestinationRespository(dio);
     try {
       final response = await destinationRepository.deleteDestination(
           destination_id: widget.destination_id);
       widget.onDeleted!(); // 상위 위젯의 콜백 호출
-      return DeleteDestination(
+      return ResponseDestination(
           status: 200,
           message: 'Successfully deleted'); // 성공적으로 받은 DeleteDestination 객체 반환
     } catch (e) {
       // print(e);
-      return DeleteDestination(
+      return ResponseDestination(
           status: 500,
           message: 'Internal Server Error'); // 실패 시 기본 DeleteDestination 객체 반환
     }
