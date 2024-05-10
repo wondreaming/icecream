@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:icecream/com/const/color.dart';
 import 'package:icecream/setting/widget/custom_elevated_button.dart';
 
-void showCustomDialog(BuildContext context, String content, {Future<void> Function()? onPressed}) {
+void showCustomDialog(BuildContext context, String content, {void Function()? onPressed, bool isNo = true}) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -20,11 +20,12 @@ void showCustomDialog(BuildContext context, String content, {Future<void> Functi
         actions: [
           Row(
             children: [
+
               Flexible(
                 child: CustomElevatedButton(
-                  onPressed: () async {
+                  onPressed: () {
                     if (onPressed != null) {
-                      await onPressed();
+                      onPressed();
                     }
                     context.pop();
                   },
@@ -35,8 +36,10 @@ void showCustomDialog(BuildContext context, String content, {Future<void> Functi
               SizedBox(
                 width: 10.0,
               ),
+              if (isNo)
               Flexible(
                 child: CustomElevatedButton(
+                  backgroundColor: AppColors.custom_gray,
                   onPressed: () {
                     context.pop();
                   },

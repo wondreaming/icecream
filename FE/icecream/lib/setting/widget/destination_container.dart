@@ -5,7 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icecream/com/const/color.dart';
 import 'package:icecream/com/const/dio_interceptor.dart';
-import 'package:icecream/setting/model/response_destination_model.dart';
+import 'package:icecream/setting/model/response_model.dart';
 import 'package:icecream/setting/model/destination_model.dart';
 import 'package:icecream/setting/repository/destination_repository.dart';
 import 'package:icecream/setting/service/buildDays.dart';
@@ -18,6 +18,7 @@ class DestinationContainer extends StatefulWidget {
   final int destination_id;
   final String name; // 목적지 이름
   final int icon; // 목적지 아이콘
+  final String address;
   final double latitude; // 목적지 위도
   final double longitude; // 목적지 경도
   final String start_time; // 목적지 시작 시간
@@ -29,6 +30,7 @@ class DestinationContainer extends StatefulWidget {
       required this.destination_id,
       required this.name,
       required this.icon,
+      required this.address,
       required this.latitude,
       required this.longitude,
       required this.start_time,
@@ -36,13 +38,13 @@ class DestinationContainer extends StatefulWidget {
       required this.day,
       this.onDeleted});
 
-  factory DestinationContainer.fromModel({
-    required DestinationModel model, required VoidCallback onDeleted
-  }) {
+  factory DestinationContainer.fromModel(
+      {required DestinationModel model, required VoidCallback onDeleted}) {
     return DestinationContainer(
       destination_id: model.destination_id,
       name: model.name,
       icon: model.icon,
+      address: model.address,
       latitude: model.latitude,
       longitude: model.longitude,
       start_time: model.start_time,
@@ -50,6 +52,20 @@ class DestinationContainer extends StatefulWidget {
       day: model.day,
       onDeleted: onDeleted,
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'destination_id': destination_id,
+      'name': name,
+      'icon': icon,
+      'address': address,
+      'latitude': latitude,
+      'longitude': longitude,
+      'start_time': start_time,
+      'end_time': end_time,
+      'day': day,
+    };
   }
 
   @override
@@ -61,7 +77,7 @@ class _DestinationContainerState extends State<DestinationContainer> {
   bool isExpanded = false;
 
   // 목적지 삭제
-  Future<ResponseDestination> deleteDestination() async {
+  Future<ResponseModel> deleteDestination() async {
     //주소
     final dio = CustomDio().createDio();
     final destinationRepository = DestinationRespository(dio);
@@ -69,12 +85,12 @@ class _DestinationContainerState extends State<DestinationContainer> {
       final response = await destinationRepository.deleteDestination(
           destination_id: widget.destination_id);
       widget.onDeleted!(); // 상위 위젯의 콜백 호출
-      return ResponseDestination(
+      return ResponseModel(
           status: 200,
           message: 'Successfully deleted'); // 성공적으로 받은 DeleteDestination 객체 반환
     } catch (e) {
       // print(e);
-      return ResponseDestination(
+      return ResponseModel(
           status: 500,
           message: 'Internal Server Error'); // 실패 시 기본 DeleteDestination 객체 반환
     }
@@ -191,17 +207,7 @@ class _DestinationContainerState extends State<DestinationContainer> {
                           children: [
                             Expanded(
                               child: CustomElevatedButton(
-                                onPressed: () {
-                                  context.goNamed(
-                                    'destination',
-                                  );
-                                },
-                                child: '수정하기',
-                              ),
-                            ),
-                            SizedBox(width: 10), // 버튼 사이의 간격
-                            Expanded(
-                              child: CustomElevatedButton(
+                                backgroundColor: AppColors.custom_gray,
                                 onPressed: () {
                                   showCustomDialog(
                                     context,
@@ -210,14 +216,24 @@ class _DestinationContainerState extends State<DestinationContainer> {
                                       var response = await deleteDestination();
                                       if (response.status == 200) {
                                         // 성공적으로 삭제 처리되었을 때 UI를 업데이트하기 위해
-                                        setState(() {
-                                          // 필요한 UI 업데이트 로직 추가
-                                        });
+                                        setState(() {});
                                       }
                                     },
                                   );
                                 },
                                 child: '삭제하기',
+                              ),
+                            ),
+                            SizedBox(width: 10), // 버튼 사이의 간격
+                            Expanded(
+                              child: CustomElevatedButton(
+                                onPressed: () {
+                                  final destinationMap = widget.toMap();
+                                  context.goNamed('destination',
+                                      extra: destinationMap);
+                                  print(destinationMap);
+                                },
+                                child: '수정하기',
                               ),
                             ),
                           ],

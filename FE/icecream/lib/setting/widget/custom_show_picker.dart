@@ -9,6 +9,7 @@ Route<dynamic> CustomShowPicker({
   required Function(Time) onChange,
 }) {
   return showPicker(
+    is24HrFormat: true,
     hmsStyle: TextStyle(
       color: AppColors.text_color,
       fontFamily: 'GmarketSans',

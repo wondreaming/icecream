@@ -6,6 +6,7 @@ import 'package:icecream/auth/screen/qrscan_page.dart';
 import 'package:icecream/com/widget/temp.dart';
 import 'package:icecream/home/screen/c_home.dart';
 import 'package:icecream/home/screen/p_home.dart';
+import 'package:icecream/setting/provider/destination_provider.dart';
 import 'package:icecream/setting/screen/child_detail_screen.dart';
 import 'package:icecream/setting/screen/child_screen.dart';
 import 'package:icecream/setting/screen/destination_screen.dart';
@@ -13,6 +14,8 @@ import 'package:icecream/setting/screen/map_screen.dart';
 import 'package:icecream/setting/screen/my_page.dart';
 import 'package:icecream/setting/screen/search_screen.dart';
 import 'package:icecream/setting/screen/setting.dart';
+import 'package:kpostal/kpostal.dart';
+import 'package:provider/provider.dart';
 
 final router = GoRouter(
   routes: [
@@ -26,12 +29,11 @@ final router = GoRouter(
               path: 'c_qrcode',
               builder: (context, state) => const QRCodePage()),
           GoRoute(
-              path: 'p_login',
-              builder: (context, state) => const LoginPage()),
+              path: 'p_login', builder: (context, state) => const LoginPage()),
           GoRoute(
-              path: 'signup',
-              builder: (context, state) => const SignUpPage()),
-          GoRoute(path: 'qrscan_page',
+              path: 'signup', builder: (context, state) => const SignUpPage()),
+          GoRoute(
+              path: 'qrscan_page',
               builder: (context, state) => const QRScanPage()),
           GoRoute(path: 'child', builder: (context, state) => const CHome()),
           GoRoute(
@@ -61,16 +63,21 @@ final router = GoRouter(
                         path: 'child',
                         name: 'child',
                         builder: (context, state) => const ChildDetailScreen(
-                          user_id: 15,
+                          user_id: 49,
                         ),
                         routes: [
                           GoRoute(
                             path: 'destination',
                             name: 'destination',
-                            builder: (context, state) =>
-                                DestinationScreen(
-                              user_id: 15,
-                            ),
+                            builder: (context, state) {
+                              // patch에서 넘어오는 data 고려
+                              final data =
+                                  state.extra as Map<String, dynamic>? ?? null;
+                              return DestinationScreen(
+                                user_id: 49,
+                                data: data,
+                              );
+                            },
                             routes: [
                               GoRoute(
                                 path: 'query_parameter',
@@ -81,6 +88,17 @@ final router = GoRouter(
                                 path: 'map',
                                 name: 'map',
                                 builder: (context, state) => MapScreen(),
+                              ),
+                              GoRoute(
+                                path: 'kpostal',
+                                name: 'kpostal',
+                                builder: (context, state) => KpostalView(
+                                  callback: (Kpostal result) {
+                                    Provider.of<Destination>(context, listen: false)
+                                        .changeTheValue(result.address, result.latitude!,
+                                        result.longitude!);
+                                  },
+                                ),
                               ),
                             ],
                           ),
