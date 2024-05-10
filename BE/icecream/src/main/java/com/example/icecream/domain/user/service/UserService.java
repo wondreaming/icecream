@@ -51,11 +51,12 @@ public class UserService {
                 .isParent(true)
                 .isDeleted(false)
                 .build();
-//        try {
+
+        try{
             userRepository.save(user);
-//        }catch (DataIntegrityViolationException e) {
-//            throw new DataConflictException(UserErrorCode.DUPLICATE_VALUE.getMessage());
-//        }
+        } catch (RuntimeException e) {
+            throw new DataConflictException(UserErrorCode.DUPLICATE_VALUE.getMessage());
+        }
     }
 
     @Transactional
@@ -76,7 +77,6 @@ public class UserService {
         parent.deleteUser();
         userRepository.save(parent);
     }
-
 
     @Transactional
     public void saveChild(final SignUpChildRequestDto signUpChildRequestDto, int parentId) {
@@ -107,6 +107,7 @@ public class UserService {
         FcmRequestDto fcmRequestDto = new FcmRequestDto(signUpChildRequestDto.getFcmToken(), "자녀 등록 알림", "자녀 등록 알림", "created");
 
         try {
+            System.out.println(fcmRequestDto);
             notificationService.sendMessageTo(fcmRequestDto);
         } catch (IOException e) {
             throw new InternalServerException(UserErrorCode.FAILED_NOTIFICATION.getMessage());
