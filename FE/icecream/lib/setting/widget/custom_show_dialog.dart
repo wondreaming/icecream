@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:icecream/com/const/color.dart';
 import 'package:icecream/setting/widget/custom_elevated_button.dart';
 
-void showCustomDialog(BuildContext context, String content, {void Function()? onPressed, bool isNo = true}) {
+void showCustomDialog(BuildContext context, String content, {void Function()? onPressed, bool isNo = true,}) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -13,7 +13,7 @@ void showCustomDialog(BuildContext context, String content, {void Function()? on
           content,
           style: TextStyle(
             fontFamily: 'GmarketSans',
-            fontSize: 20,
+            fontSize: 16.0,
             fontWeight: FontWeight.w400,
           ),
         ),
