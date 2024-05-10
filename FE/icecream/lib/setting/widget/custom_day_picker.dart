@@ -45,7 +45,7 @@ class _CustomDayPickerState extends State<CustomDayPicker> {
       for (int i = 0; i < dayListFromP.length; i++) {
         isClicked[i] = dayListFromP[i];
       }
-      print(isClicked);
+      print('이건 뭐야 $isClicked');
       if (isClicked.every((element) => element)) {
         isEveryDay = true;
       } else {

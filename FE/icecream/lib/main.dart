@@ -110,7 +110,8 @@ Future<void> _handleNotification(RemoteMessage message) async {
 
     final BigPictureStyleInformation bigPictureStyleInformation =
         BigPictureStyleInformation(FilePathAndroidBitmap(filePath),
-            largeIcon: DrawableResourceAndroidBitmap('mipmap/ic_launcher'),
+            largeIcon:
+                const DrawableResourceAndroidBitmap('mipmap/ic_launcher'),
             contentTitle: title,
             summaryText: body,
             htmlFormatContent: true,
@@ -132,7 +133,7 @@ Future<void> _handleNotification(RemoteMessage message) async {
     );
   } else {
     // overspeed 이외의 알림일 때 fullScreenIntent를 false로 설정
-    androidDetails = AndroidNotificationDetails(
+    androidDetails = const AndroidNotificationDetails(
       'high_importance_channel',
       'High Importance Notifications',
       channelDescription: 'This channel is used for important notifications.',
@@ -190,7 +191,7 @@ Future<void> main() async {
   // 알림 초기화 설정
   const AndroidInitializationSettings initializationSettingsAndroid =
       AndroidInitializationSettings('mipmap/ic_launcher');
-  final InitializationSettings initializationSettings =
+  const InitializationSettings initializationSettings =
       InitializationSettings(android: initializationSettingsAndroid);
 
   // 알림 초기화 및 대응 함수 설정
@@ -280,7 +281,8 @@ class _MyAppState extends State<MyApp> {
     await _rabbitMQService.initRabbitMQ();
     _locationSubscription =
         _locationService.getLocationStream().listen((position) {
-      _rabbitMQService.sendLocation(position.latitude, position.longitude, 5);
+      _rabbitMQService.sendLocation(
+          position.latitude, position.longitude, 5, 1);
       // _rabbitMQService.sendLocation(3, 3, 20);
     });
   }

@@ -2,104 +2,120 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:dotted_line/dotted_line.dart';
 import 'package:icecream/com/widget/default_layout.dart';
+import 'package:icecream/noti/service/notification_service.dart';
+import 'package:icecream/noti/models/notification_model.dart';
 
-class Noti extends StatelessWidget {
+class Noti extends StatefulWidget {
   const Noti({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // 임시 데이터
-    List<Map<String, dynamic>> tempData = [
-      {"date": "2024-05-03 10:29:24", "content": "오늘 내용"},
-      {"date": "2024-05-02 10:29:24", "content": "알림 내용"},
-      {"date": "2024-04-28 14:29:24", "content": "어제 내용"},
-      {"date": "2024-04-25 10:29:24", "content": "알림 내용"},
-      {"date": "2024-04-25 08:29:24", "content": "알림 내용"},
-      {"date": "2024-04-25 23:29:24", "content": "알림 내용"},
-      {"date": "2024-04-24 23:29:24", "content": "알림 내용"},
-      {"date": "2024-04-24 23:29:24", "content": "알림 내용"},
-      {"date": "2024-04-23 23:29:24", "content": "알림 내용"},
-      {"date": "2024-04-23 23:29:24", "content": "알림 내용"},
-      {"date": "2024-04-23 23:29:24", "content": "알림 내용"},
-      // 데이터 리스트 계속...
-    ];
+  _NotiState createState() => _NotiState();
+}
 
-    // 날짜별로 알림 그룹화
-    Map<String, List<Map<String, dynamic>>> groupedData = {};
-    for (var element in tempData) {
-      DateTime dateTime = DateTime.parse(element['date']);
-      String formattedDate = _formatDateString(dateTime);
-      groupedData.putIfAbsent(formattedDate, () => []).add(element);
+class _NotiState extends State<Noti> {
+  NotificationModel? _notificationModel;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchNotifications();
+  }
+
+  Future<void> _fetchNotifications() async {
+    try {
+      NotificationService service = NotificationService();
+      NotificationModel model = await service.fetchNotifications();
+      setState(() {
+        _notificationModel = model;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Error fetching data: $e')));
     }
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return DefaultLayout(
       title: '알림',
-      child: Column(
-        children: [
-          Expanded(
-            // ListView를 Expanded로 감싸기
-            child: ListView(
-              shrinkWrap: true, // 컨텐츠의 크기에 맞춰서 ListView의 크기를 조절
-              children: groupedData.entries.map<Widget>((entry) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(
-                      height: 35,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(14.0, 0, 14, 0),
-                      child: Text(
-                        entry.key,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 25,
-                        ),
-                      ),
-                    ),
-                    ...entry.value.map((data) {
-                      DateTime date = DateTime.parse(data['date']);
-                      String time = DateFormat('a hh시 mm분')
-                          .format(date); // '오전 8시 35분' 형식
-                      return Column(
-                        children: [
-                          ListTile(
-                            title: Text(
-                              time,
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 12,
-                              ),
-                            ),
-                            subtitle: Row(
-                              children: [
-                                const SizedBox(
-                                  width: 10,
-                                ),
-                                Text(
-                                  data['content'],
-                                  style: const TextStyle(fontSize: 18),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 16),
-                            child: DottedLine(dashColor: Colors.grey),
-                          ),
-                        ],
-                      );
-                    }),
-                  ],
-                );
-              }).toList(),
-            ),
+      child: _isLoading
+          ? const CircularProgressIndicator()
+          : _buildNotificationList(),
+    );
+  }
+
+  Widget _buildNotificationList() {
+    if (_notificationModel == null || _notificationModel!.data!.isEmpty) {
+      return const Text('No notifications available');
+    }
+
+    Map<String, List<NotificationData>> groupedData =
+        _groupDataByDate(_notificationModel!.data!);
+
+    return Column(
+      children: [
+        Expanded(
+          child: ListView(
+            children: groupedData.entries.map((entry) {
+              return _buildDateSection(entry.key, entry.value);
+            }).toList(),
           ),
-          const SizedBox(
-            height: 90,
-          )
-        ],
-      ),
+        ),
+        const SizedBox(height: 90),
+      ],
+    );
+  }
+
+  Map<String, List<NotificationData>> _groupDataByDate(
+      List<NotificationData> data) {
+    Map<String, List<NotificationData>> grouped = {};
+    for (var element in data) {
+      DateTime dateTime = DateTime.parse(element.datetime!);
+      String formattedDate = _formatDateString(dateTime);
+      grouped.putIfAbsent(formattedDate, () => []).add(element);
+    }
+    return grouped;
+  }
+
+  Widget _buildDateSection(String date, List<NotificationData> notifications) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 14.0),
+          child: Text(
+            date,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
+          ),
+        ),
+        ...notifications.map((data) {
+          DateTime date = DateTime.parse(data.datetime!);
+          String time = DateFormat('a hh시 mm분').format(date);
+          return Column(
+            children: [
+              ListTile(
+                title: Text(
+                  time,
+                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                ),
+                subtitle: Text(
+                  data.content!,
+                  style: const TextStyle(fontSize: 18),
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: DottedLine(dashColor: Colors.grey),
+              ),
+            ],
+          );
+        }),
+      ],
     );
   }
 
