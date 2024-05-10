@@ -1,14 +1,15 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'add_destination_model.dart';
+part of 'patch_destination_model.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-AddDestinationModel _$AddDestinationModelFromJson(Map<String, dynamic> json) =>
-    AddDestinationModel(
-      user_id: (json['user_id'] as num).toInt(),
+PatchDestinationModel _$PatchDestinationModelFromJson(
+        Map<String, dynamic> json) =>
+    PatchDestinationModel(
+      destination_id: (json['destination_id'] as num).toInt(),
       name: json['name'] as String,
       icon: (json['icon'] as num).toInt(),
       address: json['address'] as String,
@@ -19,10 +20,10 @@ AddDestinationModel _$AddDestinationModelFromJson(Map<String, dynamic> json) =>
       day: json['day'] as String,
     );
 
-Map<String, dynamic> _$AddDestinationModelToJson(
-        AddDestinationModel instance) =>
+Map<String, dynamic> _$PatchDestinationModelToJson(
+        PatchDestinationModel instance) =>
     <String, dynamic>{
-      'user_id': instance.user_id,
+      'destination_id': instance.destination_id,
       'name': instance.name,
       'icon': instance.icon,
       'address': instance.address,
