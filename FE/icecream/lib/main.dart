@@ -37,6 +37,54 @@ const AndroidNotificationChannel highImportanceChannel = AndroidNotificationChan
 // 백그라운드에서 FCM 메시지를 처리하는 핸들러
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  final bool isOverSpeed = message.data['isOverSpeed'] == 'true';
+
+  // 이미지 파일을 로컬 파일 시스템에 복사
+  final byteData = await rootBundle.load('asset/img/overspeed.png');
+  final directory = await getTemporaryDirectory();
+  final filePath = '${directory.path}/overspeed.png';
+  final file = File(filePath);
+  await file.writeAsBytes(byteData.buffer
+      .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+
+  // 알림에 사용할 이미지 설정
+  final BigPictureStyleInformation bigPictureStyleInformation =
+      BigPictureStyleInformation(
+    FilePathAndroidBitmap(filePath),
+    largeIcon: const DrawableResourceAndroidBitmap('mipmap/ic_launcher'),
+    contentTitle: message.data['title'] ?? '긴급 메시지',
+    summaryText: message.data['body'] ?? '긴급 상황 발생!',
+    htmlFormatContent: true,
+    htmlFormatContentTitle: true,
+  );
+
+  AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      isOverSpeed ? 'high_importance_channel' : 'regular_channel',
+      isOverSpeed ? 'High Importance Notifications' : 'Regular Notifications',
+      channelDescription: isOverSpeed
+          ? 'This channel is used for important notifications.'
+          : 'This channel is used for regular notifications.',
+      styleInformation: bigPictureStyleInformation,
+      importance: isOverSpeed ? Importance.high : Importance.defaultImportance,
+      priority: isOverSpeed ? Priority.high : Priority.defaultPriority,
+      fullScreenIntent: isOverSpeed,
+      icon: 'mipmap/ic_launcher',
+      ticker: 'ticker');
+
+  // 전체 화면 알림 세부 설정
+  NotificationDetails platformChannelSpecifics =
+      NotificationDetails(android: androidDetails);
+  await flutterLocalNotificationsPlugin.show(
+      message.hashCode,
+      message.data['title'] ?? 'Notification',
+      message.data['body'] ?? 'You have a new message!',
+      platformChannelSpecifics);
+  if (message.data.isNotEmpty) {
+    debugPrint("Data message title: ${message.data['title']}");
+    debugPrint("Data message body: ${message.data['body']}");
+  } else {
+    debugPrint("No data available in message.");
+  }
   await _handleNotification(message);
 }
 
@@ -205,6 +253,100 @@ Future<void> main() async {
   );
   debugPrint('User granted permission: ${settings.authorizationStatus}');
 
+  const AndroidInitializationSettings initializationSettingsAndroid =
+      AndroidInitializationSettings('mipmap/ic_launcher');
+  const InitializationSettings initializationSettings = InitializationSettings(
+    android: initializationSettingsAndroid,
+  );
+  // 알림 초기화
+  await flutterLocalNotificationsPlugin.initialize(
+    initializationSettings,
+    onDidReceiveNotificationResponse: handleNotificationResponse,
+  );
+
+  // Notification App Launch Details 가져오기
+  final NotificationAppLaunchDetails? notificationAppLaunchDetails =
+      await flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails();
+
+  const AndroidNotificationChannel channel = AndroidNotificationChannel(
+    'high_importance_channel', // 채널 id
+    'High Importance Notifications', // 채널 이름
+    description: 'This channel is used for important notifications.', // 채널 설명
+    importance: Importance.high,
+  );
+  await flutterLocalNotificationsPlugin
+      .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>()
+      ?.createNotificationChannel(channel);
+
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+    // 풀 스크린 인텐트 여부를 결정하는 플래그
+    bool isOverSpeed = message.data['isOverSpeed'] == 'true';
+
+    // 이미지 파일을 로컬 파일 시스템에 복사
+    final byteData = await rootBundle.load('asset/img/overspeed.png');
+    final directory = await getTemporaryDirectory();
+    final filePath = '${directory.path}/overspeed.png';
+    final file = File(filePath);
+    await file.writeAsBytes(byteData.buffer
+        .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+
+    // 알림에 사용할 이미지 설정
+    final BigPictureStyleInformation bigPictureStyleInformation =
+        BigPictureStyleInformation(
+      FilePathAndroidBitmap(filePath),
+      largeIcon: const DrawableResourceAndroidBitmap('mipmap/ic_launcher'),
+      contentTitle: message.data['title'] ?? '긴급 메시지',
+      summaryText: message.data['body'] ?? '긴급 상황 발생!',
+      htmlFormatContent: true,
+      htmlFormatContentTitle: true,
+    );
+
+    AndroidNotificationDetails androidDetails;
+    // 과속 차량이 있으면 = true, 이외의 알림은 = false
+    if (isOverSpeed) {
+      androidDetails = AndroidNotificationDetails(
+        'high_importance_channel', // 채널 ID
+        'High Importance Notifications', // 채널 이름
+        channelDescription: 'This channel is used for important notifications.',
+        styleInformation: bigPictureStyleInformation,
+        importance: Importance.max,
+        priority: Priority.high,
+        fullScreenIntent: true, // 전체 화면 인텐트 활성화
+        icon: 'mipmap/ic_launcher',
+        ticker: 'ticker',
+      );
+
+      // 전체 화면 알림 세부 설정
+      NotificationDetails platformChannelSpecifics =
+          NotificationDetails(android: androidDetails);
+
+      // 알림 표시
+      await flutterLocalNotificationsPlugin.show(
+          message.hashCode,
+          message.data['title'] ?? '긴급 메시지', // 타이틀
+          message.data['body'] ?? '긴급 상황 발생!', // 본문
+          platformChannelSpecifics,
+          payload: 'confirm_action');
+    } else {
+      androidDetails = const AndroidNotificationDetails(
+          'regular_channel', 'Regular Notifications',
+          channelDescription: 'This channel is used for regular notifications.',
+          importance: Importance.defaultImportance,
+          priority: Priority.defaultPriority,
+          icon: 'mipmap/ic_launcher');
+
+      NotificationDetails notificationDetails =
+          NotificationDetails(android: androidDetails);
+
+      await flutterLocalNotificationsPlugin.show(message.hashCode,
+          message.data['title'], message.data['body'], notificationDetails,
+          payload: 'Notification Payload');
+    }
+
+    debugPrint("Received notification title: ${message.data['title']}");
+    debugPrint("Received notification body: ${message.data['body']}");
+
   // 포어그라운드 메시지 처리
   FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
     await _handleNotification(message);
@@ -264,7 +406,8 @@ class _MyAppState extends State<MyApp> {
     await _rabbitMQService.initRabbitMQ();
     _locationSubscription =
         _locationService.getLocationStream().listen((position) {
-      _rabbitMQService.sendLocation(position.latitude, position.longitude, 5);
+      _rabbitMQService.sendLocation(
+          position.latitude, position.longitude, 9696, 1);
       // _rabbitMQService.sendLocation(3, 3, 20);
     });
   }
