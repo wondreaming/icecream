@@ -1,6 +1,8 @@
 package com.example.icecream.common.auth.util;
 
 import com.example.icecream.common.auth.dto.JwtTokenDto;
+import com.example.icecream.common.auth.error.AuthErrorCode;
+import com.example.icecream.common.exception.NotFoundException;
 import com.example.icecream.domain.user.repository.UserRepository;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -9,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -31,7 +34,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class JwtUtil {
 
-    @Value("${com.icecream.auth.secretKey}")
+    @Value("${com.icecream.auth.access.secretKey}")
     private String secretKey;
     private final RedisTemplate<String, String> redisTemplate;
     private final UserRepository userRepository;
@@ -106,7 +109,7 @@ public class JwtUtil {
         Claims claims = parseClaims(accessToken);
 
         if (claims.get("authority") == null) {
-            throw new RuntimeException("권한 정보가 없는 토큰입니다.");
+            throw new BadCredentialsException(AuthErrorCode.INVALID_TOKEN.getMessage());
         }
 
         Collection<? extends GrantedAuthority> authorities = Arrays.stream(claims.get("authority").toString().split(","))
@@ -127,16 +130,9 @@ public class JwtUtil {
                     .build()
                     .parseClaimsJws(token);
             return true;
-        } catch (SecurityException e) {
-            log.info("Invalid JWT Token", e);
-        } catch (ExpiredJwtException e) {
-            log.info("Expired JWT Token", e);
-        } catch (UnsupportedJwtException e) {
-            log.info("Unsupported JWT Token", e);
-        } catch (IllegalArgumentException e) {
-            log.info("JWT claims string is empty.", e);
+        } catch (Exception e) {
+            throw new BadCredentialsException(AuthErrorCode.INVALID_TOKEN.getMessage());
         }
-        return false;
     }
 
     public JwtTokenDto reissueToken(String refreshToken) {
@@ -147,15 +143,15 @@ public class JwtUtil {
         String authority = claims.get("authority", String.class);
 
         com.example.icecream.domain.user.entity.User user = userRepository.findById(Integer.parseInt(userId))
-                .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다."));
+                .orElseThrow(() -> new NotFoundException(AuthErrorCode.USER_NOT_FOUND.getMessage()));
 
         String redisRefreshToken = findRefreshTokenInRedis(userId);
 
         if (ObjectUtils.isEmpty(redisRefreshToken)) {
-            throw new IllegalArgumentException(("reissue: 로그아웃 상태입니다: redis에 refresh token이 존재하지 않습니다"));
+            throw new BadCredentialsException(AuthErrorCode.NO_TOKEN_IN_REDIS.getMessage());
         }
         if (!redisRefreshToken.equals(refreshToken)) {
-            throw new IllegalArgumentException("reissue: refresh token이 redis에 저장된 refresh token과 다릅니다");
+            throw new BadCredentialsException(AuthErrorCode.NO_TOKEN_IN_REDIS.getMessage());
         }
 
         return generateTokenByController(userId,authority);

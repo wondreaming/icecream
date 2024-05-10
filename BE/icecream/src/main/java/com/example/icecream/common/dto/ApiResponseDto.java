@@ -32,6 +32,11 @@ public class ApiResponseDto<T> {
         return ResponseEntity.status(400).body(response);
     }
 
+    public static <T> ResponseEntity<ApiResponseDto<T>> unauthorized(String message) {
+        ApiResponseDto<T> response = new ApiResponseDto<>(401, message, null);
+        return ResponseEntity.status(401).body(response);
+    }
+
     public static <T> ResponseEntity<ApiResponseDto<T>> forbidden(String message) {
         ApiResponseDto<T> response = new ApiResponseDto<>(403, message, null);
         return ResponseEntity.status(403).body(response);
