@@ -15,7 +15,11 @@ public enum UserErrorCode {
     NO_NEW_PASSWORD_PROVIDED("현재와 동일한 비밀번호 입니다."),
     DUPLICATE_LOGIN_ID("이미 사용 중인 로그인 ID 입니다."),
     DUPLICATE_VALUE("이미 사용 중인 값이 포함되어 있습니다."),
-    FAILED_NOTIFICATION("알림 전송에 실패했습니다.");
+    FAILED_NOTIFICATION("알림 전송에 실패했습니다."),
+    NOT_VALID_INPUT("중복되는 값이 있거나, 형식에 맞지 않는 값이 있습니다."),
+    DUPLICATE_MAPPING("이미 자녀로 연결되어 있습니다"),
+    NOT_NEW_VALUE("변경하려는 값이 기존의 값과 동일 합니다.");
+
 
 
     private final String message;
