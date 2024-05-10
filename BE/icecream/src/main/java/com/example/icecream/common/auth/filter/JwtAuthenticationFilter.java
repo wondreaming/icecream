@@ -6,74 +6,56 @@ import com.example.icecream.common.dto.ApiResponseDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import org.springframework.web.filter.GenericFilterBean;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
 
-@Component
 @RequiredArgsConstructor
-public class JwtAuthenticationFilter extends GenericFilterBean {
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtutil;
     private final ObjectMapper objectMapper;
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+    protected void doFilterInternal(HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull FilterChain filterChain) throws ServletException, IOException {
 
-        //permitAll() 요청 url에 대해서는 해당 필터의 동작 없이 다음 필터로 요청을 넘기기 위한 로직
-        HttpServletRequest httpRequest = (HttpServletRequest) request;
-        String requestURI = httpRequest.getRequestURI();
+        //PermitAll() url에 대해서는 다음 필터로 요청을 바로 넘김
+        String requestURI = request.getRequestURI();
         List<String> skipUrls = List.of("/api/users/check", "/api/auth/login", "/api/auth/device/login", "/api/auth/reissue");
-        System.out.println("test111111111111111111111111111111111111111111111111");
 
         boolean skip = skipUrls.stream().anyMatch(requestURI::equals);
-        if ("/api/users".equals(requestURI) && "POST".equalsIgnoreCase(httpRequest.getMethod())) {
+        if ("/api/users".equals(requestURI) && "POST".equalsIgnoreCase(request.getMethod())) {
             skip = true;
-            System.out.println("test22222222222222222222222222222222222222222222222222222222222");
         }
         if (skip) {
-            System.out.println("test333333333333333333333333333333333333333333333333333333333333");
-            chain.doFilter(request, response);
+            filterChain.doFilter(request, response);
             return;
         }
-        System.out.println("test44444444444444444444444444444444444444444");
 
         //access_token 검증
-        String token = resolveToken((HttpServletRequest) request);
-        try {
-            if (token != null && jwtutil.validateAccessToken(token)) {
-                Authentication authentication = jwtutil.getAuthentication(token);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            }
-        } catch (Exception e) {
-            HttpServletResponse httpResponse = (HttpServletResponse) response;
-            httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            httpResponse.setContentType("application/json; charset=UTF-8");
-            ApiResponseDto<String> apiResponse = new ApiResponseDto<>(HttpServletResponse.SC_UNAUTHORIZED, AuthErrorCode.INVALID_TOKEN.getMessage(), null);
-            httpResponse.getWriter().write(objectMapper.writeValueAsString(apiResponse));
-            return;
+        String token = resolveToken(request);
+        if (token != null && jwtutil.validateAccessToken(token)) {
+            Authentication authentication = jwtutil.getAuthentication(token);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         }
-        System.out.println("test55555555555555555555555555555555555555555555555555");
-
-        chain.doFilter(request, response);
+        filterChain.doFilter(request, response);
     }
 
     private String resolveToken(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer")) {
-            return bearerToken.substring(7);
-        }
-        return null;
-    }
+            String bearerToken = request.getHeader("Authorization");
 
+            if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer")) {
+                return bearerToken.substring(7);
+            }
+
+            return null;
+    }
 }
