@@ -34,41 +34,41 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   final directory = await getTemporaryDirectory();
   final filePath = '${directory.path}/overspeed.png';
   final file = File(filePath);
-    await file.writeAsBytes(byteData.buffer
-        .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+  await file.writeAsBytes(byteData.buffer
+      .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
 
   // 알림에 사용할 이미지 설정
-    final BigPictureStyleInformation bigPictureStyleInformation =
-        BigPictureStyleInformation(
-      FilePathAndroidBitmap(filePath),
-      largeIcon: DrawableResourceAndroidBitmap('mipmap/ic_launcher'),
-      contentTitle: message.data['title'] ?? '긴급 메시지',
-      summaryText: message.data['body'] ?? '긴급 상황 발생!',
-      htmlFormatContent: true,
-      htmlFormatContentTitle: true,
-    );
+  final BigPictureStyleInformation bigPictureStyleInformation =
+      BigPictureStyleInformation(
+    FilePathAndroidBitmap(filePath),
+    largeIcon: const DrawableResourceAndroidBitmap('mipmap/ic_launcher'),
+    contentTitle: message.data['title'] ?? '긴급 메시지',
+    summaryText: message.data['body'] ?? '긴급 상황 발생!',
+    htmlFormatContent: true,
+    htmlFormatContentTitle: true,
+  );
 
   AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-    isOverSpeed ? 'high_importance_channel' : 'regular_channel',
-    isOverSpeed ? 'High Importance Notifications' : 'Regular Notifications',
-    channelDescription: isOverSpeed ? 'This channel is used for important notifications.' : 'This channel is used for regular notifications.',
-    styleInformation: bigPictureStyleInformation,
-    importance: isOverSpeed ? Importance.high : Importance.defaultImportance,
-    priority: isOverSpeed ? Priority.high : Priority.defaultPriority,
-    fullScreenIntent: isOverSpeed,
-    icon: 'mipmap/ic_launcher',
-    ticker: 'ticker'
-  );
+      isOverSpeed ? 'high_importance_channel' : 'regular_channel',
+      isOverSpeed ? 'High Importance Notifications' : 'Regular Notifications',
+      channelDescription: isOverSpeed
+          ? 'This channel is used for important notifications.'
+          : 'This channel is used for regular notifications.',
+      styleInformation: bigPictureStyleInformation,
+      importance: isOverSpeed ? Importance.high : Importance.defaultImportance,
+      priority: isOverSpeed ? Priority.high : Priority.defaultPriority,
+      fullScreenIntent: isOverSpeed,
+      icon: 'mipmap/ic_launcher',
+      ticker: 'ticker');
 
   // 전체 화면 알림 세부 설정
   NotificationDetails platformChannelSpecifics =
       NotificationDetails(android: androidDetails);
   await flutterLocalNotificationsPlugin.show(
-    message.hashCode,
-    message.data['title'] ?? 'Notification',
-    message.data['body'] ?? 'You have a new message!',
-    platformChannelSpecifics
-  );
+      message.hashCode,
+      message.data['title'] ?? 'Notification',
+      message.data['body'] ?? 'You have a new message!',
+      platformChannelSpecifics);
   if (message.data.isNotEmpty) {
     debugPrint("Data message title: ${message.data['title']}");
     debugPrint("Data message body: ${message.data['body']}");
@@ -123,7 +123,7 @@ void main() async {
 
   const AndroidInitializationSettings initializationSettingsAndroid =
       AndroidInitializationSettings('mipmap/ic_launcher');
-  final InitializationSettings initializationSettings = InitializationSettings(
+  const InitializationSettings initializationSettings = InitializationSettings(
     android: initializationSettingsAndroid,
   );
   // 알림 초기화
@@ -163,7 +163,7 @@ void main() async {
     final BigPictureStyleInformation bigPictureStyleInformation =
         BigPictureStyleInformation(
       FilePathAndroidBitmap(filePath),
-      largeIcon: DrawableResourceAndroidBitmap('mipmap/ic_launcher'),
+      largeIcon: const DrawableResourceAndroidBitmap('mipmap/ic_launcher'),
       contentTitle: message.data['title'] ?? '긴급 메시지',
       summaryText: message.data['body'] ?? '긴급 상황 발생!',
       htmlFormatContent: true,
@@ -197,7 +197,7 @@ void main() async {
           platformChannelSpecifics,
           payload: 'confirm_action');
     } else {
-      androidDetails = AndroidNotificationDetails(
+      androidDetails = const AndroidNotificationDetails(
           'regular_channel', 'Regular Notifications',
           channelDescription: 'This channel is used for regular notifications.',
           importance: Importance.defaultImportance,
@@ -256,7 +256,8 @@ class _MyAppState extends State<MyApp> {
     await _rabbitMQService.initRabbitMQ();
     _locationSubscription =
         _locationService.getLocationStream().listen((position) {
-      _rabbitMQService.sendLocation(position.latitude, position.longitude, 5);
+      _rabbitMQService.sendLocation(
+          position.latitude, position.longitude, 9696, 1);
       // _rabbitMQService.sendLocation(3, 3, 20);
     });
   }
