@@ -4,12 +4,14 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 
 @Getter
 public class DeviceLoginRequestDto {
 
     @NotBlank
+    @Size(max=20)
     private String deviceId;
 
     private String refreshToken;
