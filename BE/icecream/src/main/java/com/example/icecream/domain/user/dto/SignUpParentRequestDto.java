@@ -2,6 +2,7 @@ package com.example.icecream.domain.user.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 
 @Getter
@@ -27,6 +28,7 @@ public class SignUpParentRequestDto {
     private String passwordCheck;
 
     @NotBlank
+    @Size(max=20)
     private String deviceId;
 }
 

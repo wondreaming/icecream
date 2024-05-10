@@ -1,9 +1,6 @@
 package com.example.icecream.domain.user.service;
 
-import com.example.icecream.common.exception.BadRequestException;
-import com.example.icecream.common.exception.DataConflictException;
-import com.example.icecream.common.exception.InternalServerException;
-import com.example.icecream.common.exception.NotFoundException;
+import com.example.icecream.common.exception.*;
 import com.example.icecream.domain.goal.service.GoalService;
 import com.example.icecream.domain.notification.dto.FcmRequestDto;
 import com.example.icecream.domain.notification.service.NotificationService;
@@ -82,14 +79,19 @@ public class UserService {
     public void saveChild(final SignUpChildRequestDto signUpChildRequestDto, int parentId) {
         User child = userRepository.findByDeviceId(signUpChildRequestDto.getDeviceId())
                 .orElseGet(() -> {
-                    User newUser = User.builder()
-                            .username(signUpChildRequestDto.getUsername())
-                            .phoneNumber(signUpChildRequestDto.getPhoneNumber())
-                            .deviceId(signUpChildRequestDto.getDeviceId())
-                            .isParent(false)
-                            .isDeleted(false)
-                            .build();
-                    return userRepository.save(newUser);
+                    try {
+                        User newUser = User.builder()
+                                .username(signUpChildRequestDto.getUsername())
+                                .phoneNumber(signUpChildRequestDto.getPhoneNumber())
+                                .deviceId(signUpChildRequestDto.getDeviceId())
+                                .isParent(false)
+                                .isDeleted(false)
+                                .build();
+
+                        return userRepository.save(newUser);
+                    } catch (RuntimeException e) {
+                        throw new BadRequestException(UserErrorCode.NOT_VALID_INPUT.getMessage());
+                    }
                 });
 
         User parent = userRepository.findById(parentId)
@@ -100,7 +102,11 @@ public class UserService {
                 .child(child)
                 .build();
 
-        parentChildMappingRepository.save(parentChildMapping);
+        try {
+            parentChildMappingRepository.save(parentChildMapping);
+        } catch (RuntimeException e) {
+            throw new BadRequestException(UserErrorCode.DUPLICATE_MAPPING.getMessage());
+        }
 
         goalService.createGoalStatus(child.getId());
 
@@ -122,6 +128,10 @@ public class UserService {
         }
 
         userValidationUtils.isValidChild(parentId, signUpChildRequestDto.getUserId());
+
+        if (child.getUsername().equals(signUpChildRequestDto.getUsername())) {
+            throw new BadRequestException(UserErrorCode.NOT_NEW_VALUE.getMessage());
+        }
 
         child.updateUsername(signUpChildRequestDto.getUsername());
         userRepository.save(child);
