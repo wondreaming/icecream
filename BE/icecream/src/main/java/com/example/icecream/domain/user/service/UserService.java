@@ -107,7 +107,6 @@ public class UserService {
         FcmRequestDto fcmRequestDto = new FcmRequestDto(signUpChildRequestDto.getFcmToken(), "자녀 등록 알림", "자녀 등록 알림", "created");
 
         try {
-            System.out.println(fcmRequestDto);
             notificationService.sendMessageTo(fcmRequestDto);
         } catch (IOException e) {
             throw new InternalServerException(UserErrorCode.FAILED_NOTIFICATION.getMessage());
