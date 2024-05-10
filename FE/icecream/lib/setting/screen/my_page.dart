@@ -30,8 +30,10 @@ class _MyPageState extends State<MyPage> {
     final userRepository = UserRespository(dio);
 
     PasswordModel newPassword = PasswordModel(password: password);
+
     ResponseModel response =
         await userRepository.postPassword(password: newPassword);
+
     return response;
   }
 
@@ -39,15 +41,18 @@ class _MyPageState extends State<MyPage> {
     ResponseModel response;
     response = await postPassword();
 
+    print('배부름 ${response.status}');
     if (response.status == 200) {
-      password = '';
+      passwordController.clear();
       context.pop();
       changePasswordModal(context);
     } else {
       final String message = response.message;
-      showCustomDialog(context, message, isNo: false, onPressed: () {
-        context.pop();
-      });
+      showCustomDialog(
+        context,
+        message,
+        isNo: false,
+      );
     }
   }
 
@@ -67,7 +72,7 @@ class _MyPageState extends State<MyPage> {
     response = await patchPassword();
 
     if (response.status == 200) {
-      password = '';
+      passwordController.clear();
       context.pop();
     } else {
       final String message = response.message;
@@ -95,6 +100,24 @@ class _MyPageState extends State<MyPage> {
     return response;
   }
 
+  void deleteChild() async {
+    ResponseModel response;
+    response = await deleteUser();
+
+    if (response.status == 200) {
+      final String message = response.message;
+      showCustomDialog(context, message, isNo: false, onPressed: () {
+        context.pop();
+      });
+    } else {
+      final String message = response.message;
+      showCustomDialog(context, message, isNo: false, onPressed: () {
+        context.pop();
+      });
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return DefaultLayout(
@@ -110,40 +133,45 @@ class _MyPageState extends State<MyPage> {
             showCustomModal(
               context,
               '비밀번호 변경',
-              StatefulBuilder(
-                  builder: (BuildContext context, StateSetter setState) {
-                return Column(
-                  children: [
-                    SizedBox(height: 16.0),
-                    CustomTextField(
-                      controller: passwordController,
-                      onChanged: (String value) {
-                        password = value;
-                      },
-                      obscureText: _isHidden,
-                      maxLines: 1,
-                      suffixIcon: IconButton(
-                        onPressed: () {
-                          print('숨김이 될까요? $_isHidden');
-                          setState(() {
-                            _isHidden = !_isHidden;
-                          });
+              PopScope(
+                canPop: true,
+                onPopInvoked: (bool didPop) async {
+                  passwordController.clear();
+                },
+                child: StatefulBuilder(
+                    builder: (BuildContext context, StateSetter setState) {
+                  return Column(
+                    children: [
+                      SizedBox(height: 16.0),
+                      CustomTextField(
+                        controller: passwordController,
+                        onChanged: (String value) {
+                          password = value;
                         },
-                        icon: Icon(_isHidden
-                            ? Icons.visibility_off
-                            : Icons.visibility),
+                        obscureText: _isHidden,
+                        maxLines: 1,
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _isHidden = !_isHidden;
+                            });
+                          },
+                          icon: Icon(_isHidden
+                              ? Icons.visibility_off
+                              : Icons.visibility),
+                        ),
+                        hintText: '현재 비밀번호를 입력해주세요',
                       ),
-                      hintText: '현재 비밀번호를 입력해주세요',
-                    ),
-                    SizedBox(height: 16.0),
-                    CustomElevatedButton(
-                        onPressed: () {
-                          checkPostPassword();
-                        },
-                        child: '다음'),
-                  ],
-                );
-              }),
+                      SizedBox(height: 16.0),
+                      CustomElevatedButton(
+                          onPressed: () {
+                            checkPostPassword();
+                          },
+                          child: '다음'),
+                    ],
+                  );
+                }),
+              ),
               160.0,
             );
           },
@@ -175,7 +203,7 @@ class _MyPageState extends State<MyPage> {
           },
           fourthOnTap: () {
             showCustomDialog(context, '회원 탈퇴하시겠습니까?', onPressed: () {
-              deleteUser();
+              deleteChild();
             });
           },
         ),
@@ -213,7 +241,6 @@ void changePasswordModal(BuildContext context) {
             maxLines: 1,
             suffixIcon: IconButton(
               onPressed: () {
-                print('숨김이 될까요? $_isHidden1');
                 setState(() {
                   _isHidden1 = !_isHidden1;
                 });
@@ -262,12 +289,13 @@ void changePassword(context, password) async {
   response = await patchPassword(password);
   print('변경이 잘 되었나 ${response.status}');
   if (response.status == 200) {
-    context.pop();
   } else {
     final String message = response.message;
-    showCustomDialog(context, message, isNo: false, onPressed: () {
-      context.pop();
-    });
+    showCustomDialog(
+      context,
+      message,
+      isNo: false,
+    );
   }
 }
 
