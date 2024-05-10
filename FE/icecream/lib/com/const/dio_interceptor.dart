@@ -7,7 +7,8 @@ class CustomDio {
   static const String baseUrl = "http://k10e202.p.ssafy.io:8080/api";
   Dio createDio() {
     final Dio dio = Dio(BaseOptions(baseUrl: baseUrl));
-    dio.options.validateStatus = (status) => true;
+    dio.options.validateStatus = (status) => true;  // 모든 상태 코드를 유효한 것으로 처리
+    
     // 인터셉터 추가
     dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
