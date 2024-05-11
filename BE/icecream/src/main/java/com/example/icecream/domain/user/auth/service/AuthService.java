@@ -1,14 +1,14 @@
-package com.example.icecream.common.auth.service;
+package com.example.icecream.domain.user.auth.service;
 
-import com.example.icecream.common.auth.dto.*;
-import com.example.icecream.common.auth.error.AuthErrorCode;
-import com.example.icecream.common.auth.util.JwtUtil;
+import com.example.icecream.domain.user.auth.error.AuthErrorCode;
+import com.example.icecream.domain.user.auth.util.JwtUtil;
 import com.example.icecream.common.exception.NotFoundException;
 import com.example.icecream.domain.notification.dto.LoginRequestDto;
 import com.example.icecream.domain.notification.service.NotificationService;
 import com.example.icecream.domain.user.entity.User;
 import com.example.icecream.domain.user.repository.ParentChildMappingRepository;
 import com.example.icecream.domain.user.repository.UserRepository;
+import com.example.icecream.domain.user.auth.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
