@@ -51,9 +51,9 @@ class UserProvider extends ChangeNotifier {
     _username = userData['username'];
     _loginId = userData['login_id'] ?? '';
     _phoneNumber = userData['phone_number'];
-    _profileImage = userData['profile_image'];
+    _profileImage = userData['profile_image'] ?? '';
     _isParent = userData.containsKey('children');
-    
+
     if (_isParent) {
       _children = (userData['children'] as List<dynamic>)
           .map((child) => Child.fromJson(child))

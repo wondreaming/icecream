@@ -6,7 +6,7 @@ import 'dart:convert';
 import '../../com/const/dio_interceptor.dart';
 
 class UserService {
-  final Dio _dio = CustomDio().createDio();  // CustomDio 인스턴스를 사용하여 Dio 객체 생성
+  final Dio _dio = CustomDio().createDio(); // CustomDio 인스턴스를 사용하여 Dio 객체 생성
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
   // secure storage 값 읽기
@@ -28,7 +28,6 @@ class UserService {
   Future<String> getFCMToken() async {
     return await _readFromSecureStorage('fcmToken');
   }
-
 
   // 토큰 저장
   Future<void> _saveTokens(String accessToken, String refreshToken) async {
@@ -60,7 +59,8 @@ class UserService {
   }
 
   // 부모 로그인
-  Future<void> loginUser(String loginId, String password, String fcmToken, UserProvider userProvider) async {
+  Future<void> loginUser(String loginId, String password, String fcmToken,
+      UserProvider userProvider) async {
     try {
       final response = await _dio.post(
         '/auth/login',
@@ -71,6 +71,7 @@ class UserService {
         },
         options: Options(headers: {'no-token': true}),
       );
+      print(response.statusCode);
       if (response.statusCode == 200) {
         // 토큰 저장
         await _saveTokens(
