@@ -6,7 +6,7 @@ import 'dart:convert';
 import '../../com/const/dio_interceptor.dart';
 
 class UserService {
-  final Dio _dio = CustomDio().createDio();  // CustomDio 인스턴스를 사용하여 Dio 객체 생성
+  final Dio _dio = CustomDio().createDio(); // CustomDio 인스턴스를 사용하여 Dio 객체 생성
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
   // secure storage 값 읽기
@@ -29,7 +29,6 @@ class UserService {
     return await _readFromSecureStorage('fcmToken');
   }
 
-
   // 토큰 저장
   Future<void> _saveTokens(String accessToken, String refreshToken) async {
     await _writeToSecureStorage('accessToken', accessToken);
@@ -39,11 +38,10 @@ class UserService {
   // 부모 회원가입
   Future<Response> registerUser(Map<String, dynamic> userData) async {
     try {
-      final response = await _dio.post(
-        '/users',
-        data: userData,
-        options: Options(headers: {'no-token': true}) // 토큰을 포함하지 않음
-      );
+      final response = await _dio.post('/users',
+          data: userData,
+          options: Options(headers: {'no-token': true}) // 토큰을 포함하지 않음
+          );
       return response;
     } catch (e) {
       throw Exception('Failed to register user: $e');
@@ -53,10 +51,7 @@ class UserService {
   // 자녀 등록
   Future<Response> registerChild(Map<String, dynamic> userData) async {
     try {
-      final response = await _dio.post(
-        '/users/child',
-        data: userData
-      );
+      final response = await _dio.post('/users/child', data: userData);
       return response;
     } catch (e) {
       throw Exception('Registration failed: $e');
@@ -64,7 +59,8 @@ class UserService {
   }
 
   // 부모 로그인
-  Future<void> loginUser(String loginId, String password, String fcmToken, UserProvider userProvider) async {
+  Future<void> loginUser(String loginId, String password, String fcmToken,
+      UserProvider userProvider) async {
     try {
       final response = await _dio.post(
         '/auth/login',
@@ -75,6 +71,7 @@ class UserService {
         },
         options: Options(headers: {'no-token': true}),
       );
+      print(response.statusCode);
       if (response.statusCode == 200) {
         // 토큰 저장
         await _saveTokens(
@@ -126,15 +123,13 @@ class UserService {
     }
   }
 
-
   // 로그인 ID 중복 확인
   Future<Map<String, dynamic>> checkLoginIdAvailability(String loginId) async {
     try {
-      final response = await _dio.get(
-        '/users/check',
-        queryParameters: {'login_id': loginId},
-        options: Options(headers: {'no-token': true})  // 토큰을 포함하지 않음
-      );
+      final response = await _dio.get('/users/check',
+          queryParameters: {'login_id': loginId},
+          options: Options(headers: {'no-token': true}) // 토큰을 포함하지 않음
+          );
       return {
         'status': response.statusCode,
         'message': response.data['message'],
