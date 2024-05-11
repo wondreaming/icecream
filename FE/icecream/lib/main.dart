@@ -155,18 +155,6 @@ Future<void> _handleNotification(RemoteMessage message) async {
   );
 }
 
-// // sharedpreferences에 문자열을 저장하는 함수
-// Future<void> saveToDevicePrefs(String key, String value) async {
-//   final SharedPreferences prefs = await SharedPreferences.getInstance();
-//   await prefs.setString(key, value);
-// }
-
-// // sharedpreferences에서 문자열을 읽어오는 함수
-// Future<String?> readFromDevicePrefs(String key) async {
-//   final SharedPreferences prefs = await SharedPreferences.getInstance();
-//   return prefs.getString(key);
-// }
-
 // 디바이스 ID를 가져오고 이를 서버로 전송하는 함수
 Future<void> checkDeviceWithServerUsingDio() async {
   const androidIdPlugin = AndroidId();
