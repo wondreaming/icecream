@@ -1,8 +1,6 @@
-package com.example.icecream.common.auth.filter;
+package com.example.icecream.domain.user.auth.filter;
 
-import com.example.icecream.common.auth.error.AuthErrorCode;
-import com.example.icecream.common.auth.util.JwtUtil;
-import com.example.icecream.common.dto.ApiResponseDto;
+import com.example.icecream.domain.user.auth.util.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
