@@ -4,7 +4,7 @@ import 'dart:convert';
 import '../../com/const/dio_interceptor.dart';
 
 class UserService {
-  final Dio _dio = CustomDio().createDio();  // CustomDio 인스턴스를 사용하여 Dio 객체 생성
+  final Dio _dio = CustomDio().createDio(); // CustomDio 인스턴스를 사용하여 Dio 객체 생성
 
   // fcm 토큰 가져오기
   Future<String> getFCMToken() async {
@@ -46,11 +46,10 @@ class UserService {
   // 부모 회원가입
   Future<Response> registerUser(Map<String, dynamic> userData) async {
     try {
-      final response = await _dio.post(
-        '/users',
-        data: userData,
-        options: Options(headers: {'no-token': true}) // 토큰을 포함하지 않음
-      );
+      final response = await _dio.post('/users',
+          data: userData,
+          options: Options(headers: {'no-token': true}) // 토큰을 포함하지 않음
+          );
       return response;
     } catch (e) {
       throw Exception('Failed to register user: $e');
@@ -60,10 +59,7 @@ class UserService {
   // 자녀 등록
   Future<Response> registerChild(Map<String, dynamic> userData) async {
     try {
-      final response = await _dio.post(
-        '/users/child',
-        data: userData
-      );
+      final response = await _dio.post('/users/child', data: userData);
       return response;
     } catch (e) {
       throw Exception('Registration failed: $e');
@@ -71,28 +67,32 @@ class UserService {
   }
 
   // 부모 로그인
-  Future<void> loginUser(String loginId, String password, String fcmToken) async {
+  Future<void> loginUser(
+      String loginId, String password, String fcmToken) async {
     try {
-      final response = await _dio.post(
-        '/auth/login',
-        data: {
-          'login_id': loginId,
-          'password': password,
-          'fcm_token': fcmToken,
-        },
-        options: Options(headers: {'no-token': true})  // 토큰을 포함하지 않음
-      );
+      final response = await _dio.post('/auth/login',
+          data: {
+            'login_id': loginId,
+            'password': password,
+            'fcm_token': fcmToken,
+          },
+          options: Options(headers: {'no-token': true}) // 토큰을 포함하지 않음
+          );
       if (response.statusCode == 200) {
         // 토큰 저장
-        await _saveTokens(
-          response.data['data']['access_token'],
-          response.data['data']['refresh_token']
-        );
+        await _saveTokens(response.data['data']['access_token'],
+            response.data['data']['refresh_token']);
 
         // 자녀의 전체 정보 저장
-        if (response.data['data']['child'] != null && response.data['data']['child'].isNotEmpty) {
-          await _saveChildData(response.data['data']['child']);
+        if (response.data['data']['children'] != null &&
+            response.data['data']['children'].isNotEmpty) {
+          await _saveChildData(response.data['data']['children']);
         }
+        print('자녀 정보1414:');
+        response.data['data']['children'].forEach((child) {
+          print('username: ${child['username']}');
+          print('자녀 유저 아이디: ${child['id']}');
+        });
       } else {
         throw Exception(response.data['message']);
       }
@@ -100,6 +100,7 @@ class UserService {
       throw Exception('Login failed: $e');
     }
   }
+
   // 자동 로그인
   Future<void> autoLogin() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -109,20 +110,15 @@ class UserService {
 
     if (deviceId != null && refreshToken != null && fcmToken != null) {
       try {
-        final response = await _dio.post(
-          '/auth/device/login',
-          data: {
-            'device_id': deviceId,
-            'refresh_token': refreshToken,
-            'fcm_token': fcmToken,
-          }
-        );
+        final response = await _dio.post('/auth/device/login', data: {
+          'device_id': deviceId,
+          'refresh_token': refreshToken,
+          'fcm_token': fcmToken,
+        });
         if (response.statusCode == 200) {
           // 토큰 저장
-          await _saveTokens(
-            response.data['data']['access_token'],
-            response.data['data']['refresh_token']
-          );
+          await _saveTokens(response.data['data']['access_token'],
+              response.data['data']['refresh_token']);
         } else {
           throw Exception('Failed to auto login');
         }
@@ -132,15 +128,13 @@ class UserService {
     }
   }
 
-
   // 로그인 ID 중복 확인
   Future<Map<String, dynamic>> checkLoginIdAvailability(String loginId) async {
     try {
-      final response = await _dio.get(
-        '/users/check',
-        queryParameters: {'login_id': loginId},
-        options: Options(headers: {'no-token': true})  // 토큰을 포함하지 않음
-      );
+      final response = await _dio.get('/users/check',
+          queryParameters: {'login_id': loginId},
+          options: Options(headers: {'no-token': true}) // 토큰을 포함하지 않음
+          );
       return {
         'status': response.statusCode,
         'message': response.data['message'],
