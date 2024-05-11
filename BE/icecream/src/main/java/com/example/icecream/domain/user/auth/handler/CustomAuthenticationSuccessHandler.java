@@ -1,9 +1,9 @@
-package com.example.icecream.common.auth.handler;
+package com.example.icecream.domain.user.auth.handler;
 
-import com.example.icecream.common.auth.dto.ChildrenResponseDto;
-import com.example.icecream.common.auth.dto.JwtTokenDto;
-import com.example.icecream.common.auth.dto.ParentLoginResponseDto;
-import com.example.icecream.common.auth.util.JwtUtil;
+import com.example.icecream.domain.user.auth.dto.ChildrenResponseDto;
+import com.example.icecream.domain.user.auth.dto.JwtTokenDto;
+import com.example.icecream.domain.user.auth.dto.ParentLoginResponseDto;
+import com.example.icecream.domain.user.auth.util.JwtUtil;
 import com.example.icecream.common.dto.ApiResponseDto;
 import com.example.icecream.domain.notification.dto.LoginRequestDto;
 import com.example.icecream.domain.notification.service.NotificationService;

@@ -1,6 +1,6 @@
-package com.example.icecream.common.auth.handler;
+package com.example.icecream.domain.user.auth.handler;
 
-import com.example.icecream.common.auth.error.AuthErrorCode;
+import com.example.icecream.domain.user.auth.error.AuthErrorCode;
 import com.example.icecream.common.dto.ApiResponseDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;

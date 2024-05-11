@@ -1,23 +1,22 @@
 package com.example.icecream.domain.user.service;
 
 import com.example.icecream.common.exception.*;
+import com.example.icecream.domain.user.dto.SignUpChildRequestDto;
+import com.example.icecream.domain.user.dto.SignUpParentRequestDto;
+import com.example.icecream.domain.user.entity.ParentChildMapping;
+import com.example.icecream.domain.user.error.UserErrorCode;
+import com.example.icecream.domain.user.repository.UserRepository;
 import com.example.icecream.domain.goal.service.GoalService;
 import com.example.icecream.domain.notification.dto.FcmRequestDto;
 import com.example.icecream.domain.notification.service.NotificationService;
-import com.example.icecream.domain.user.dto.SignUpChildRequestDto;
-import com.example.icecream.domain.user.dto.SignUpParentRequestDto;
 import com.example.icecream.domain.user.dto.UpdateChildRequestDto;
-import com.example.icecream.domain.user.entity.ParentChildMapping;
 import com.example.icecream.domain.user.entity.User;
-import com.example.icecream.domain.user.error.UserErrorCode;
 import com.example.icecream.domain.user.repository.ParentChildMappingRepository;
-import com.example.icecream.domain.user.repository.UserRepository;
 
 import com.example.icecream.domain.user.util.UserValidationUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

@@ -1,4 +1,4 @@
-package com.example.icecream.common.auth.error;
+package com.example.icecream.domain.user.auth.error;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

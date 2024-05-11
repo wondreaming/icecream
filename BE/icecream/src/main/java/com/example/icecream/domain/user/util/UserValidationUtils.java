@@ -1,15 +1,13 @@
 package com.example.icecream.domain.user.util;
 
-import com.example.icecream.common.auth.error.AuthErrorCode;
 import com.example.icecream.common.exception.DataAccessException;
 import com.example.icecream.common.exception.DataConflictException;
 import com.example.icecream.common.exception.NotFoundException;
 import com.example.icecream.domain.user.entity.User;
 import com.example.icecream.domain.user.error.UserErrorCode;
-import com.example.icecream.domain.user.repository.ParentChildMappingRepository;
 import com.example.icecream.domain.user.repository.UserRepository;
+import com.example.icecream.domain.user.repository.ParentChildMappingRepository;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.AuthenticationException;
 
 import lombok.RequiredArgsConstructor;
 
