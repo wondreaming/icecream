@@ -39,11 +39,10 @@ class UserService {
   // 부모 회원가입
   Future<Response> registerUser(Map<String, dynamic> userData) async {
     try {
-      final response = await _dio.post(
-        '/users',
-        data: userData,
-        options: Options(headers: {'no-token': true}) // 토큰을 포함하지 않음
-      );
+      final response = await _dio.post('/users',
+          data: userData,
+          options: Options(headers: {'no-token': true}) // 토큰을 포함하지 않음
+          );
       return response;
     } catch (e) {
       throw Exception('Failed to register user: $e');
@@ -53,10 +52,7 @@ class UserService {
   // 자녀 등록
   Future<Response> registerChild(Map<String, dynamic> userData) async {
     try {
-      final response = await _dio.post(
-        '/users/child',
-        data: userData
-      );
+      final response = await _dio.post('/users/child', data: userData);
       return response;
     } catch (e) {
       throw Exception('Registration failed: $e');
@@ -126,15 +122,13 @@ class UserService {
     }
   }
 
-
   // 로그인 ID 중복 확인
   Future<Map<String, dynamic>> checkLoginIdAvailability(String loginId) async {
     try {
-      final response = await _dio.get(
-        '/users/check',
-        queryParameters: {'login_id': loginId},
-        options: Options(headers: {'no-token': true})  // 토큰을 포함하지 않음
-      );
+      final response = await _dio.get('/users/check',
+          queryParameters: {'login_id': loginId},
+          options: Options(headers: {'no-token': true}) // 토큰을 포함하지 않음
+          );
       return {
         'status': response.statusCode,
         'message': response.data['message'],

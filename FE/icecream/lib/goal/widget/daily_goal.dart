@@ -74,17 +74,27 @@ class _DailyGoalWidgetState extends State<DailyGoalWidget> {
   }
 
   Map<String, bool?> extendDateRange(Map<String, bool> originalResults) {
+    // 맵이 비어있는 경우 기본값 설정
+    if (originalResults.isEmpty) {
+      DateTime today = DateTime.now();
+      String todayStr = DateFormat('yyyy-MM-dd').format(today);
+      return {todayStr: null}; // 오늘 날짜로 초기화하고 결과 없음으로 설정
+    }
+
     DateTime minDate =
         DateFormat('yyyy-MM-dd').parse(originalResults.keys.reduce(min));
     DateTime maxDate =
         DateFormat('yyyy-MM-dd').parse(originalResults.keys.reduce(max));
+
     Map<String, bool?> extendedResults = {};
 
+    // 최소 날짜부터 최대 날짜까지 모든 날짜에 대해 결과 맵 확장
     for (DateTime date = minDate;
         date.isBefore(maxDate.add(const Duration(days: 1)));
         date = date.add(const Duration(days: 1))) {
       String key = DateFormat('yyyy-MM-dd').format(date);
-      extendedResults[key] = originalResults[key];
+      extendedResults[key] =
+          originalResults.containsKey(key) ? originalResults[key] : null;
     }
 
     return extendedResults;
