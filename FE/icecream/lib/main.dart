@@ -7,12 +7,17 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:go_router/go_router.dart';
 import 'package:icecream/auth/service/user_service.dart';
+import 'package:icecream/home/screen/c_home.dart';
+import 'package:icecream/home/screen/p_home.dart';
 import 'package:icecream/setting/provider/destination_provider.dart';
 import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'package:icecream/com/router/router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:icecream/provider/user_provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as image;
@@ -151,24 +156,23 @@ Future<void> _handleNotification(RemoteMessage message) async {
   );
 }
 
-// sharedpreferences에 문자열을 저장하는 함수
-Future<void> saveToDevicePrefs(String key, String value) async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  await prefs.setString(key, value);
-}
+// // sharedpreferences에 문자열을 저장하는 함수
+// Future<void> saveToDevicePrefs(String key, String value) async {
+//   final SharedPreferences prefs = await SharedPreferences.getInstance();
+//   await prefs.setString(key, value);
+// }
 
-// sharedpreferences에서 문자열을 읽어오는 함수
-Future<String?> readFromDevicePrefs(String key) async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  return prefs.getString(key);
-}
+// // sharedpreferences에서 문자열을 읽어오는 함수
+// Future<String?> readFromDevicePrefs(String key) async {
+//   final SharedPreferences prefs = await SharedPreferences.getInstance();
+//   return prefs.getString(key);
+// }
 
 // 디바이스 ID를 가져오고 이를 서버로 전송하는 함수
 Future<void> checkDeviceWithServerUsingDio() async {
   const androidIdPlugin = AndroidId();
   final String? deviceId = await androidIdPlugin.getId();
-  // 디바이스 ID를 sharedPreferences에 저장
-  await saveToDevicePrefs("deviceId", deviceId!);
+  await FlutterSecureStorage().write(key: "deviceId", value: deviceId!);
   debugPrint("android ID: $deviceId");
 }
 
@@ -181,7 +185,7 @@ Future<void> main() async {
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   final fcmToken = await firebaseMessaging.getToken();
-  await saveToDevicePrefs("fcmToken", fcmToken!);
+  await FlutterSecureStorage().write(key: "fcmToken", value: fcmToken!);
   debugPrint('FCM Token: $fcmToken');
 
   // 알림 초기화 설정
@@ -216,13 +220,14 @@ Future<void> main() async {
     await _handleNotification(message);
   });
 
-  UserService userService = UserService();
-  await userService.autoLogin();
 
   runApp(
     MultiProvider(
-      providers: [ChangeNotifierProvider(create: (context) => Destination())],
-      child: const MyApp(),
+      providers: [
+        ChangeNotifierProvider(create: (context) => Destination()),
+        ChangeNotifierProvider(create: (context) => UserProvider()),
+      ],
+      child: MyApp(),
     ),
   );
 }
@@ -258,13 +263,16 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  final UserService _userService = UserService();
   final LocationService _locationService = LocationService();
   final RabbitMQService _rabbitMQService = RabbitMQService();
   late StreamSubscription<Position> _locationSubscription;
+  late Future<void> _autoLoginFuture;
 
   @override
   void initState() {
     super.initState();
+    _autoLoginFuture = _autoLogin();
     initServices();
   }
 
@@ -285,11 +293,32 @@ class _MyAppState extends State<MyApp> {
     super.dispose();
   }
 
+  // 자동 로그인
+  Future<void> _autoLogin() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    try {
+      await _userService.autoLogin(userProvider);
+      // 부모/자녀 페이지로 이동
+      // if (userProvider.isParent) {
+      //   context.go('/parents');
+      // } else {
+      //   context.go('/child');
+      // }
+    } catch (e) {
+      debugPrint('Auto-login failed: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      routerConfig: router,
-      debugShowCheckedModeBanner: false,
+    return FutureBuilder<void>(
+      future: _autoLoginFuture,
+      builder: (context, snapshot) {
+        return MaterialApp.router(
+          routerConfig: router,
+          debugShowCheckedModeBanner: false,
+        );
+      },
     );
   }
 }

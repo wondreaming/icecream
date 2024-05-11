@@ -4,8 +4,11 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icecream/com/const/dio_interceptor.dart';
 import 'package:icecream/com/widget/default_layout.dart';
+import 'package:icecream/setting/model/child_name_model.dart';
 import 'package:icecream/setting/model/destination_model.dart';
+import 'package:icecream/setting/model/response_model.dart';
 import 'package:icecream/setting/repository/destination_repository.dart';
+import 'package:icecream/setting/repository/user_repository.dart';
 import 'package:icecream/setting/widget/add_container.dart';
 import 'package:icecream/setting/widget/custom_elevated_button.dart';
 import 'package:icecream/setting/widget/destination_container.dart';
@@ -33,6 +36,27 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
     super.initState();
   }
 
+  late String username = '';
+  TextEditingController usernameController = TextEditingController();
+
+  // 자녀 이름 수정
+  Future<ResponseModel> patchChild() async {
+    final dio = CustomDio().createDio();
+    final userRepository = UserRespository(dio);
+
+    ChildNameModel newChildName = ChildNameModel(user_id: widget.user_id, username: username);
+    ResponseModel response = await userRepository.patchChild(childName: newChildName);
+    return response;
+  }
+
+  // 자녀 해제
+  Future<ResponseModel> deleteChild() async {
+    final dio = CustomDio().createDio();
+    final userRepository = UserRespository(dio);
+
+    ResponseModel response = await userRepository.deleteChild(user_id: widget.user_id);
+    return response;
+  }
   // 안심 보행 목적지 조회
   Future<List<DestinationModel>> getDestination() async {
     final dio = CustomDio().createDio();
@@ -49,12 +73,39 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
   }
 
   // 하위 위젯에서 안심 보행 업데이트를 위한 콜백 함수
-  void refresh() {
+  Future<void> refresh() async {
+    await getDestination();
     setState(() {
       getDestination();
     });
   }
 
+  // 자녀 연결 해제
+  void saveDeleteChild() async {
+    ResponseModel response;
+    response = await deleteChild();
+
+    if (response.status == 200) {
+      context.pop();
+    } else{
+      final String message = response.message;
+      showCustomDialog(context, message, isNo: false, onPressed: (){context.pop();});
+    }
+  }
+
+  // 자녀 이름 수정
+  void saveUsername() async {
+    ResponseModel response;
+    response = await patchChild();
+
+    if (response.status == 200) {
+      usernameController.clear();
+      context.pop();
+    } else{
+      final String message = response.message;
+      showCustomDialog(context, message, isNo: false, onPressed: (){context.pop();});
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return DefaultLayout(
@@ -70,15 +121,28 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
             showCustomModal(
               context,
               '이름 변경',
-              Column(
-                children: [
-                  SizedBox(height: 16.0),
-                  CustomTextField(
-                    hintText: '변경할 이름을 입력해주세요',
-                  ),
-                  SizedBox(height: 16.0),
-                  CustomElevatedButton(onPressed: () {}, child: '저장'),
-                ],
+              PopScope(
+                canPop: true,
+                onPopInvoked: (bool didPop) async {
+                  usernameController.clear();
+                },
+                child: Column(
+                  children: [
+                    SizedBox(height: 16.0),
+                    CustomTextField(
+                      controller: usernameController,
+                      onChanged: (String value){
+                        username = value;
+                        print(username);
+                      },
+                      hintText: '변경할 이름을 입력해주세요',
+                    ),
+                    SizedBox(height: 16.0),
+                    CustomElevatedButton(onPressed: () {
+                      saveUsername();
+                    }, child: '저장'),
+                  ],
+                ),
               ),
               160.0,
             );
@@ -107,7 +171,7 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
             context.push('/qrscan_page');
           },
           fourthOnTap: (){
-            showCustomDialog(context, '연결 해제 하시겠습니까?');
+            showCustomDialog(context, '연결 해제 하시겠습니까?', onPressed: (){saveDeleteChild();});
           },
         ),
       ],
@@ -190,6 +254,12 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
                 mention: '안심 보행지를 추가해주세요',
                 onPressed: () {
                   context.goNamed('destination');
+                  onDataSaved: () {
+                    setState(() {
+                      // 데이터를 새로고침하거나 UI를 업데이트
+                      refresh();
+                    });
+                  };
                 },
               ),
             ],

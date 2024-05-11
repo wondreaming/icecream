@@ -1,46 +1,39 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:icecream/provider/user_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../../com/const/dio_interceptor.dart';
 
 class UserService {
-  final Dio _dio = CustomDio().createDio(); // CustomDio 인스턴스를 사용하여 Dio 객체 생성
+  final Dio _dio = CustomDio().createDio();  // CustomDio 인스턴스를 사용하여 Dio 객체 생성
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
-  // fcm 토큰 가져오기
-  Future<String> getFCMToken() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString('fcmToken') ?? '';
+  // secure storage 값 읽기
+  Future<String> _readFromSecureStorage(String key) async {
+    return await _secureStorage.read(key: key) ?? '';
   }
 
-  // device ID 가져오기
+  // secure storage 값 저장
+  Future<void> _writeToSecureStorage(String key, String value) async {
+    await _secureStorage.write(key: key, value: value);
+  }
+
+  // 기기 식별자 가져오기
   Future<String> getDeviceId() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString('deviceId') ?? '';
+    return await _readFromSecureStorage('deviceId');
   }
+
+  // FCM 토큰 가져오기
+  Future<String> getFCMToken() async {
+    return await _readFromSecureStorage('fcmToken');
+  }
+
 
   // 토큰 저장
   Future<void> _saveTokens(String accessToken, String refreshToken) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('accessToken', accessToken);
-    await prefs.setString('refreshToken', refreshToken);
-  }
-
-  // 자녀 정보 저장
-  Future<void> _saveChildData(List<dynamic> childrenData) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    String childrenJson = jsonEncode(childrenData);
-    await prefs.setString('childrenData', childrenJson);
-  }
-
-  // 자녀 정보 불러오기
-  Future<List<Map<String, dynamic>>> getChildData() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? childrenJson = prefs.getString('childrenData');
-    if (childrenJson != null) {
-      List<dynamic> childrenList = jsonDecode(childrenJson);
-      return childrenList.cast<Map<String, dynamic>>();
-    }
-    return [];
+    await _writeToSecureStorage('accessToken', accessToken);
+    await _writeToSecureStorage('refreshToken', refreshToken);
   }
 
   // 부모 회원가입
@@ -67,32 +60,26 @@ class UserService {
   }
 
   // 부모 로그인
-  Future<void> loginUser(
-      String loginId, String password, String fcmToken) async {
+  Future<void> loginUser(String loginId, String password, String fcmToken, UserProvider userProvider) async {
     try {
-      final response = await _dio.post('/auth/login',
-          data: {
-            'login_id': loginId,
-            'password': password,
-            'fcm_token': fcmToken,
-          },
-          options: Options(headers: {'no-token': true}) // 토큰을 포함하지 않음
-          );
+      final response = await _dio.post(
+        '/auth/login',
+        data: {
+          'login_id': loginId,
+          'password': password,
+          'fcm_token': fcmToken,
+        },
+        options: Options(headers: {'no-token': true}),
+      );
       if (response.statusCode == 200) {
         // 토큰 저장
-        await _saveTokens(response.data['data']['access_token'],
-            response.data['data']['refresh_token']);
+        await _saveTokens(
+          response.data['data']['access_token'],
+          response.data['data']['refresh_token'],
+        );
 
-        // 자녀의 전체 정보 저장
-        if (response.data['data']['children'] != null &&
-            response.data['data']['children'].isNotEmpty) {
-          await _saveChildData(response.data['data']['children']);
-        }
-        print('자녀 정보1414:');
-        response.data['data']['children'].forEach((child) {
-          print('username: ${child['username']}');
-          print('자녀 유저 아이디: ${child['id']}');
-        });
+        // 사용자 및 자녀 정보 Provider에 저장
+        userProvider.setUserData(response.data['data']);
       } else {
         throw Exception(response.data['message']);
       }
@@ -102,28 +89,35 @@ class UserService {
   }
 
   // 자동 로그인
-  Future<void> autoLogin() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? deviceId = prefs.getString('device_id');
-    String? refreshToken = prefs.getString('refresh_token');
-    String? fcmToken = prefs.getString('fcm_token');
+  Future<void> autoLogin(UserProvider userProvider) async {
+    String deviceId = await getDeviceId();
+    String refreshToken = await _readFromSecureStorage('refreshToken');
+    String fcmToken = await _readFromSecureStorage('fcmToken');
 
-    if (deviceId != null && refreshToken != null && fcmToken != null) {
+    if (deviceId.isNotEmpty && refreshToken.isNotEmpty && fcmToken.isNotEmpty) {
       try {
-        final response = await _dio.post('/auth/device/login', data: {
-          'device_id': deviceId,
-          'refresh_token': refreshToken,
-          'fcm_token': fcmToken,
-        });
+        final response = await _dio.post(
+          '/auth/device/login',
+          data: {
+            'device_id': deviceId,
+            'refresh_token': refreshToken,
+            'fcm_token': fcmToken,
+          },
+        );
         if (response.statusCode == 200) {
           // 토큰 저장
-          await _saveTokens(response.data['data']['access_token'],
-              response.data['data']['refresh_token']);
+          await _saveTokens(
+            response.data['data']['access_token'],
+            response.data['data']['refresh_token'],
+          );
+
+          // 사용자 및 자녀 정보 Provider에 저장
+          userProvider.setUserData(response.data['data']);
         } else {
-          throw Exception('Failed to auto login');
+          throw Exception('자동로그인에 실패했어요');
         }
       } catch (e) {
-        throw Exception('Login failed: $e');
+        throw Exception('자동로그인에 실패했어요: $e');
       }
     }
   }
