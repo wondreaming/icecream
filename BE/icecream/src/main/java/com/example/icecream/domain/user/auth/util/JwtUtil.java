@@ -1,9 +1,7 @@
-package com.example.icecream.common.auth.util;
+package com.example.icecream.domain.user.auth.util;
 
-import com.example.icecream.common.auth.dto.JwtTokenDto;
-import com.example.icecream.common.auth.error.AuthErrorCode;
-import com.example.icecream.common.exception.NotFoundException;
-import com.example.icecream.domain.user.repository.UserRepository;
+import com.example.icecream.domain.user.auth.dto.JwtTokenDto;
+import com.example.icecream.domain.user.auth.error.AuthErrorCode;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 
