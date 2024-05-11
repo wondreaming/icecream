@@ -4,12 +4,11 @@ class DailyGoal {
   final String content;
   final Map<String, bool> result;
 
-  DailyGoal({
-    required this.period,
-    required this.record,
-    required this.content,
-    required this.result,
-  });
+  DailyGoal(
+      {required this.period,
+      required this.record,
+      required this.content,
+      required this.result});
 
   factory DailyGoal.fromJson(Map<String, dynamic> json) {
     return DailyGoal(
