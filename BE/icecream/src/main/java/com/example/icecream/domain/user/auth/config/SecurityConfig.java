@@ -36,7 +36,6 @@ public class SecurityConfig {
     private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity, AuthenticationManager authenticationManager) throws Exception {
         LoginIdAuthenticationFilter loginIdAuthenticationFilter = new LoginIdAuthenticationFilter(authenticationManager, customAuthenticationSuccessHandler, objectMapper);
@@ -51,7 +50,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.POST, "/users")
                         .permitAll()
-                        .requestMatchers("/users/check", "/auth/login", "/auth/device/login","auth/reissue")
+                        .requestMatchers("/users/check", "/auth/login", "/auth/device/login","/auth/reissue", "/error")
                         .permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling((exceptionConfig) ->
