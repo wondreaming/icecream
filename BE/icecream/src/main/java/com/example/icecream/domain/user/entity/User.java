@@ -59,6 +59,9 @@ public class User extends BaseEntity {
         this.username = newUsername;
     }
     public void updatePassword(String newPassword) { this.password = newPassword; }
+    public void updateProfileImage(String newProfileImage) {this.profileImage = newProfileImage;}
+    public void updatePhoneNumber(String newPhoneNumber) {this.phoneNumber = newPhoneNumber;}
+    public void updateDeviceId(String newDeviceId) {this.deviceId = newDeviceId;}
     public void deleteUser() {
         this.isDeleted = true;
     }

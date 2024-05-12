@@ -19,5 +19,8 @@ public interface ParentChildMappingRepository extends JpaRepository<ParentChildM
     @Query("SELECT p.child FROM ParentChildMapping p WHERE p.parent.id = :parentId")
     List<User> findChildrenByParentId(@Param("parentId") int parentId);
 
+    @Query("SELECT p.child FROM ParentChildMapping p WHERE p.parent.loginId = :loginId")
+    List<User> findChildrenByParentLoginId(@Param("loginId") String loginId);
+
     ParentChildMapping findByChildId(Integer childId);
 }
