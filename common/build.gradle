@@ -1,0 +1,69 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.2.5'
+	id 'io.spring.dependency-management' version '1.1.4'
+	id 'maven-publish'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	sourceCompatibility = '17'
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.4'
+	implementation 'org.springframework.boot:spring-boot-starter-amqp'
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation 'org.hibernate:hibernate-spatial:6.4.4.Final'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+
+	compileOnly 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+//	testImplementation 'com.squareup.okhttp3:mockwebserver:5.0.0-alpha.3'
+}
+
+jar {
+	archiveBaseName = 'icecream'
+	archiveVersion = '0.0.1'
+}
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			groupId = 'com.example'
+			artifactId = 'icecream'
+			version = '0.0.1'
+			from components.java
+
+			pom {
+				name = 'IceCream lib'
+				description = 'A description of IceCream lib'
+			}
+		}
+	}
+	repositories {
+		maven {
+			url = uri('https://k10e202.p.ssafy.io/repository/maven-releases')
+			credentials {
+				username = 'admin'
+				password = 'vhtmxlr'
+			}
+		}
+	}
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+	exclude '**/CommonApplicationTests.*'
+}
