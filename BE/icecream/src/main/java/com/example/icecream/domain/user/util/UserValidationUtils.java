@@ -21,15 +21,16 @@ public class UserValidationUtils {
     private final UserRepository userRepository;
     private final ParentChildMappingRepository parentChildMappingRepository;
 
-    public void isValidUser(int userId) {
+    public User isValidUser(int userId) {
         Optional<User> user = userRepository.findByIdAndIsDeletedFalse(userId);
         if (user.isEmpty()) {
             throw new NotFoundException(UserErrorCode.USER_NOT_FOUND.getMessage());
         }
+        return user.get();
     }
 
     public void isValidLoginId(String loginId) {
-        if (userRepository.existsByLoginId(loginId)) {
+        if (userRepository.existsByLoginIdAndIsDeletedFalse(loginId)) {
             throw new DataConflictException(UserErrorCode.DUPLICATE_LOGIN_ID.getMessage());
         }
     }
