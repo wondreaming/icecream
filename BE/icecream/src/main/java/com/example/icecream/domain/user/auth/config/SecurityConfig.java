@@ -1,5 +1,7 @@
 package com.example.icecream.domain.user.auth.config;
 
+import com.example.icecream.common.logging.CorrelationIdFilter;
+import com.example.icecream.common.logging.LoggingFilter;
 import com.example.icecream.domain.user.auth.filter.JwtAuthenticationFilter;
 import com.example.icecream.domain.user.auth.filter.LoginIdAuthenticationFilter;
 import com.example.icecream.domain.user.auth.handler.CustomAuthenticationEntryPoint;
@@ -35,7 +37,8 @@ public class SecurityConfig {
     private final CustomUserDetailsService customUserDetailService;
     private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
-
+    private final LoggingFilter loggingFilter;
+    private final CorrelationIdFilter correlationIdFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity, AuthenticationManager authenticationManager) throws Exception {
@@ -43,6 +46,8 @@ public class SecurityConfig {
         JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtUtil, objectMapper);
 
         return httpSecurity
+                .addFilterBefore(correlationIdFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(loggingFilter, UsernamePasswordAuthenticationFilter.class)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
