@@ -41,23 +41,32 @@ public class LoggingFilter extends OncePerRequestFilter {
     }
 
     private void logRequest(ContentCachingRequestWrapper request) {
-        String body = getRequestBody(request);
-        log.info("Incoming request data - method: {}, uri: {}, correlationId: {}, headers: {}, body: {}",
-                request.getMethod(), request.getRequestURI(), MDC.get("correlationId"), getHeaders(request), body);
+        String requestBody = getRequestBody(request);
+        String prettyRequestBody = prettyPrintJson(requestBody);
+
+        log.info("Incoming request data: {{\n  \"method\": \"{}\",\n  \"uri\": \"{}\",\n  \"correlationId\": \"{}\",\n  \"headers\": {},\n  \"body\": {}\n}}",
+                request.getMethod(), request.getRequestURI(), MDC.get("correlationId"), getHeaders(request), indentJson(prettyRequestBody));
     }
 
     private void logResponse(ContentCachingResponseWrapper response) throws IOException {
-        String body = getResponseBody(response);
-        log.info("Outgoing response data - status: {}, correlationId: {}, body: {}", response.getStatus(), MDC.get("correlationId"), body);
+        String responseBody = getResponseBody(response);
+        String prettyResponseBody = prettyPrintJson(responseBody);
+
+        log.info("Outgoing response data: {{\n  \"status\": {},\n  \"correlationId\": \"{}\",\n  \"body\": {}\n}}",
+                response.getStatus(), MDC.get("correlationId"), indentJson(prettyResponseBody));
     }
 
     private String getHeaders(HttpServletRequest request) {
-        StringBuilder headers = new StringBuilder();
+        StringBuilder headers = new StringBuilder("{\n");
         Enumeration<String> headerNames = request.getHeaderNames();
         while (headerNames.hasMoreElements()) {
             String headerName = headerNames.nextElement();
-            headers.append(headerName).append(": ").append(request.getHeader(headerName)).append(", ");
+            headers.append("    \"").append(headerName).append("\": \"").append(request.getHeader(headerName)).append("\",\n");
         }
+        if (headers.length() > 2) {
+            headers.setLength(headers.length() - 2);
+        }
+        headers.append("\n  }");
         return headers.toString();
     }
 
@@ -68,17 +77,28 @@ public class LoggingFilter extends OncePerRequestFilter {
 
     private String getResponseBody(ContentCachingResponseWrapper response) throws IOException {
         byte[] content = response.getContentAsByteArray();
-        String responseBody = new String(content, StandardCharsets.UTF_8);
-        return prettyPrintJson(responseBody);
+        return new String(content, StandardCharsets.UTF_8);
     }
 
     private String prettyPrintJson(String json) {
         try {
             Object jsonObject = objectMapper.readValue(json, Object.class);
-            return objectMapper.writeValueAsString(jsonObject);
+            return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
         } catch (IOException e) {
             log.error("Failed to pretty print JSON", e);
             return json;
         }
+    }
+
+    private String indentJson(String json) {
+        StringBuilder indentedJson = new StringBuilder();
+        String[] lines = json.split("\n");
+        for (String line : lines) {
+            indentedJson.append("  ").append(line).append("\n");
+        }
+        if (!indentedJson.isEmpty()) {
+            indentedJson.setLength(indentedJson.length() - 1);
+        }
+        return indentedJson.toString();
     }
 }
