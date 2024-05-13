@@ -48,10 +48,9 @@ class ChildList extends StatelessWidget {
           } else {
             var child = children[index];
             // 자녀 프로필 이미지가 null인 경우 기본 이미지 사용
-            var childImage = child.profileImage != null
-                ? AssetImage(child.profileImage)
-                : const AssetImage(
-                    'assets/default_image.png'); // 기본 이미지 경로를 확인하세요.
+            ImageProvider childImage = child.profileImage != null && child.profileImage!.isNotEmpty
+                ? AssetImage(child.profileImage!)
+                : const AssetImage('assets/default_image.png'); // 기본 이미지 경로를 확인하세요.
 
             return SizedBox(
               width: 80,

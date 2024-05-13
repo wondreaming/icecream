@@ -33,6 +33,10 @@ class UserService {
   Future<void> _saveTokens(String accessToken, String refreshToken) async {
     await _writeToSecureStorage('accessToken', accessToken);
     await _writeToSecureStorage('refreshToken', refreshToken);
+
+    // 저장된 refresh_token 확인
+    String? storedRefreshToken = await _secureStorage.read(key: 'refreshToken');
+    print("Stored refresh token: $storedRefreshToken");
   }
 
   // 부모 회원가입
@@ -89,43 +93,58 @@ class UserService {
     }
   }
 
-
   // 자동 로그인
   Future<void> autoLogin(UserProvider userProvider) async {
     String deviceId = await getDeviceId();
     String refreshToken = await _readFromSecureStorage('refreshToken');
     String fcmToken = await _readFromSecureStorage('fcmToken');
+    print(deviceId);
+    print(refreshToken);
+    print(fcmToken);
 
-    if (deviceId.isNotEmpty && refreshToken.isNotEmpty && fcmToken.isNotEmpty) {
-      try {
-        final response = await _dio.post(
-          '/auth/device/login',
-          data: {
-            'device_id': deviceId,
-            'refresh_token': refreshToken,
-            'fcm_token': fcmToken,
-          },
+    if (deviceId.isNotEmpty && fcmToken.isNotEmpty) {
+    Map<String, dynamic> postData = {
+      'device_id': deviceId,
+      'fcm_token': fcmToken,
+      'refresh_token': refreshToken.isNotEmpty ? refreshToken : ""
+    };
+
+    try {
+      final response = await _dio.post(
+        '/auth/device/login',
+        data: postData,
+        options: Options(headers: {'no-token': true}),
+      );
+
+      if (response.statusCode == 200) {
+        // 토큰 저장
+        await _saveTokens(
+          response.data['data']['access_token'],
+          response.data['data']['refresh_token'],
         );
-        if (response.statusCode == 200) {
-          // 토큰 저장
-          await _saveTokens(
-            response.data['data']['access_token'],
-            response.data['data']['refresh_token'],
-          );
 
-          // 사용자 및 자녀 정보 Provider에 저장
+        // 사용자 데이터 Provider에 저장
+        userProvider.setUserData(response.data['data']);
+
+        // 부모인지 자녀인지 구분
+        if (response.data['data'].containsKey('children')) {
+          // 부모 페이지로 이동 로직
+          print("User is a Parent");
         } else {
-          userProvider.clearUserData();
-          throw Exception('자동로그인에 실패했습니다');
+          // 자녀 페이지로 이동 로직
+          print("User is a Child");
         }
-      } catch (e) {
+      } else {
         userProvider.clearUserData();
-        throw Exception('자동로그인에 실패했습니다: $e');
+        throw Exception('자동로그인에 실패했습니다');
       }
-    }
-    else {
+    } catch (e) {
       userProvider.clearUserData();
+      throw Exception('자동로그인에 실패했습니다: $e');
     }
+  } else {
+    userProvider.clearUserData();
+  }
   }
 
   // 로그인 ID 중복 확인
