@@ -87,7 +87,7 @@ class ChildReward extends StatelessWidget {
           ),
           SizedBox(
             height: maxHeight,
-            child: DailyGoalWidget(dailyGoal: dailyGoal),
+            child: ChildDailyGoal(dailyGoal: dailyGoal),
           ),
           const Divider(
             thickness: 1,

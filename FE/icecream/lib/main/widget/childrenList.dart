@@ -1,33 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:icecream/provider/user_provider.dart';
 
 class ChildList extends StatelessWidget {
-  ChildList({super.key});
-
-  final List<Map<String, String>> children = [
-    {'name': '김싸피', 'image': 'asset/img/picture.JPEG'},
-    {'name': '이싸피', 'image': 'asset/img/picture.JPEG'},
-    {'name': '이싸피', 'image': 'asset/img/picture.JPEG'},
-    {'name': '이싸피', 'image': 'asset/img/picture.JPEG'},
-    {'name': '이싸피', 'image': 'asset/img/picture.JPEG'},
-    {'name': '이싸피', 'image': 'asset/img/picture.JPEG'},
-    {'name': '이싸피', 'image': 'asset/img/picture.JPEG'},
-    {'name': '최싸피', 'image': 'asset/img/picture.JPEG'},
-    // Add more children if needed
-  ];
+  const ChildList({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+    final children = userProvider.children;
+
+    print("자녀수: ${children.length}"); // 콘솔에 자녀 수 출력
+
     return Container(
-      height: 100, // Adjusted height to prevent overflow
-      color: Colors.yellow, // Background color for the entire list
-      padding: const EdgeInsets.symmetric(vertical: 10), // Padding adjusted
+      height: 100,
+      color: Colors.yellow,
+      padding: const EdgeInsets.symmetric(vertical: 10),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: children.length + 1, // Account for the additional IconButton
+        itemCount: children.length + 1,
         itemBuilder: (context, index) {
           if (index == children.length) {
+            // 자녀 추가 버튼
             return Container(
-              width: 50, // Adjust width as necessary for the button
+              width: 50,
               alignment: Alignment.center,
               child: Stack(
                 alignment: Alignment.center,
@@ -41,13 +37,9 @@ class ChildList extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(
-                      Icons.add,
-                      size: 24, // Reduced icon size for better fit
-                      color: Colors.black,
-                    ),
+                    icon: const Icon(Icons.add, size: 24, color: Colors.black),
                     onPressed: () {
-                      // Action for adding a new child
+                      // 자녀 추가 로직
                     },
                   ),
                 ],
@@ -55,21 +47,25 @@ class ChildList extends StatelessWidget {
             );
           } else {
             var child = children[index];
+            // 자녀 프로필 이미지가 null인 경우 기본 이미지 사용
+            var childImage = child.profileImage != null
+                ? AssetImage(child.profileImage)
+                : const AssetImage(
+                    'assets/default_image.png'); // 기본 이미지 경로를 확인하세요.
+
             return SizedBox(
               width: 80,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const SizedBox(
-                    height: 7,
-                  ),
+                  const SizedBox(height: 7),
                   CircleAvatar(
-                    radius: 25, // Radius reduced to fit within the new height
-                    backgroundImage: AssetImage(child['image']!),
+                    radius: 25,
+                    backgroundImage: childImage,
                   ),
-                  const SizedBox(height: 5), // Spacing reduced
+                  const SizedBox(height: 5),
                   Text(
-                    child['name']!,
+                    child.username,
                     style: const TextStyle(fontSize: 12),
                     overflow: TextOverflow.ellipsis,
                   ),
