@@ -1,21 +1,28 @@
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:developer';
 
 class CustomDio {
   // baseurl 설정
   static const String baseUrl = "http://k10e202.p.ssafy.io:8080/api";
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
   Dio createDio() {
     final Dio dio = Dio(BaseOptions(baseUrl: baseUrl));
-    dio.options.validateStatus = (status) => true;  // 모든 상태 코드를 유효한 것으로 처리
-    
+    dio.options.validateStatus = (status) => true; // 모든 상태 코드를 유효한 것으로 처리
+
     // 인터셉터 추가
     dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
         print('Sending request to ${options.uri.toString()}');
+
         // SharedPreferences에서 토큰 불러오기
-        final prefs = await SharedPreferences.getInstance();
-        final String? accessToken = prefs.getString('accessToken');
+        // final prefs = await SharedPreferences.getInstance();
+        // final String? accessToken = prefs.getString('accessToken');
+
+        // FlutterSecureStorage에서 토큰 불러오기
+        final String? accessToken =
+            await _secureStorage.read(key: 'accessToken');
 
         // 'no-token' 헤더가 true일 경우 토큰을 추가하지 않습니다.
         if (options.headers['no-token'] != true) {
@@ -51,7 +58,8 @@ class CustomDio {
                 await prefs.setString('accessToken', newAccessToken);
 
                 final RequestOptions requestOptions = e.requestOptions;
-                requestOptions.headers['Authorization'] = 'Bearer $newAccessToken';
+                requestOptions.headers['Authorization'] =
+                    'Bearer $newAccessToken';
 
                 return dio.fetch(requestOptions).then(
                       (r) => handler.resolve(r),
