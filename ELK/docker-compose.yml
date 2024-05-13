@@ -41,7 +41,7 @@ services:
       - "5044:5044"
       - "9600:9600"
     volumes:
-      - ./var/jenkins_home/workspace/ELK/ELK/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+      - /var/jenkins_home/workspace/ELK/ELK/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
     depends_on:
       - elasticsearch
 
