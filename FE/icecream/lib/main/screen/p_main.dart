@@ -52,29 +52,11 @@ class _PMainState extends State<PMain> {
       child: Scaffold(
         body: Column(
           children: [
-            ExpansionPanelList(
-              expansionCallback: (int index, bool isExpanded) {
-                setState(() {
-                  _isExpanded = !_isExpanded;
-                });
-              },
-              children: [
-                ExpansionPanel(
-                  headerBuilder: (BuildContext context, bool isExpanded) {
-                    return Container(
-                      height: 55, // 헤더의 높이를 명확하게 고정합니다.
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16), // 좌우 패딩 설정
-                      alignment: Alignment.centerLeft,
-                      child:
-                          const Text('자녀 목록', style: TextStyle(fontSize: 16)),
-                    );
-                  },
-                  body: ChildList(),
-                  isExpanded: _isExpanded,
-                  canTapOnHeader: true,
-                ),
-              ],
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey[300]!, width: 1),
+              ),
+              child: _buildExpansionPanelList(),
             ),
             Expanded(
               child: FutureBuilder(
@@ -114,6 +96,27 @@ class _PMainState extends State<PMain> {
         ),
         floatingActionButtonLocation: const StartFloatFabLocation(),
       ),
+    );
+  }
+
+  Widget _buildExpansionPanelList() {
+    return ExpansionPanelList(
+      expansionCallback: (int index, bool isExpanded) {
+        setState(() {
+          _isExpanded = !_isExpanded;
+        });
+      },
+      children: [
+        ExpansionPanel(
+          headerBuilder: (BuildContext context, bool isExpanded) {
+            return const ListTile(
+              title: Text('자녀 목록', style: TextStyle(fontSize: 16)),
+            );
+          },
+          body: const ChildList(),
+          isExpanded: _isExpanded,
+        ),
+      ],
     );
   }
 

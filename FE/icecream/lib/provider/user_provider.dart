@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class Child {
   final int userId;
-  final String profileImage;
+  final profileImage;
   final String username;
   final String phoneNumber;
 

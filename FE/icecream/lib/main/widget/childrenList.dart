@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:icecream/provider/user_provider.dart';
+import 'package:go_router/go_router.dart';
 
 class ChildList extends StatelessWidget {
   const ChildList({super.key});
@@ -10,18 +11,17 @@ class ChildList extends StatelessWidget {
     final userProvider = Provider.of<UserProvider>(context);
     final children = userProvider.children;
 
-    print("자녀수: ${children.length}"); // 콘솔에 자녀 수 출력
+    print("자녀수: ${children.length}");
 
     return Container(
       height: 100,
-      color: Colors.yellow,
+      color: Colors.amber[100],
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: children.length + 1,
         itemBuilder: (context, index) {
           if (index == children.length) {
-            // 자녀 추가 버튼
             return Container(
               width: 50,
               alignment: Alignment.center,
@@ -39,7 +39,8 @@ class ChildList extends StatelessWidget {
                   IconButton(
                     icon: const Icon(Icons.add, size: 24, color: Colors.black),
                     onPressed: () {
-                      // 자녀 추가 로직
+                      // GoRouter를 사용하여 QRScanPage로 이동합니다.
+                      context.go('/qrscan_page');
                     },
                   ),
                 ],
@@ -47,11 +48,9 @@ class ChildList extends StatelessWidget {
             );
           } else {
             var child = children[index];
-            // 자녀 프로필 이미지가 null인 경우 기본 이미지 사용
             var childImage = child.profileImage != null
                 ? AssetImage(child.profileImage)
-                : const AssetImage(
-                    'assets/default_image.png'); // 기본 이미지 경로를 확인하세요.
+                : const AssetImage('asset/img/picture.JPEG');
 
             return SizedBox(
               width: 80,
