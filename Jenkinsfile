@@ -11,20 +11,12 @@ pipeline {
             steps {
                 withCredentials([
                     file(credentialsId: 'ENV-ELK', variable: 'ENV_ELK'),
-                    file(credentialsId: 'CONF-ELK', variable: 'CONF_ELK')
-                ]) {
+                    ]) {
 
-                    script{
+                    script {
                         sh 'cp "${ENV_ELK}" ELK/.env'
-                        sh 'cp "${CONF_ELK}" ELK/logstash.conf'
-                        // 파일 경로 및 권한 확인
-                        sh 'chmod 644 ELK/logstash.conf'
-                        sh 'chmod 644 ELK/.env'
-                        sh 'chmod 755 ELK'
-                        sh 'ls -l ELK/logstash.conf'
-                        sh 'cat ELK/logstash.conf'
                     }
-                } 
+                }   
             }
         }
 
