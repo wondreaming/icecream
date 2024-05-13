@@ -51,7 +51,7 @@ class _NotiState extends State<Noti> {
 
   Widget _buildNotificationList() {
     if (_notificationModel == null || _notificationModel!.data!.isEmpty) {
-      return const Text('No notifications available');
+      return const Text('알람이 없습니다.');
     }
 
     Map<String, List<NotificationData>> groupedData =

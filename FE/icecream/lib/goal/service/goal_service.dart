@@ -16,22 +16,18 @@ class GoalService {
           'data': response.data['data']
         };
       } else {
-        return {
-          'status': response.statusCode,
-          'message': response.data['message'] ?? '데이터 로드 실패',
-          'data': []
-        };
+        throw Exception(response.data['message'] ?? '데이터 로드 실패');
       }
     } catch (e) {
       print('Failed to fetch goals: $e');
-      return {'status': 500, 'message': '서버 오류가 발생했습니다.', 'data': []};
+      throw Exception('서버 오류가 발생했습니다.');
     }
   }
 
+  // 새로운 목표 추가
   Future<Response> addGoal(Map<String, dynamic> goalData) async {
     try {
-      Response response = await _dio.post('/goal', data: goalData);
-      return response;
+      return await _dio.post('/goal', data: goalData);
     } catch (e) {
       print('Failed to add goal: $e');
       throw Exception('Failed to add goal');
