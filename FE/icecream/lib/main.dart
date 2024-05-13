@@ -285,12 +285,6 @@ class _MyAppState extends State<MyApp> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     try {
       await _userService.autoLogin(userProvider);
-      // 부모/자녀 페이지로 이동
-      // if (userProvider.isParent) {
-      //   context.go('/parents');
-      // } else {
-      //   context.go('/child');
-      // }
     } catch (e) {
       debugPrint('Auto-login failed: $e');
     }
@@ -298,13 +292,18 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<void>(
-      future: _autoLoginFuture,
-      builder: (context, snapshot) {
-        return MaterialApp.router(
-          routerConfig: router,
-          debugShowCheckedModeBanner: false,
-        );
+    final userProvider = Provider.of<UserProvider>(context);
+
+    return MaterialApp.router(
+      routerConfig: router,
+      debugShowCheckedModeBanner: false,
+      builder: (context, child) {
+        // 자동 로그인 상태에 따라서 페이지 이동
+        if (userProvider.isLoggedIn) {
+          return userProvider.isParent ? const PHome() : const CHome();
+        } else {
+          return child ?? Container();
+        }
       },
     );
   }

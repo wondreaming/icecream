@@ -89,6 +89,7 @@ class UserService {
     }
   }
 
+
   // 자동 로그인
   Future<void> autoLogin(UserProvider userProvider) async {
     String deviceId = await getDeviceId();
@@ -114,11 +115,16 @@ class UserService {
 
           // 사용자 및 자녀 정보 Provider에 저장
         } else {
-          throw Exception('자동로그인에 실패했어요');
+          userProvider.clearUserData();
+          throw Exception('자동로그인에 실패했습니다');
         }
       } catch (e) {
-        throw Exception('자동로그인에 실패했어요: $e');
+        userProvider.clearUserData();
+        throw Exception('자동로그인에 실패했습니다: $e');
       }
+    }
+    else {
+      userProvider.clearUserData();
     }
   }
 
