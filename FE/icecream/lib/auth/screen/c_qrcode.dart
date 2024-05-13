@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:icecream/noti/models/notification_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
@@ -13,8 +14,7 @@ class QRCodePage extends StatefulWidget {
 }
 
 class _QRCodePageState extends State<QRCodePage> {
-  String deviceId = '';
-  String fcmToken = '';
+  final storage = FlutterSecureStorage(); // Secure Storage 객체 생성
   String _qrData = '';
 
   @override
@@ -24,9 +24,9 @@ class _QRCodePageState extends State<QRCodePage> {
   }
 
   Future<void> _generateQrData() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    String deviceId = prefs.getString('deviceId') ?? 'No device ID';
-    String fcmToken = prefs.getString('fcmToken') ?? 'No FCM token';
+    // Secure Storage에서 값 가져오기
+    String deviceId = await storage.read(key: 'deviceId') ?? 'No device ID';
+    String fcmToken = await storage.read(key: 'fcmToken') ?? 'No FCM token';
     // String phoneNum = '01012345678';
 
     Map<String, String> data = {
