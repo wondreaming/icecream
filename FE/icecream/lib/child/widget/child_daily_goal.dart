@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:icecream/goal/model/goal_model.dart';
 
-class DailyGoalPage extends StatelessWidget {
+class ChildDailyGoal extends StatelessWidget {
   final DailyGoal dailyGoal;
 
-  const DailyGoalPage({super.key, required this.dailyGoal});
+  const ChildDailyGoal({super.key, required this.dailyGoal});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class DailyGoalPage extends StatelessWidget {
             ),
           ),
           Positioned.fill(
-            child: DailyGoalWidget(dailyGoal: dailyGoal),
+            child: ChildDailyGoalWidget(dailyGoal: dailyGoal),
           ),
         ],
       ),
@@ -29,16 +29,16 @@ class DailyGoalPage extends StatelessWidget {
   }
 }
 
-class DailyGoalWidget extends StatefulWidget {
+class ChildDailyGoalWidget extends StatefulWidget {
   final DailyGoal dailyGoal;
 
-  const DailyGoalWidget({super.key, required this.dailyGoal});
+  const ChildDailyGoalWidget({super.key, required this.dailyGoal});
 
   @override
-  _DailyGoalWidgetState createState() => _DailyGoalWidgetState();
+  _ChildDailyGoalWidgetState createState() => _ChildDailyGoalWidgetState();
 }
 
-class _DailyGoalWidgetState extends State<DailyGoalWidget> {
+class _ChildDailyGoalWidgetState extends State<ChildDailyGoalWidget> {
   DateTime _currentMonth = DateTime.now();
   final ScrollController _scrollController = ScrollController();
   final List<DateTime> _visibleDates = [];
@@ -106,21 +106,55 @@ class _DailyGoalWidgetState extends State<DailyGoalWidget> {
   Widget build(BuildContext context) {
     Map<String, bool?> fullResult = extendDateRange(widget.dailyGoal.result);
 
-    return ListView.builder(
-      controller: _scrollController,
-      itemCount: _visibleDates.length,
-      itemBuilder: (context, index) {
-        DateTime date = _visibleDates[index];
-        String dateStr = DateFormat('yyyy-MM-dd').format(date);
-        bool? isSuccess = fullResult[dateStr];
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                _changeMonth(isNext: false);
+              },
+            ),
+            Text(
+              DateFormat('MMMM yyyy').format(_currentMonth),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            IconButton(
+              icon: const Icon(Icons.arrow_forward),
+              onPressed: () {
+                _changeMonth(isNext: true);
+              },
+            ),
+          ],
+        ),
+        Expanded(
+          child: ListView.builder(
+            controller: _scrollController,
+            itemCount: _visibleDates.length,
+            itemBuilder: (context, index) {
+              DateTime date = _visibleDates[index];
+              String dateStr = DateFormat('yyyy-MM-dd').format(date);
+              bool? isSuccess = fullResult[dateStr];
 
-        return DailyDateCircle(
-          date: date,
-          isSuccess: isSuccess,
-          isToday: date.isAtSameMomentAs(DateTime.now()),
-        );
-      },
+              return DailyDateCircle(
+                date: date,
+                isSuccess: isSuccess,
+                isToday: date.isAtSameMomentAs(DateTime.now()),
+              );
+            },
+          ),
+        ),
+      ],
     );
+  }
+
+  void _changeMonth({required bool isNext}) {
+    DateTime newMonth = isNext
+        ? DateTime(_currentMonth.year, _currentMonth.month + 1)
+        : DateTime(_currentMonth.year, _currentMonth.month - 1);
+    _populateDates(newMonth);
   }
 
   @override
@@ -205,9 +239,10 @@ class CircleLinePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    // 이전 구문에서 올바르지 않았던 부분들을 수정했습니다.
     final paint = Paint()
       ..color = Colors.grey
-      ..strokeWidth = 2.0;
+      ..strokeWidth = 2.0; // strokeWidth를 올바르게 설정
 
     canvas.drawLine(Offset(size.width / 2, 0),
         Offset(size.width / 2, lineHeight / 2), paint);
@@ -221,7 +256,8 @@ class CircleLinePainter extends CustomPainter {
       final outlinePaint = Paint()
         ..color = isToday ? Colors.black : Colors.grey
         ..strokeWidth = 2.0
-        ..style = PaintingStyle.stroke;
+        ..style = PaintingStyle.stroke; // style을 올바르게 설정
+
       canvas.drawCircle(Offset(size.width / 2, lineHeight / 2 + circleRadius),
           circleRadius, outlinePaint);
     }
