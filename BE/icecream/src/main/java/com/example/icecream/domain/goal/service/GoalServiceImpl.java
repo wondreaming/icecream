@@ -4,7 +4,6 @@ import com.example.icecream.common.exception.BadRequestException;
 import com.example.icecream.common.exception.DataAccessException;
 import com.example.icecream.common.exception.DataConflictException;
 import com.example.icecream.common.exception.NotFoundException;
-import com.example.icecream.common.service.CommonService;
 import com.example.icecream.domain.goal.document.GoalStatus;
 import com.example.icecream.domain.goal.dto.CreateGoalDto;
 import com.example.icecream.domain.goal.dto.GoalStatusDto;
@@ -14,8 +13,7 @@ import com.example.icecream.domain.goal.entity.Goal;
 import com.example.icecream.domain.goal.error.GoalErrorCode;
 import com.example.icecream.domain.goal.repository.mongodb.GoalStatusRepository;
 import com.example.icecream.domain.goal.repository.postgres.GoalRepository;
-import com.example.icecream.domain.user.repository.ParentChildMappingRepository;
-import com.example.icecream.domain.user.repository.UserRepository;
+import com.example.icecream.domain.user.util.UserValidationUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,18 +22,18 @@ import java.time.Period;
 import java.util.*;
 
 @Service
-public class GoalServiceImpl extends CommonService implements GoalService {
+public class GoalServiceImpl implements GoalService {
 
     private final GoalRepository goalRepository;
     private final GoalStatusRepository goalStatusRepository;
+    private final UserValidationUtils userValidationUtils;
 
-    public GoalServiceImpl(UserRepository userRepository,
-                           ParentChildMappingRepository ParentChildMappingRepository,
+    public GoalServiceImpl(UserValidationUtils userValidationUtils,
                            GoalRepository goalRepository,
                            GoalStatusRepository goalStatusRepository) {
-        super(userRepository, ParentChildMappingRepository);
         this.goalRepository = goalRepository;
         this.goalStatusRepository = goalStatusRepository;
+        this.userValidationUtils = userValidationUtils;
     }
 
     @Override
@@ -50,7 +48,7 @@ public class GoalServiceImpl extends CommonService implements GoalService {
                 break;
             }
         }
-        if (!isParentUserWithPermission(parentId, createGoalDto.getUserId())) {
+        if (!userValidationUtils.isParentUserWithPermission(parentId, createGoalDto.getUserId())) {
             throw new DataAccessException(GoalErrorCode.REGISTER_GOAL_ACCESS_DENIED.getMessage());
         } else if (isActive) {
             throw new DataConflictException(GoalErrorCode.REGISTER_GOAL_DUPLICATED.getMessage());
@@ -71,7 +69,7 @@ public class GoalServiceImpl extends CommonService implements GoalService {
         Goal goal = goalRepository.findById(updateGoalDto.getGoalId()).orElse(null);
         if (goal == null) {
             throw new NotFoundException(GoalErrorCode.NOT_FOUND_GOAL.getMessage());
-        } else if (!isParentUserWithPermission(parentId, goal.getUserId())){
+        } else if (!userValidationUtils.isParentUserWithPermission(parentId, goal.getUserId())){
             throw new DataAccessException(GoalErrorCode.UPDATE_GOAL_ACCESS_DENIED.getMessage());
         } else if (!goal.getIsActive()) {
             throw new BadRequestException(GoalErrorCode.UPDATE_IS_NOT_ACTIVED_GOAL.getMessage());
@@ -84,7 +82,7 @@ public class GoalServiceImpl extends CommonService implements GoalService {
 
     @Override
     public List<Goal> getGoals(int userId, Integer selfId) {
-        if (!isParentUserWithPermission(selfId, userId) && !selfId.equals(userId)) {
+        if (!userValidationUtils.isParentUserWithPermission(selfId, userId) && !selfId.equals(userId)) {
             throw new DataAccessException(GoalErrorCode.GET_GOAL_ACCESS_DENIED.getMessage());
         }
         return goalRepository.findAllByUserId(userId);
@@ -136,7 +134,7 @@ public class GoalServiceImpl extends CommonService implements GoalService {
     @Transactional
     public void updateGoalStatus(UpdateGoalStatusDto updateGoalStatusDto, Integer parentId) {
         GoalStatus goalStatus = goalStatusRepository.findByUserId(updateGoalStatusDto.getUserId());
-        if (!isParentUserWithPermission(parentId, updateGoalStatusDto.getUserId())) {
+        if (!userValidationUtils.isParentUserWithPermission(parentId, updateGoalStatusDto.getUserId())) {
             throw new DataAccessException(GoalErrorCode.UPDATE_GOAL_STATUS_ACCESS_DENIED.getMessage());
         } else if (!goalStatus.getResult().containsKey(updateGoalStatusDto.getDate())) {
             throw new NotFoundException(GoalErrorCode.UPDATE_GOAL_STATUS_NOT_FOUND.getMessage());
