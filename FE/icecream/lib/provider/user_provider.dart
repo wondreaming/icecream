@@ -38,6 +38,7 @@ class UserProvider extends ChangeNotifier {
   String _phoneNumber = '';
   String _profileImage = '';
   bool _isParent = false;
+  bool _isLoggedIn = false;
   List<Child> _children = [];
 
   String get username => _username;
@@ -45,6 +46,7 @@ class UserProvider extends ChangeNotifier {
   String get phoneNumber => _phoneNumber;
   String get profileImage => _profileImage;
   bool get isParent => _isParent;
+  bool get isLoggedIn => _isLoggedIn;
   List<Child> get children => _children;
 
   void setUserData(Map<String, dynamic> userData) {
@@ -53,6 +55,7 @@ class UserProvider extends ChangeNotifier {
     _phoneNumber = userData['phone_number'];
     _profileImage = userData['profile_image'] ?? '';
     _isParent = userData.containsKey('children');
+    _isLoggedIn = true;
 
     if (_isParent) {
       _children = (userData['children'] as List<dynamic>)
@@ -71,6 +74,7 @@ class UserProvider extends ChangeNotifier {
     _profileImage = '';
     _children = [];
     _isParent = false;
+    _isLoggedIn = false;
     notifyListeners();
   }
 }
