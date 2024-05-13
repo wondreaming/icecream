@@ -12,6 +12,7 @@ public interface UserRepository extends JpaRepository<User, Integer>{
     Optional<User> findByIdAndIsDeletedFalse(int id);
     Optional<User> findByLoginIdAndIsDeletedFalse(String loginId);
     Optional<User> findByDeviceIdAndIsDeletedFalse(String deviceId);
+    boolean existsByIdAndIsDeletedFalse(int id);
     boolean existsByLoginIdAndIsDeletedFalse(String loginId);
 
     List<User> findAllByIsParentAndIsDeletedFalse(boolean isParent);
