@@ -20,6 +20,15 @@ pipeline {
             }
         }
 
+        // logstash.conf 파일 경로 확인
+        stage('Check logstash.conf') {
+            steps {
+                script {
+                    sh 'ls -l ELK/logstash.conf'
+                }
+            }
+        }
+
         // 배포
         stage('Deploy ELK') {
             steps {
