@@ -15,6 +15,8 @@ pipeline {
 
                     script {
                         sh 'cp "${ENV_ELK}" ELK/.env'
+                        sh 'chmod 644 ELK/logstash.conf'
+                        sh 'chmod 755 ELK'
                     }
                 }   
             }
