@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         HOME_PATH = '/home/ubuntu'
+        DOCKER_COMPOSE_VERSION = '1.25.0'
     }
 
     stages {
