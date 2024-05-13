@@ -45,13 +45,13 @@ public class GlobalExceptionHandler {
         return ApiResponseDto.unauthorized(e.getMessage());
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponseDto<String>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        return ApiResponseDto.badRequest(e.getBindingResult().getAllErrors().get(0).getDefaultMessage());
-    }
-
-    @ExceptionHandler(HandlerMethodValidationException.class)
-    public ResponseEntity<ApiResponseDto<String>> handleMethodArgumentNotValidException(HandlerMethodValidationException e) {
-        return ApiResponseDto.badRequest(e.getMessage());
-    }
+//    @ExceptionHandler(MethodArgumentNotValidException.class)
+//    public ResponseEntity<ApiResponseDto<String>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+//        return ApiResponseDto.badRequest(e.getBindingResult().getAllErrors().get(0).getDefaultMessage());
+//    }
+//
+//    @ExceptionHandler(HandlerMethodValidationException.class)
+//    public ResponseEntity<ApiResponseDto<String>> handleMethodValidationException(HandlerMethodValidationException e) {
+//        return ApiResponseDto.badRequest(e.getMessage());
+//    }
 }

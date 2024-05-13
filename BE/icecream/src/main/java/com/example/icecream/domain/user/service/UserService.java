@@ -1,6 +1,7 @@
 package com.example.icecream.domain.user.service;
 
 import com.example.icecream.common.exception.*;
+import com.example.icecream.domain.user.auth.dto.ChildrenResponseDto;
 import com.example.icecream.domain.user.dto.SignUpChildRequestDto;
 import com.example.icecream.domain.user.dto.SignUpParentRequestDto;
 import com.example.icecream.domain.user.entity.ParentChildMapping;
@@ -57,7 +58,8 @@ public class UserService {
 
     @Transactional
     public void deleteParent(int parentId) {
-        userValidationUtils.isValidUser(parentId);
+        User parent = userValidationUtils.isValidUser(parentId);
+
         List<User> children = parentChildMappingRepository.findChildrenByParentId(parentId);
         if (children != null) {
             for (User child : children) {
@@ -67,16 +69,48 @@ public class UserService {
         }
 
         parentChildMappingRepository.deleteByParentId(parentId);
-        User parent = userRepository.findById(parentId)
-                .orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND.getMessage()));
 
         parent.deleteUser();
         userRepository.save(parent);
     }
 
+    public List<ChildrenResponseDto> getChild(int parentId) {
+
+        List<User> children = parentChildMappingRepository.findChildrenByParentId(parentId);
+        return children.stream()
+                .map(child -> new ChildrenResponseDto(child.getId(), child.getProfileImage(), child.getUsername(), child.getPhoneNumber()))
+                .toList();
+    }
+
+    @Transactional
+    public List<ChildrenResponseDto> shareChild(String shareLoginId, int userId) {
+        userRepository.findByLoginIdAndIsDeletedFalse(shareLoginId)
+                .orElseThrow(() -> new NotFoundException(UserErrorCode.SHARE_USER_NOT_FOUND.getMessage()));
+
+        List<User> children = parentChildMappingRepository.findChildrenByParentLoginId(shareLoginId);
+        User parent = userValidationUtils.isValidUser(userId);
+
+        for (User child : children) {
+            try {
+                ParentChildMapping parentChildMapping = ParentChildMapping.builder()
+                        .parent(parent)
+                        .child(child)
+                        .build();
+                parentChildMappingRepository.save(parentChildMapping);
+            } catch (RuntimeException e) {
+                throw new BadRequestException(UserErrorCode.DUPLICATE_MAPPING.getMessage());
+            }
+        }
+
+        return children.stream()
+                .map(child -> new ChildrenResponseDto(child.getId(), child.getProfileImage(), child.getUsername(), child.getPhoneNumber()))
+                .toList();
+    }
+
+
     @Transactional
     public void saveChild(final SignUpChildRequestDto signUpChildRequestDto, int parentId) {
-        User child = userRepository.findByDeviceId(signUpChildRequestDto.getDeviceId())
+        User child = userRepository.findByDeviceIdAndIsDeletedFalse(signUpChildRequestDto.getDeviceId())
                 .orElseGet(() -> {
                     try {
                         User newUser = User.builder()
@@ -93,8 +127,7 @@ public class UserService {
                     }
                 });
 
-        User parent = userRepository.findById(parentId)
-                .orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND.getMessage()));
+        User parent = userValidationUtils.isValidUser(parentId);
 
         ParentChildMapping parentChildMapping = ParentChildMapping.builder()
                 .parent(parent)
@@ -119,8 +152,7 @@ public class UserService {
     }
 
     public void updateChild(int parentId, final UpdateChildRequestDto signUpChildRequestDto) {
-        User child = userRepository.findById(signUpChildRequestDto.getUserId())
-                .orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND.getMessage()));
+        User child = userValidationUtils.isValidUser(signUpChildRequestDto.getUserId());
 
         if (child.getIsParent()) {
             throw new BadRequestException(UserErrorCode.NOT_CHILD.getMessage());
@@ -138,11 +170,9 @@ public class UserService {
 
     @Transactional
     public void deleteChild(int parentId, int childId ) {
+        User child = userValidationUtils.isValidUser(childId);
         userValidationUtils.isValidChild(parentId, childId);
         parentChildMappingRepository.deleteByParentIdAndChildId(parentId, childId);
-
-        User child = userRepository.findById(childId)
-                .orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND.getMessage()));
 
         child.deleteUser();
         userRepository.save(child);
@@ -154,8 +184,7 @@ public class UserService {
 
 
     public void checkPassword(String currentPassword, int userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND.getMessage()));
+        User user = userValidationUtils.isValidUser(userId);
 
         if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
             throw new BadCredentialsException(UserErrorCode.INVALID_CURRENT_PASSWORD.getMessage());
@@ -163,8 +192,7 @@ public class UserService {
     }
 
     public void updatePassword(String newPassword, int userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(UserErrorCode.USER_NOT_FOUND.getMessage()));
+        User user = userValidationUtils.isValidUser(userId);
 
         if (passwordEncoder.matches(newPassword, user.getPassword())) {
             throw new BadRequestException(UserErrorCode.NO_NEW_PASSWORD_PROVIDED.getMessage());
@@ -173,4 +201,41 @@ public class UserService {
         user.updatePassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
+
+    public void updatePhoneNumber(String newPhoneNumber, int userId, int parentId) {
+        User user = userValidationUtils.isValidUser(userId);
+
+        if(!user.getIsParent()){
+            userValidationUtils.isValidChild(parentId, userId);
+        }else if(userId != parentId){
+            throw new BadRequestException(UserErrorCode.NOT_ALLOW.getMessage());
+        }
+
+        user.updatePhoneNumber(newPhoneNumber);
+
+        try{
+            userRepository.save(user);
+        } catch (RuntimeException e) {
+            throw new DataConflictException(UserErrorCode.DUPLICATE_VALUE.getMessage());
+        }
+    }
+
+    public void updateDeviceId(String newDeviceId, int userId, int parentId) {
+        User user = userValidationUtils.isValidUser(userId);
+
+        if(!user.getIsParent()){
+            userValidationUtils.isValidChild(parentId, userId);
+        }else if(userId != parentId){
+            throw new BadRequestException(UserErrorCode.NOT_ALLOW.getMessage());
+        }
+
+        user.updateDeviceId(newDeviceId);
+
+        try{
+            userRepository.save(user);
+        } catch (RuntimeException e) {
+            throw new DataConflictException(UserErrorCode.DUPLICATE_VALUE.getMessage());
+        }
+    }
+
 }

@@ -10,9 +10,10 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer>{
     Optional<User> findByIdAndIsDeletedFalse(int id);
-    Optional<User> findByLoginId(String loginId);
-    Optional<User> findByDeviceId(String deviceId);
-    boolean existsByLoginId(String loginId);
+    Optional<User> findByLoginIdAndIsDeletedFalse(String loginId);
+    Optional<User> findByDeviceIdAndIsDeletedFalse(String deviceId);
+    boolean existsByIdAndIsDeletedFalse(int id);
+    boolean existsByLoginIdAndIsDeletedFalse(String loginId);
 
     List<User> findAllByIsParentAndIsDeletedFalse(boolean isParent);
 }
