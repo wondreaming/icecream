@@ -14,7 +14,7 @@
 
       // 웹캠 접근 요청
       navigator.mediaDevices
-        .getUserMedia({ video: { width: 640, height: 480, facingMode: "environment" } })
+        .getUserMedia({ video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: "environment" } })
         .then(stream => {
           const video = document.getElementById("video");
           video.srcObject = stream;
@@ -56,8 +56,8 @@
           const ctx = canvas.getContext("2d");
 
           setInterval(() => {
-            canvas.width = video.width;
-            canvas.height = video.height;
+            canvas.width = 640;
+            canvas.height = 480;
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             canvas.toBlob(blob => {
               if (!blob) {
