@@ -48,7 +48,7 @@ server.listen(port, "0.0.0.0", () => {
 
 // room에 입장할 수 있는 제한인원 3명으로 설정
 const roomCapacity = { [roomName]: 0 };
-const maxRoomCapacity = 3;
+const maxRoomCapacity = 5;
 
 // router
 app.get("/", (req, res) => {
