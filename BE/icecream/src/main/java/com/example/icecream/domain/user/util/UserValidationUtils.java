@@ -21,6 +21,14 @@ public class UserValidationUtils {
     private final UserRepository userRepository;
     private final ParentChildMappingRepository parentChildMappingRepository;
 
+    public boolean isUserExist(Integer userId) {
+        return userRepository.existsByIdAndIsDeletedFalse(userId);
+    }
+
+    public boolean isParentUserWithPermission(Integer parentId, Integer childId) {
+        return parentChildMappingRepository.existsByParentIdAndChildId(parentId, childId);
+    }
+
     public User isValidUser(int userId) {
         Optional<User> user = userRepository.findByIdAndIsDeletedFalse(userId);
         if (user.isEmpty()) {

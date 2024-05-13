@@ -4,15 +4,14 @@ import com.example.icecream.common.exception.BadRequestException;
 import com.example.icecream.common.exception.DataAccessException;
 import com.example.icecream.common.exception.DataConflictException;
 import com.example.icecream.common.exception.NotFoundException;
-import com.example.icecream.common.service.CommonService;
 import com.example.icecream.domain.map.dto.DestinationModifyDto;
 import com.example.icecream.domain.map.dto.DestinationRegisterDto;
 import com.example.icecream.domain.map.dto.DestinationResponseDto;
 import com.example.icecream.domain.map.entity.Destination;
 import com.example.icecream.domain.map.error.MapErrorCode;
 import com.example.icecream.domain.map.repository.DestinationRepository;
-import com.example.icecream.domain.user.repository.ParentChildMappingRepository;
-import com.example.icecream.domain.user.repository.UserRepository;
+import com.example.icecream.domain.user.util.UserValidationUtils;
+
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
@@ -24,25 +23,25 @@ import java.util.List;
 
 @Transactional(readOnly = true)
 @Service
-public class DestinationServiceImpl extends CommonService implements DestinationService {
+public class DestinationServiceImpl implements DestinationService {
 
     private final DestinationRepository destinationRepository;
     private final GeometryFactory geometryFactory = new GeometryFactory();
+    private final UserValidationUtils userValidationUtils;
 
-    public DestinationServiceImpl(UserRepository userRepository,
-                                  ParentChildMappingRepository parentChildMappingRepository,
+    public DestinationServiceImpl(UserValidationUtils userValidationUtils,
                                   DestinationRepository destinationRepository) {
-        super(userRepository, parentChildMappingRepository);
         this.destinationRepository = destinationRepository;
+        this.userValidationUtils = userValidationUtils;
     }
 
     @Override
     public List<DestinationResponseDto> getDestinations(Integer userId, Integer childId) {
-        if (!isUserExist(childId)) {
+        if (!userValidationUtils.isUserExist(childId)) {
             throw new NotFoundException(MapErrorCode.USER_NOT_FOUND.getMessage());
         }
 
-        if (!isParentUserWithPermission(userId, childId) && !userId.equals(childId)) {
+        if (!userValidationUtils.isParentUserWithPermission(userId, childId) && !userId.equals(childId)) {
             throw new DataAccessException(MapErrorCode.GET_DESTINATION_ACCESS_DENIED.getMessage());
         }
 
@@ -65,7 +64,7 @@ public class DestinationServiceImpl extends CommonService implements Destination
     @Override
     @Transactional
     public void registerDestination(Integer userId, DestinationRegisterDto destinationRegisterDto) {
-        if (!isParentUserWithPermission(userId, destinationRegisterDto.getUserId())) {
+        if (!userValidationUtils.isParentUserWithPermission(userId, destinationRegisterDto.getUserId())) {
             throw new DataAccessException(MapErrorCode.REGISTER_DESTINATION_ACCESS_DENIED.getMessage());
         }
 
@@ -101,7 +100,7 @@ public class DestinationServiceImpl extends CommonService implements Destination
         Destination destination = destinationRepository.findById(destinationModifyDto.getDestinationId())
                 .orElseThrow(() -> new NotFoundException(MapErrorCode.DESTINATION_NOT_FOUND.getMessage()));
 
-        if (!isParentUserWithPermission(userId, destination.getUserId())) {
+        if (!userValidationUtils.isParentUserWithPermission(userId, destination.getUserId())) {
             throw new DataAccessException(MapErrorCode.MODIFY_DESTINATION_ACCESS_DENIED.getMessage());
         }
 
@@ -128,7 +127,7 @@ public class DestinationServiceImpl extends CommonService implements Destination
         Destination destination = destinationRepository.findById(destinationId)
                 .orElseThrow(() -> new NotFoundException(MapErrorCode.DESTINATION_NOT_FOUND.getMessage()));
 
-        if (!isParentUserWithPermission(userId, destination.getUserId())) {
+        if (!userValidationUtils.isParentUserWithPermission(userId, destination.getUserId())) {
             throw new DataAccessException(MapErrorCode.DELETE_DESTINATION_ACCESS_DENIED.getMessage());
         }
 
