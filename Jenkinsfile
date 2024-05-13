@@ -15,8 +15,10 @@ pipeline {
 
                     script {
                         sh 'cp "${ENV_ELK}" ELK/.env'
-                        sh 'chmod 644 ELK/logstash.conf'
-                        sh 'chmod 755 ELK'
+                        // 파일 경로 및 내용 확인
+                        sh 'ls -l ELK/logstash.conf ELK/.env'
+                        sh 'cat ELK/logstash.conf'
+                        sh 'cat ELK/.env'
                     }
                 }   
             }
