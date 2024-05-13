@@ -11,21 +11,14 @@ pipeline {
             steps {
                 withCredentials([
                     file(credentialsId: 'ENV-ELK', variable: 'ENV_ELK'),
+                    file(credentialsId: 'CONF-ELK', variable: 'CONF_ELK')
                     ]) {
 
                 script{
                     sh 'cp "${ENV_ELK}" ELK/.env'
+                    sh 'cp "${CONF_ELK}" ELK/logstash.conf'
                     }
                 }   
-            }
-        }
-
-        // logstash.conf 파일 경로 확인
-        stage('Check logstash.conf') {
-            steps {
-                script {
-                    sh 'ls -l ELK/logstash.conf'
-                }
             }
         }
 
