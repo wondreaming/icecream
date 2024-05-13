@@ -15,10 +15,6 @@ pipeline {
 
                     script {
                         sh 'cp "${ENV_ELK}" ELK/.env'
-                        // 파일 경로 및 내용 확인
-                        sh 'ls -l ELK/logstash.conf ELK/.env'
-                        sh 'cat ELK/logstash.conf'
-                        sh 'cat ELK/.env'
                     }
                 }   
             }
@@ -32,6 +28,8 @@ pipeline {
                     echo 'Deploying ELK...'
                     // 빌드가 진행되면 기존의 컨테이너 중지 및 제거 & 컨테이너가 없어도 실패하지 않고계속 수행
                     sh 'docker-compose down || true'
+                    // 파일 권한 및 경로 확인
+                    sh 'ls -l ./logstash.conf'
                     // 백엔드 이미지 실행
                     sh 'docker-compose up -d'
                 }
