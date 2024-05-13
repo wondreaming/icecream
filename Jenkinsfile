@@ -11,7 +11,8 @@ pipeline {
             steps {
                 withCredentials([
                     file(credentialsId: 'icecream-prod', variable: 'PROD_PROPERTIES'),
-                    file(credentialsId: 'icecream-fcm', variable: 'FCM_JSON')
+                    file(credentialsId: 'icecream-fcm', variable: 'FCM_JSON'),
+                    file(credentialsId: 'icecream-log', variable: 'LOG_SPRING')
                     ]) {
 
                 script{
@@ -21,6 +22,7 @@ pipeline {
                     // Secret File Credential을 사용하여 설정 파일을 Spring 프로젝트의 resources 디렉토리로 복사
                     sh 'cp "${PROD_PROPERTIES}" BE/icecream/src/main/resources/application-prod.properties'
                     sh 'cp "${FCM_JSON}" BE/icecream/src/main/resources/fcm-admin-sdk.json'
+                    sh 'cp "${LOG_SPRING}" BE/icecream/src/main/resources/logback-spring.xml'
                     }
                 }   
             }
