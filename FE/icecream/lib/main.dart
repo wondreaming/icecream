@@ -286,12 +286,6 @@ class _MyAppState extends State<MyApp> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     try {
       await _userService.autoLogin(userProvider);
-      // 부모/자녀 페이지로 이동
-      // if (userProvider.isParent) {
-      //   context.go('/parents');
-      // } else {
-      //   context.go('/child');
-      // }
     } catch (e) {
       debugPrint('Auto-login failed: $e');
     }
