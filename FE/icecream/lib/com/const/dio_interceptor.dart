@@ -8,8 +8,8 @@ class CustomDio {
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
   Dio createDio() {
     final Dio dio = Dio(BaseOptions(baseUrl: baseUrl));
-    dio.options.validateStatus = (status) => true;  // 모든 상태 코드를 유효한 것으로 처리
-    
+    dio.options.validateStatus = (status) => true; // 모든 상태 코드를 유효한 것으로 처리
+
     // 인터셉터 추가
     dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
@@ -50,7 +50,8 @@ class CustomDio {
                 await secureStorage.write(key: 'accessToken', value: newAccessToken);
 
                 final RequestOptions requestOptions = e.requestOptions;
-                requestOptions.headers['Authorization'] = 'Bearer $newAccessToken';
+                requestOptions.headers['Authorization'] =
+                    'Bearer $newAccessToken';
 
                 return dio.fetch(requestOptions).then(
                       (r) => handler.resolve(r),

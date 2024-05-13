@@ -109,23 +109,29 @@ class _GoalState extends State<Goal> {
   }
 
   Widget buildGoalsList() {
-    return ListView.builder(
-      itemCount: goalData.length,
-      itemBuilder: (context, index) {
-        var goal = goalData[index];
-        Map<String, bool> results = goal['result'] != null
-            ? (goal['result'] as Map).map<String, bool>(
-                (key, value) => MapEntry(key as String, value as bool))
-            : {};
+    return Column(
+      children: [
+        Expanded(
+          child: ListView.builder(
+            itemCount: goalData.length,
+            itemBuilder: (context, index) {
+              var goal = goalData[index];
+              Map<String, bool> results = goal['result'] != null
+                  ? (goal['result'] as Map).map<String, bool>(
+                      (key, value) => MapEntry(key as String, value as bool))
+                  : {};
 
-        DailyGoal dailyGoal = DailyGoal(
-          period: goal['period'] as int,
-          record: goal['record'] as int,
-          content: goal['content'] as String,
-          result: results,
-        );
-        return DailyGoalPage(dailyGoal: dailyGoal);
-      },
+              DailyGoal dailyGoal = DailyGoal(
+                period: goal['period'] as int,
+                record: goal['record'] as int,
+                content: goal['content'] as String,
+                result: results,
+              );
+              return DailyGoalPage(dailyGoal: dailyGoal);
+            },
+          ),
+        ),
+      ],
     );
   }
 
