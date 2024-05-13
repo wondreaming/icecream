@@ -24,7 +24,12 @@ pipeline {
         stage('Check logstash.conf') {
             steps {
                 script {
-                    sh 'ls -l ELK/logstash.conf'
+                    sh '''
+                    ls -l ELK/logstash.conf
+                    sudo chown jenkins:jenkins ELK/logstash.conf
+                    sudo chmod 644 ELK/logstash.conf
+                    ls -l ELK/logstash.conf
+                    '''
                 }
             }
         }
