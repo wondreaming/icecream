@@ -11,10 +11,12 @@ pipeline {
             steps {
                 withCredentials([
                     file(credentialsId: 'ENV-ELK', variable: 'ENV_ELK'),
+                    file(credentialsId: 'ELK_COF', variable: 'ELK_COF')
                     ]) {
 
                     script {
                         sh 'cp "${ENV_ELK}" ELK/.env'
+                        sh 'cp "${ELK_COF}" ELK/logstash.conf'
                     }
                 }   
             }
@@ -24,18 +26,26 @@ pipeline {
         stage('Deploy ELK') {
             steps {
                 dir('ELK') {
-                    // 배포 관련 작업을 여기에 추가
-                    echo 'Deploying ELK...'
-                    // 빌드가 진행되면 기존의 컨테이너 중지 및 제거 & 컨테이너가 없어도 실패하지 않고계속 수행
-                    sh 'docker-compose down || true'
-                    // 파일 권한 및 경로 확인
-                    sh 'ls -l ./logstash.conf'
-                    // 백엔드 이미지 실행
-                    sh 'docker-compose up -d'
+                    script {
+                        sh '''
+                            # Build custom Logstash image with the provided logstash.conf
+                            cat <<EOF > Dockerfile.logstash
+                            FROM docker.elastic.co/logstash/logstash:7.10.2
+                            COPY logstash.conf /usr/share/logstash/pipeline/logstash.conf
+                            EOF
+
+                            # Build the custom Logstash image
+                            docker build -t custom-logstash:latest -f Dockerfile.logstash .
+
+                            # Stop and remove existing containers if any
+                            docker-compose down || true
+
+                            # Deploy using Docker Compose
+                            docker-compose up -d
+                        '''
+                    }
                 }
             }
         }
-
     }
 }
-
