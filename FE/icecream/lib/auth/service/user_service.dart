@@ -89,20 +89,6 @@ class UserService {
     }
   }
 
-  // 자녀 데이터 가져오기
-  Future<List<Map<String, dynamic>>> getChildData() async {
-    try {
-      final response = await _dio.get('/users/children');
-      if (response.statusCode == 200) {
-        List<dynamic> data = response.data['data'];
-        return data.map((child) => child as Map<String, dynamic>).toList();
-      } else {
-        throw Exception('Failed to load child data');
-      }
-    } catch (e) {
-      throw Exception('Failed to load child data: $e');
-    }
-  }
 
   // 자동 로그인
   Future<void> autoLogin(UserProvider userProvider) async {
