@@ -41,6 +41,7 @@ public class AuthService {
                 notificationService.saveOrUpdateFcmToken(loginRequestDto);
 
                 return ParentLoginResponseDto.builder()
+                        .userId(user.getId())
                         .username(user.getUsername())
                         .loginId(user.getLoginId())
                         .phoneNumber(user.getPhoneNumber())
