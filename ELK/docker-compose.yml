@@ -29,7 +29,7 @@ services:
       - elasticsearch
 
   logstash:
-    image: docker.elastic.co/logstash/logstash:7.10.2
+    image: custom-logstash:latest
     container_name: logstash
     environment:
       - xpack.monitoring.enabled=true
@@ -40,8 +40,6 @@ services:
     ports:
       - "5044:5044"
       - "9600:9600"
-    volumes:
-      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
     depends_on:
       - elasticsearch
 
