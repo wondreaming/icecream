@@ -113,7 +113,6 @@ class UserService {
           );
 
           // 사용자 및 자녀 정보 Provider에 저장
-          userProvider.setUserData(response.data['data']);
         } else {
           throw Exception('자동로그인에 실패했어요');
         }
