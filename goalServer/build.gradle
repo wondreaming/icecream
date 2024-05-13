@@ -64,19 +64,3 @@ dependencyManagement {
 tasks.named('test') {
 	useJUnitPlatform()
 }
-
-//task checkArtifactoryConnection {
-//	doLast {
-//		configurations.create("tempConfig")
-//		dependencies.add("tempConfig", "com.example:example:1.0.0")
-//		try {
-//			configurations.getByName("tempConfig").resolvedConfiguration
-//			println "Artifactory 연결 성공"
-//		} catch (Exception e) {
-//			println "Artifactory 연결 실패: ${e.message}"
-//		} finally {
-//			configurations.remove(configurations.getByName("tempConfig"))
-//			println "123"
-//		}
-//	}
-//}

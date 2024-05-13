@@ -4,7 +4,6 @@ import com.example.common.exception.BadRequestException;
 import com.example.common.exception.DataAccessException;
 import com.example.common.exception.DataConflictException;
 import com.example.common.exception.NotFoundException;
-import com.example.icecream.common.service.CommonService;
 import com.example.goalserver.goal.document.GoalStatus;
 import com.example.goalserver.goal.dto.CreateGoalDto;
 import com.example.goalserver.goal.dto.GoalStatusDto;
@@ -14,8 +13,7 @@ import com.example.goalserver.goal.entity.Goal;
 import com.example.goalserver.goal.error.GoalErrorCode;
 import com.example.goalserver.goal.repository.mongodb.GoalStatusRepository;
 import com.example.goalserver.goal.repository.postgres.GoalRepository;
-import com.example.icecream.domain.user.repository.ParentChildMappingRepository;
-import com.example.icecream.domain.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,19 +24,11 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class GoalServiceImpl extends CommonService implements GoalService {
+@RequiredArgsConstructor
+public class GoalServiceImpl implements GoalService {
 
     private final GoalRepository goalRepository;
     private final GoalStatusRepository goalStatusRepository;
-
-    public GoalServiceImpl(UserRepository userRepository,
-                           ParentChildMappingRepository ParentChildMappingRepository,
-                           GoalRepository goalRepository,
-                           GoalStatusRepository goalStatusRepository) {
-        super(userRepository, ParentChildMappingRepository);
-        this.goalRepository = goalRepository;
-        this.goalStatusRepository = goalStatusRepository;
-    }
 
     @Override
     @Transactional
