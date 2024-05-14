@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 
 class Child {
   final int userId;
-  final profileImage;
+  final String? profileImage;
   final String username;
   final String phoneNumber;
 
   Child({
     required this.userId,
-    required this.profileImage,
+    this.profileImage,
     required this.username,
     required this.phoneNumber,
   });
@@ -25,7 +25,7 @@ class Child {
   Map<String, dynamic> toJson() {
     return {
       'user_id': userId,
-      'profile_image': profileImage,
+      'profile_image': profileImage ?? '',
       'username': username,
       'phone_number': phoneNumber,
     };
@@ -36,7 +36,7 @@ class UserProvider extends ChangeNotifier {
   String _username = '';
   String _loginId = '';
   String _phoneNumber = '';
-  String _profileImage = '';
+  String? _profileImage = '';
   bool _isParent = false;
   bool _isLoggedIn = false;
   List<Child> _children = [];
@@ -44,7 +44,7 @@ class UserProvider extends ChangeNotifier {
   String get username => _username;
   String get loginId => _loginId;
   String get phoneNumber => _phoneNumber;
-  String get profileImage => _profileImage;
+  String? get profileImage => _profileImage;
   bool get isParent => _isParent;
   bool get isLoggedIn => _isLoggedIn;
   List<Child> get children => _children;

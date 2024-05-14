@@ -291,15 +291,25 @@ class _MyAppState extends State<MyApp> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<void>(
-      future: _autoLoginFuture,
-      builder: (context, snapshot) {
+Widget build(BuildContext context) {
+  return FutureBuilder<void>(
+    future: _autoLoginFuture,
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        // 로딩 중일 때 로딩 화면 표시
+        return const MaterialApp(
+          home: Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          ),
+        );
+      } else {
+        // 자동 로그인 성공 여부에 따라 GoRouter 사용
         return MaterialApp.router(
           routerConfig: router,
           debugShowCheckedModeBanner: false,
         );
-      },
-    );
-  }
+      }
+    },
+  );
+}
 }
