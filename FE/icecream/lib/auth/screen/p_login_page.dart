@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../service/user_service.dart';
 import 'package:icecream/provider/user_provider.dart';
@@ -41,6 +42,7 @@ class _LoginPageState extends State<LoginPage> {
     try {
       await _userService.loginUser(loginId, password, _fcmToken, userProvider);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('로그인 성공')));
+      context.go('/parents'); // 부모 유저 로그인 성공시 PHome으로 이동
     } catch (e) {
       debugPrint("$e");
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('로그인 실패: $e')));

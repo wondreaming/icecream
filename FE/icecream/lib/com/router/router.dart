@@ -6,6 +6,7 @@ import 'package:icecream/auth/screen/qrscan_page.dart';
 import 'package:icecream/com/widget/temp.dart';
 import 'package:icecream/home/screen/c_home.dart';
 import 'package:icecream/home/screen/p_home.dart';
+import 'package:icecream/provider/user_provider.dart';
 import 'package:icecream/setting/provider/destination_provider.dart';
 import 'package:icecream/setting/screen/child_detail_screen.dart';
 import 'package:icecream/setting/screen/child_screen.dart';
@@ -18,6 +19,17 @@ import 'package:kpostal/kpostal.dart';
 import 'package:provider/provider.dart';
 
 final router = GoRouter(
+  initialLocation: '/',
+  redirect: (context, state) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    if (!userProvider.isLoggedIn) {
+      return '/p_login';
+    } else if (userProvider.isParent) {
+      return '/parents';
+    } else {
+      return '/child';
+    }
+  },
   routes: [
     GoRoute(
         path: '/',
