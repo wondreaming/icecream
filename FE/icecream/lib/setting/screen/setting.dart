@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icecream/com/widget/default_layout.dart';
+import 'package:icecream/provider/user_provider.dart';
 import 'package:icecream/setting/widget/custom_text_container.dart';
 import 'package:icecream/setting/widget/profile.dart';
+import 'package:provider/provider.dart';
 
 class Setting extends StatelessWidget {
   const Setting({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // user 정보 가져오기
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
     return DefaultLayout(
       title: '설정',
       child: Container(
@@ -17,9 +22,14 @@ class Setting extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Profile(number: '010-1234-5678', name: '김싸피', onPressed: () {
-              context.goNamed('my_page');
-            },),
+            Profile(
+              imgUrl: userProvider.profileImage,
+              number: userProvider.phoneNumber,
+              name: userProvider.username,
+              onPressed: () {
+                context.goNamed('my_page');
+              },
+            ),
             SizedBox(
               height: 20.0,
             ),

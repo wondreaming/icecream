@@ -4,6 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icecream/com/const/dio_interceptor.dart';
 import 'package:icecream/com/widget/default_layout.dart';
+import 'package:icecream/provider/user_provider.dart';
 import 'package:icecream/setting/model/child_name_model.dart';
 import 'package:icecream/setting/model/destination_model.dart';
 import 'package:icecream/setting/model/response_model.dart';
@@ -17,6 +18,7 @@ import 'package:icecream/setting/widget/custom_popupbutton.dart';
 import 'package:icecream/setting/widget/custom_show_dialog.dart';
 import 'package:icecream/setting/widget/custom_text_field.dart';
 import 'package:icecream/setting/widget/detail_profile.dart';
+import 'package:provider/provider.dart';
 
 class ChildDetailScreen extends StatefulWidget {
   final int user_id;
@@ -44,8 +46,10 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
     final dio = CustomDio().createDio();
     final userRepository = UserRespository(dio);
 
-    ChildNameModel newChildName = ChildNameModel(user_id: widget.user_id, username: username);
-    ResponseModel response = await userRepository.patchChild(childName: newChildName);
+    ChildNameModel newChildName =
+        ChildNameModel(user_id: widget.user_id, username: username);
+    ResponseModel response =
+        await userRepository.patchChild(childName: newChildName);
     return response;
   }
 
@@ -54,9 +58,11 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
     final dio = CustomDio().createDio();
     final userRepository = UserRespository(dio);
 
-    ResponseModel response = await userRepository.deleteChild(user_id: widget.user_id);
+    ResponseModel response =
+        await userRepository.deleteChild(user_id: widget.user_id);
     return response;
   }
+
   // 안심 보행 목적지 조회
   Future<List<DestinationModel>> getDestination() async {
     final dio = CustomDio().createDio();
@@ -87,9 +93,11 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
 
     if (response.status == 200) {
       context.pop();
-    } else{
-      final String message = response.message;
-      showCustomDialog(context, message, isNo: false, onPressed: (){context.pop();});
+    } else {
+      final String message = response.message!;
+      showCustomDialog(context, message, isNo: false, onPressed: () {
+        context.pop();
+      });
     }
   }
 
@@ -101,13 +109,22 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
     if (response.status == 200) {
       usernameController.clear();
       context.pop();
-    } else{
+    } else {
       final String message = response.message;
-      showCustomDialog(context, message, isNo: false, onPressed: (){context.pop();});
+      showCustomDialog(context, message, isNo: false, onPressed: () {
+        context.pop();
+      });
     }
   }
+
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final children = userProvider.children;
+
+    late Child child =
+        children.firstWhere((child) => child.userId == widget.user_id);
+
     return DefaultLayout(
       title: '자녀 관리',
       action: [
@@ -131,16 +148,18 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
                     SizedBox(height: 16.0),
                     CustomTextField(
                       controller: usernameController,
-                      onChanged: (String value){
+                      onChanged: (String value) {
                         username = value;
                         print(username);
                       },
                       hintText: '변경할 이름을 입력해주세요',
                     ),
                     SizedBox(height: 16.0),
-                    CustomElevatedButton(onPressed: () {
-                      saveUsername();
-                    }, child: '저장'),
+                    CustomElevatedButton(
+                        onPressed: () {
+                          saveUsername();
+                        },
+                        child: '저장'),
                   ],
                 ),
               ),
@@ -158,9 +177,11 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
                     hintText: '현재 전화번호를 입력해주세요',
                   ),
                   SizedBox(height: 16.0),
-                  CustomElevatedButton(onPressed: () {
-                    context.pop();
-                  }, child: '저장'),
+                  CustomElevatedButton(
+                      onPressed: () {
+                        context.pop();
+                      },
+                      child: '저장'),
                 ],
               ),
               160.0,
@@ -170,8 +191,10 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
             // QR 찍는 페이지로 이동
             context.push('/qrscan_page');
           },
-          fourthOnTap: (){
-            showCustomDialog(context, '연결 해제 하시겠습니까?', onPressed: (){saveDeleteChild();});
+          fourthOnTap: () {
+            showCustomDialog(context, '연결 해제 하시겠습니까?', onPressed: () {
+              saveDeleteChild();
+            });
           },
         ),
       ],
@@ -182,8 +205,8 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
             children: [
               DetailProfile(
                 is_parents: false,
-                id: '김자식',
-                number: '010-1234-5678',
+                id: child.username,
+                number: child.phoneNumber,
               ),
               Container(
                 margin: EdgeInsets.only(bottom: 8.0, top: 16.0),
@@ -253,8 +276,10 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
               AddContainer(
                 mention: '안심 보행지를 추가해주세요',
                 onPressed: () {
-                  context.goNamed('destination');
-                  onDataSaved: () {
+                  context.goNamed('destination',
+                      pathParameters: {'user_id': widget.user_id.toString()});
+                  onDataSaved:
+                  () {
                     setState(() {
                       // 데이터를 새로고침하거나 UI를 업데이트
                       refresh();

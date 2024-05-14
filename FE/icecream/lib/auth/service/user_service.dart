@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:icecream/provider/user_provider.dart';
+import 'package:icecream/setting/model/refresh_token_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../../com/const/dio_interceptor.dart';
@@ -27,6 +28,17 @@ class UserService {
   // FCM 토큰 가져오기
   Future<String> getFCMToken() async {
     return await _readFromSecureStorage('fcmToken');
+  }
+
+  // refreshToken 가져가기
+  Future<RefreashTokenModel> getRefreashToken() async {
+    final token = await _readFromSecureStorage('refreshToken');
+    return RefreashTokenModel(refreashToken: token);
+  }
+
+  // 모든 데이터 삭제
+  Future<void> deleteAll() async {
+    await _secureStorage.deleteAll();
   }
 
   // 토큰 저장
