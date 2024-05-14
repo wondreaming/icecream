@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icecream/com/const/color.dart';
+import 'package:icecream/provider/user_provider.dart';
 import 'package:icecream/setting/widget/profile_image.dart';
+import 'package:provider/provider.dart';
 
 class Profile extends StatelessWidget {
   final String name;
