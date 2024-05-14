@@ -8,13 +8,13 @@ import 'dart:convert';
 import 'dart:math';
 
 class QRCodePage extends StatefulWidget {
-  const QRCodePage({Key? key}) : super(key: key);
+  const QRCodePage({super.key});
   @override
   _QRCodePageState createState() => _QRCodePageState();
 }
 
 class _QRCodePageState extends State<QRCodePage> {
-  final storage = FlutterSecureStorage(); // Secure Storage 객체 생성
+  final storage = const FlutterSecureStorage(); // Secure Storage 객체 생성
   String _qrData = '';
 
   @override
@@ -61,14 +61,14 @@ class _QRCodePageState extends State<QRCodePage> {
   // }
 
   String _encryptData(String data) {
-  final key = en.Key.fromUtf8('1996100219961002');
-  final iv = en.IV.fromLength(16);  // IV 생성
-  final encrypter = en.Encrypter(en.AES(key, mode: en.AESMode.cbc));
-  final encrypted = encrypter.encrypt(data, iv: iv);
+    final key = en.Key.fromUtf8('1996100219961002');
+    final iv = en.IV.fromLength(16); // IV 생성
+    final encrypter = en.Encrypter(en.AES(key, mode: en.AESMode.cbc));
+    final encrypted = encrypter.encrypt(data, iv: iv);
 
-  debugPrint("IV for Encryption: ${iv.base64}"); // IV 출력 및 저장 필요
-  return '${encrypted.base64}::${iv.base64}';  // 암호화된 데이터와 IV를 함께 반환
-}
+    debugPrint("IV for Encryption: ${iv.base64}"); // IV 출력 및 저장 필요
+    return '${encrypted.base64}::${iv.base64}'; // 암호화된 데이터와 IV를 함께 반환
+  }
 
   List<Color> getRandomColors() {
     Random random = Random();
