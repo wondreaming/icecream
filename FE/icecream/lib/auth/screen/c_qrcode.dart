@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:icecream/noti/models/notification_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
@@ -7,14 +8,13 @@ import 'dart:convert';
 import 'dart:math';
 
 class QRCodePage extends StatefulWidget {
-  const QRCodePage({Key? key}) : super(key: key);
+  const QRCodePage({super.key});
   @override
   _QRCodePageState createState() => _QRCodePageState();
 }
 
 class _QRCodePageState extends State<QRCodePage> {
-  String deviceId = '';
-  String fcmToken = '';
+  final storage = const FlutterSecureStorage(); // Secure Storage 객체 생성
   String _qrData = '';
 
   @override
@@ -24,9 +24,9 @@ class _QRCodePageState extends State<QRCodePage> {
   }
 
   Future<void> _generateQrData() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    String deviceId = prefs.getString('deviceId') ?? 'No device ID';
-    String fcmToken = prefs.getString('fcmToken') ?? 'No FCM token';
+    // Secure Storage에서 값 가져오기
+    String deviceId = await storage.read(key: 'deviceId') ?? 'No device ID';
+    String fcmToken = await storage.read(key: 'fcmToken') ?? 'No FCM token';
     // String phoneNum = '01012345678';
 
     Map<String, String> data = {
@@ -61,14 +61,14 @@ class _QRCodePageState extends State<QRCodePage> {
   // }
 
   String _encryptData(String data) {
-  final key = en.Key.fromUtf8('1996100219961002');
-  final iv = en.IV.fromLength(16);  // IV 생성
-  final encrypter = en.Encrypter(en.AES(key, mode: en.AESMode.cbc));
-  final encrypted = encrypter.encrypt(data, iv: iv);
+    final key = en.Key.fromUtf8('1996100219961002');
+    final iv = en.IV.fromLength(16); // IV 생성
+    final encrypter = en.Encrypter(en.AES(key, mode: en.AESMode.cbc));
+    final encrypted = encrypter.encrypt(data, iv: iv);
 
-  debugPrint("IV for Encryption: ${iv.base64}"); // IV 출력 및 저장 필요
-  return '${encrypted.base64}::${iv.base64}';  // 암호화된 데이터와 IV를 함께 반환
-}
+    debugPrint("IV for Encryption: ${iv.base64}"); // IV 출력 및 저장 필요
+    return '${encrypted.base64}::${iv.base64}'; // 암호화된 데이터와 IV를 함께 반환
+  }
 
   List<Color> getRandomColors() {
     Random random = Random();
