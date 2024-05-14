@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:icecream/main/screen/p_main.dart';
 import 'package:icecream/goal/screen/goal.dart';
 import 'package:icecream/noti/screen/notification.dart';
