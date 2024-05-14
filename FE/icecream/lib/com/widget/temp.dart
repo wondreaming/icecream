@@ -84,7 +84,7 @@ class _TempState extends State<Temp> {
           ),
           ElevatedButton(
             onPressed: () {
-              context.go('/parents/setting');
+              context.go('/parents/setting/my_page');
             },
             child: const Text('부모 설정 페이지'),
           ),

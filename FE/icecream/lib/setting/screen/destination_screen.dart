@@ -389,7 +389,7 @@ class _DestinationScreenState extends State<DestinationScreen> {
                   isDone: isDoneAddress,
                   explainText: isDoneAddress ? address : hintAddress,
                   onTap: () async {
-                    context.goNamed('search');
+                    context.pushNamed('search');
                   },
                 );
               },

@@ -4,8 +4,10 @@ import 'package:icecream/setting/model/all_destination_model.dart';
 import 'package:icecream/setting/model/child_name_model.dart';
 import 'package:icecream/setting/model/password_model.dart';
 import 'package:icecream/setting/model/patch_destination_model.dart';
+import 'package:icecream/setting/model/refresh_token_model.dart';
 import 'package:icecream/setting/model/response_model.dart';
 import 'package:icecream/setting/model/destination_model.dart';
+import 'package:icecream/setting/model/user_phone_number_model.dart';
 import 'package:retrofit/http.dart';
 import 'package:retrofit/retrofit.dart';
 part 'user_repository.g.dart';
@@ -16,7 +18,8 @@ abstract class UserRespository {
 
   // 로그아웃
   @POST('/auth/logout')
-  Future<ResponseModel> postLogout();
+  Future<ResponseModel> postLogout(
+      {@Body() required String refreashToken});
 
   // 자녀 이름 수정
   @PATCH('/users/child')
@@ -42,4 +45,9 @@ abstract class UserRespository {
   @PATCH('/users/password')
   Future<ResponseModel> patchPassword(
       {@Body() required PasswordModel password});
+
+  // 전화번호수정
+  @PATCH('/users/phone')
+  Future<ResponseModel> patchPhoneNumber(
+      {@Body() required UserPhoneNumberModel userPhoneNumber});
 }

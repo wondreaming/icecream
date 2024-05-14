@@ -88,7 +88,7 @@ class _ProfileImageState extends State<ProfileImage> {
                         ),
                       ],
                     ),
-                    470.0,
+                    450.0,
                   );
                 },
               ),

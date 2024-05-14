@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:icecream/auth/service/user_service.dart';
 import 'package:icecream/com/const/dio_interceptor.dart';
+import 'package:icecream/com/router/router.dart';
 import 'package:icecream/com/widget/default_layout.dart';
+import 'package:icecream/provider/user_provider.dart';
 import 'package:icecream/setting/model/password_model.dart';
 import 'package:icecream/setting/model/response_model.dart';
+import 'package:icecream/setting/model/user_phone_number_model.dart';
 import 'package:icecream/setting/repository/user_repository.dart';
 import 'package:icecream/setting/widget/custom_elevated_button.dart';
 import 'package:icecream/setting/widget/custom_modal.dart';
@@ -11,6 +15,7 @@ import 'package:icecream/setting/widget/custom_popupbutton.dart';
 import 'package:icecream/setting/widget/custom_show_dialog.dart';
 import 'package:icecream/setting/widget/custom_text_field.dart';
 import 'package:icecream/setting/widget/detail_profile.dart';
+import 'package:provider/provider.dart';
 
 class MyPage extends StatefulWidget {
   const MyPage({super.key});
@@ -22,7 +27,22 @@ class MyPage extends StatefulWidget {
 class _MyPageState extends State<MyPage> {
   late bool _isHidden = true;
   late String password = '';
+  late String phone_number = '';
   TextEditingController passwordController = TextEditingController();
+  TextEditingController phoneNumberController = TextEditingController();
+  late UserProvider userProvider;
+  late int user_id;
+  late String refreshToken;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // 여기서 context가 유효함 userProvider와 user_id를 초기화
+      userProvider = Provider.of<UserProvider>(context, listen: false);
+      user_id = userProvider.userId;
+    });
+  }
 
   // 비밀 번호 확인 api
   Future<ResponseModel> postPassword() async {
@@ -86,9 +106,28 @@ class _MyPageState extends State<MyPage> {
   Future<ResponseModel> postLogout() async {
     final dio = CustomDio().createDio();
     final userRepository = UserRespository(dio);
-
-    ResponseModel response = await userRepository.postLogout();
+    final refreshTokenModel = await UserService().getRefreashToken();
+    print('222222222222222222 ${refreshTokenModel.refreashToken}');
+    final refreashToken = refreshTokenModel.refreashToken;
+    ResponseModel response = await userRepository.postLogout(refreashToken: refreashToken);
+    print('111111111111111111 $response');
     return response;
+  }
+
+  void logout() async {
+    ResponseModel response;
+    response = await postLogout();
+
+    if (response.status == 200) {
+      final String message = response.message;
+      showCustomDialog(context, message, isNo: false, onPressed: () {
+        context.pop();
+      });
+    } else {
+      showCustomDialog(context, '로그아웃이 실패했습니다', isNo: false, onPressed: () {
+        context.pop();
+      });
+    }
   }
 
   // 회원 탈퇴 api
@@ -117,9 +156,38 @@ class _MyPageState extends State<MyPage> {
     }
   }
 
+  // 전화 번호 변경 api
+  Future<ResponseModel> changePhoneNumber() async {
+    final dio = CustomDio().createDio();
+    final userRepository = UserRespository(dio);
+
+    UserPhoneNumberModel newPhoneNumber = UserPhoneNumberModel(user_id: user_id, phone_number: phone_number);
+    ResponseModel response = await userRepository.patchPhoneNumber(userPhoneNumber: newPhoneNumber);
+    return response;
+  }
+
+  void patchPhoneNumber() async {
+    ResponseModel response;
+    response = await changePhoneNumber();
+
+    if (response.status == 200) {
+      phoneNumberController.clear();
+      final String message = response.message;
+      showCustomDialog(context, message, isNo: false, onPressed: () {
+        context.pop();
+      });
+    } else {
+      showCustomDialog(context, '전화번호 수정이 실패했습니다', isNo: false, onPressed: () {
+        context.pop();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    // user 정보 가져오기
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
     return DefaultLayout(
       title: '마이 페이지',
       action: [
@@ -179,26 +247,39 @@ class _MyPageState extends State<MyPage> {
             showCustomModal(
               context,
               '전화번호 변경',
-              Column(
-                children: [
-                  SizedBox(height: 16.0),
-                  CustomTextField(
-                    hintText: '현재 전화번호를 입력해주세요',
-                  ),
-                  SizedBox(height: 16.0),
-                  CustomElevatedButton(
-                      onPressed: () {
-                        context.pop();
-                      },
-                      child: '저장'),
-                ],
+              PopScope(
+                canPop: true,
+                onPopInvoked: (bool didPop) async {
+                  phoneNumberController.clear();
+                },
+                child: StatefulBuilder(
+                    builder: (BuildContext context, StateSetter setState) {
+                  return Column(
+                    children: [
+                      SizedBox(height: 16.0),
+                      CustomTextField(
+                        controller: phoneNumberController,
+                        onChanged: (String value) {
+                          phone_number = value;
+                        },
+                        hintText: '-를 포함해서 전화번호를 입력해주세요',
+                      ),
+                      SizedBox(height: 16.0),
+                      CustomElevatedButton(
+                          onPressed: () {
+                            patchPhoneNumber();
+                          },
+                          child: '저장'),
+                    ],
+                  );},
+                ),
               ),
               160.0,
             );
           },
           thirdOnTap: () {
             showCustomDialog(context, '로그아웃하시겠습니까?', onPressed: () {
-              postLogout();
+              logout();
             });
           },
           fourthOnTap: () {
@@ -209,9 +290,10 @@ class _MyPageState extends State<MyPage> {
         ),
       ],
       child: DetailProfile(
-        name: '김싸피',
-        id: 'ssafy',
-        number: '010-1234-5678',
+        imgUrl: userProvider.profileImage,
+        name: userProvider.username,
+        id: userProvider.loginId,
+        number: userProvider.phoneNumber,
       ),
     );
   }

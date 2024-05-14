@@ -40,6 +40,7 @@ class UserProvider extends ChangeNotifier {
   bool _isParent = false;
   bool _isLoggedIn = false;
   List<Child> _children = [];
+  int _userId = 0; // userId 추가
 
   String get username => _username;
   String get loginId => _loginId;
@@ -48,6 +49,7 @@ class UserProvider extends ChangeNotifier {
   bool get isParent => _isParent;
   bool get isLoggedIn => _isLoggedIn;
   List<Child> get children => _children;
+  int get userId => _userId; // userId getter 추가
 
   void setUserData(Map<String, dynamic> userData) {
     _username = userData['username'];
@@ -56,6 +58,7 @@ class UserProvider extends ChangeNotifier {
     _profileImage = userData['profile_image'] ?? '';
     _isParent = userData.containsKey('children');
     _isLoggedIn = true;
+    _userId = userData['user_id']; // userId 설정
 
     if (_isParent) {
       _children = (userData['children'] as List<dynamic>)
@@ -75,6 +78,7 @@ class UserProvider extends ChangeNotifier {
     _children = [];
     _isParent = false;
     _isLoggedIn = false;
+    _userId = 0; // userId 초기화
     notifyListeners();
   }
 }
