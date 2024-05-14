@@ -292,18 +292,13 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    final userProvider = Provider.of<UserProvider>(context);
-
-    return MaterialApp.router(
-      routerConfig: router,
-      debugShowCheckedModeBanner: false,
-      builder: (context, child) {
-        // 자동 로그인 상태에 따라서 페이지 이동
-        if (userProvider.isLoggedIn) {
-          return userProvider.isParent ? const PHome() : const CHome();
-        } else {
-          return child ?? Container();
-        }
+    return FutureBuilder<void>(
+      future: _autoLoginFuture,
+      builder: (context, snapshot) {
+        return MaterialApp.router(
+          routerConfig: router,
+          debugShowCheckedModeBanner: false,
+        );
       },
     );
   }
