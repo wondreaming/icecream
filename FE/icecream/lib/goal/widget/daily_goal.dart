@@ -39,32 +39,109 @@ class DailyGoalWidget extends StatefulWidget {
 }
 
 class _DailyGoalWidgetState extends State<DailyGoalWidget> {
+  DateTime _currentMonth = DateTime.now();
+  final ScrollController _scrollController = ScrollController();
+  final List<DateTime> _visibleDates = [];
+  late DateTime _today;
+
+  @override
+  void initState() {
+    super.initState();
+    _today = DateTime.now();
+    _currentMonth = DateTime(_today.year, _today.month);
+    _populateDates(_currentMonth);
+    _scrollController.addListener(_scrollListener);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToCurrentDate());
+  }
+
+  void _scrollListener() {
+    if (_scrollController.position.atEdge) {
+      if (_scrollController.position.pixels == 0) {
+        DateTime newMonth =
+            DateTime(_currentMonth.year, _currentMonth.month - 1);
+        _populateDates(newMonth, append: false);
+        // Adjust scroll to the end of the newly loaded previous month after setState
+        Future.delayed(Duration.zero, () {
+          _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+        });
+      } else if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        DateTime newMonth =
+            DateTime(_currentMonth.year, _currentMonth.month + 1);
+        _populateDates(newMonth, append: true);
+      }
+    }
+  }
+
+  void _populateDates(DateTime month, {bool append = true}) {
+    List<DateTime> newDates = [];
+    DateTime startDate = DateTime(month.year, month.month, 1);
+    DateTime endDate = DateTime(month.year, month.month + 1, 0);
+    for (DateTime date = startDate;
+        date.isBefore(endDate.add(const Duration(days: 1)));
+        date = date.add(const Duration(days: 1))) {
+      newDates.add(date);
+    }
+
+    setState(() {
+      if (append) {
+        _visibleDates.addAll(newDates);
+      } else {
+        _visibleDates.insertAll(0, newDates);
+        _currentMonth = month; // Update the current month
+      }
+    });
+  }
+
+  void _scrollToCurrentDate() {
+    int index = _visibleDates.indexOf(_today);
+    if (index != -1) {
+      double position = index * 60.0; // assuming each item height as 60.0
+      position -= MediaQuery.of(context).size.height / 2; // Center the date
+      _scrollController.jumpTo(position > 0 ? position : 0);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     Map<String, bool?> fullResult = extendDateRange(widget.dailyGoal.result);
-    List<String> dates = fullResult.keys.toList();
-    dates.sort();
-
-    String todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    DateTime startDate = DateTime.now().subtract(const Duration(days: 30));
-    DateTime endDate = DateTime.now().add(const Duration(days: 1));
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                _changeMonth(isNext: false);
+              },
+            ),
+            Text(
+              DateFormat('MMMM yyyy').format(_currentMonth),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            IconButton(
+              icon: const Icon(Icons.arrow_forward),
+              onPressed: () {
+                _changeMonth(isNext: true);
+              },
+            ),
+          ],
+        ),
         Expanded(
           child: ListView.builder(
-            itemCount: endDate.difference(startDate).inDays,
+            controller: _scrollController,
+            itemCount: _visibleDates.length,
             itemBuilder: (context, index) {
-              DateTime date = startDate.add(Duration(days: index));
+              DateTime date = _visibleDates[index];
               String dateStr = DateFormat('yyyy-MM-dd').format(date);
               bool? isSuccess = fullResult[dateStr];
-              bool isToday = dateStr == todayStr;
 
               return DailyDateCircle(
                 date: date,
                 isSuccess: isSuccess,
-                isToday: isToday,
+                isToday: date.isAtSameMomentAs(DateTime.now()),
               );
             },
           ),
@@ -73,35 +150,27 @@ class _DailyGoalWidgetState extends State<DailyGoalWidget> {
     );
   }
 
-  Map<String, bool?> extendDateRange(Map<String, bool> originalResults) {
-    // 맵이 비어있는 경우 기본값 설정
-    if (originalResults.isEmpty) {
-      DateTime today = DateTime.now();
-      String todayStr = DateFormat('yyyy-MM-dd').format(today);
-      return {todayStr: null}; // 오늘 날짜로 초기화하고 결과 없음으로 설정
-    }
-
-    DateTime minDate =
-        DateFormat('yyyy-MM-dd').parse(originalResults.keys.reduce(min));
-    DateTime maxDate =
-        DateFormat('yyyy-MM-dd').parse(originalResults.keys.reduce(max));
-
-    Map<String, bool?> extendedResults = {};
-
-    // 최소 날짜부터 최대 날짜까지 모든 날짜에 대해 결과 맵 확장
-    for (DateTime date = minDate;
-        date.isBefore(maxDate.add(const Duration(days: 1)));
-        date = date.add(const Duration(days: 1))) {
-      String key = DateFormat('yyyy-MM-dd').format(date);
-      extendedResults[key] =
-          originalResults.containsKey(key) ? originalResults[key] : null;
-    }
-
-    return extendedResults;
+  void _changeMonth({required bool isNext}) {
+    DateTime newMonth = isNext
+        ? DateTime(_currentMonth.year, _currentMonth.month + 1)
+        : DateTime(_currentMonth.year, _currentMonth.month - 1);
+    _populateDates(newMonth);
   }
 
-  String min(String a, String b) => a.compareTo(b) < 0 ? a : b;
-  String max(String a, String b) => a.compareTo(b) > 0 ? a : b;
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Map<String, bool?> extendDateRange(Map<String, bool> originalResults) {
+    Map<String, bool?> extendedResults = {};
+    for (DateTime date in _visibleDates) {
+      String key = DateFormat('yyyy-MM-dd').format(date);
+      extendedResults[key] = originalResults[key];
+    }
+    return extendedResults;
+  }
 }
 
 class DailyDateCircle extends StatelessWidget {
@@ -118,7 +187,7 @@ class DailyDateCircle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool successStatus = isSuccess ?? false; // null인 경우 false를 기본값으로 사용합니다.
+    bool successStatus = isSuccess ?? false;
 
     return Center(
       child: CustomPaint(
@@ -128,6 +197,7 @@ class DailyDateCircle extends StatelessWidget {
           isUndefined: isSuccess == null,
           circleRadius: 45.0,
           lineHeight: 48.0,
+          drawBottomLine: true,
         ),
         child: Padding(
           padding: const EdgeInsets.only(top: 24.0),
@@ -156,6 +226,7 @@ class CircleLinePainter extends CustomPainter {
   final bool isUndefined;
   final double circleRadius;
   final double lineHeight;
+  final bool drawBottomLine;
 
   CircleLinePainter({
     required this.isToday,
@@ -163,24 +234,30 @@ class CircleLinePainter extends CustomPainter {
     this.isUndefined = false,
     required this.circleRadius,
     required this.lineHeight,
+    this.drawBottomLine = false,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
+    // 이전 구문에서 올바르지 않았던 부분들을 수정했습니다.
     final paint = Paint()
       ..color = Colors.grey
-      ..strokeWidth = 2;
+      ..strokeWidth = 2.0; // strokeWidth를 올바르게 설정
 
     canvas.drawLine(Offset(size.width / 2, 0),
         Offset(size.width / 2, lineHeight / 2), paint);
-    canvas.drawLine(Offset(size.width / 2, circleRadius * 2),
-        Offset(size.width / 2, size.height), paint);
+
+    if (drawBottomLine) {
+      canvas.drawLine(Offset(size.width / 2, circleRadius * 2 + lineHeight / 2),
+          Offset(size.width / 2, size.height), paint);
+    }
 
     if (isUndefined) {
       final outlinePaint = Paint()
         ..color = isToday ? Colors.black : Colors.grey
-        ..strokeWidth = 2
-        ..style = PaintingStyle.stroke;
+        ..strokeWidth = 2.0
+        ..style = PaintingStyle.stroke; // style을 올바르게 설정
+
       canvas.drawCircle(Offset(size.width / 2, lineHeight / 2 + circleRadius),
           circleRadius, outlinePaint);
     }
@@ -192,6 +269,7 @@ class CircleLinePainter extends CustomPainter {
         oldDelegate.isSuccess != isSuccess ||
         oldDelegate.isUndefined != isUndefined ||
         oldDelegate.circleRadius != circleRadius ||
-        oldDelegate.lineHeight != lineHeight;
+        oldDelegate.lineHeight != lineHeight ||
+        oldDelegate.drawBottomLine != drawBottomLine;
   }
 }

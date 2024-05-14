@@ -160,7 +160,7 @@ Future<void> _handleNotification(RemoteMessage message) async {
 Future<void> checkDeviceWithServerUsingDio() async {
   const androidIdPlugin = AndroidId();
   final String? deviceId = await androidIdPlugin.getId();
-  await FlutterSecureStorage().write(key: "deviceId", value: deviceId!);
+  await const FlutterSecureStorage().write(key: "deviceId", value: deviceId!);
   debugPrint("android ID: $deviceId");
 }
 
@@ -173,7 +173,7 @@ Future<void> main() async {
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   final fcmToken = await firebaseMessaging.getToken();
-  await FlutterSecureStorage().write(key: "fcmToken", value: fcmToken!);
+  await const FlutterSecureStorage().write(key: "fcmToken", value: fcmToken!);
   debugPrint('FCM Token: $fcmToken');
 
   // 알림 초기화 설정
@@ -214,7 +214,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (context) => Destination()),
         ChangeNotifierProvider(create: (context) => UserProvider()),
       ],
-      child: MyApp(),
+      child: const MyApp(),
     ),
   );
 }
