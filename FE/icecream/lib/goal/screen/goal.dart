@@ -24,6 +24,7 @@ class _GoalState extends State<Goal> {
   bool dataAvailable = false;
   List<dynamic> goalData = [];
   GoalService goalService = GoalService();
+  DailyGoal? dailyGoal;
 
   @override
   void initState() {
@@ -47,8 +48,41 @@ class _GoalState extends State<Goal> {
       selectedChild = child.username;
       selectedChildId = child.userId.toString();
       childrenItems = childrenData.map((child) => child.username).toList();
-      fetchGoals();
     });
+    fetchGoals();
+  }
+
+  Future<void> fetchGoals() async {
+    try {
+      var result = await goalService.fetchGoals(selectedChildId);
+      setState(() {
+        goalData = result['data'];
+        dataAvailable = result['status'] == 200 && goalData.isNotEmpty;
+
+        if (dataAvailable && goalData.isNotEmpty) {
+          var goal = goalData.first;
+          Map<String, bool>? results = goal['result'] != null
+              ? Map<String, bool>.from(goal['result'])
+              : {};
+
+          dailyGoal = DailyGoal(
+            period: goal['period'] as int,
+            record: goal['record'] as int,
+            content: goal['content'] as String,
+            result: results ?? {}, // result가 null일 경우 빈 Map 제공
+          );
+        } else {
+          dailyGoal = null; // 데이터가 없거나 로드에 실패했을 경우 dailyGoal을 null로 설정
+        }
+      });
+    } catch (e) {
+      debugPrint('Error fetching goals: $e');
+      setState(() {
+        goalData = [];
+        dataAvailable = false;
+        dailyGoal = null;
+      });
+    }
   }
 
   @override
@@ -62,8 +96,35 @@ class _GoalState extends State<Goal> {
           buildChildDropdown(),
           const SizedBox(height: 25),
           Expanded(
-            child: dataAvailable && goalData.isNotEmpty
-                ? buildGoalsList()
+            child: dataAvailable && dailyGoal != null
+                ? Column(
+                    children: [
+                      const Text('현재 ~일째 안전 보행중'),
+                      Expanded(
+                        flex: 6, // 길이를 줄이기 위해 flex 비율 조정
+                        child: DailyGoalPage(dailyGoal: dailyGoal!),
+                      ),
+                      Expanded(
+                        flex: 1, // RewardModal 버튼을 추가
+                        child: Center(
+                          child: ElevatedButton(
+                            onPressed: _openRewardModal,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  const Color.fromARGB(255, 25, 243, 116),
+                            ),
+                            child: const Text('보상 수정하기'),
+                          ),
+                        ),
+                      ),
+                      const Expanded(
+                        flex: 1,
+                        child: SizedBox(
+                          height: 10,
+                        ),
+                      )
+                    ],
+                  )
                 : buildEmptyGoals(),
           ),
         ],
@@ -108,60 +169,63 @@ class _GoalState extends State<Goal> {
     );
   }
 
-  Widget buildGoalsList() {
-    return Column(
-      children: [
-        Expanded(
-          child: ListView.builder(
-            itemCount: goalData.length,
-            itemBuilder: (context, index) {
-              var goal = goalData[index];
-              Map<String, bool> results = goal['result'] != null
-                  ? (goal['result'] as Map).map<String, bool>(
-                      (key, value) => MapEntry(key as String, value as bool))
-                  : {};
+  // Widget buildGoalsList() {
+  //   return Expanded(
+  //     child: SizedBox(
+  //       // ListView가 차지할 수 있는 최대 높이를 명시적으로 지정
+  //       height: MediaQuery.of(context).size.height -
+  //           200, // 200은 다른 요소들이 차지하는 높이를 예상한 값
+  //       child: ListView.builder(
+  //         itemCount: goalData.length,
+  //         itemBuilder: (context, index) {
+  //           var goal = goalData[index];
+  //           Map<String, bool> results = goal['result'] != null
+  //               ? (goal['result'] as Map).map<String, bool>(
+  //                   (key, value) => MapEntry(key as String, value as bool))
+  //               : {};
 
-              DailyGoal dailyGoal = DailyGoal(
-                period: goal['period'] as int,
-                record: goal['record'] as int,
-                content: goal['content'] as String,
-                result: results,
-              );
-              return DailyGoalPage(dailyGoal: dailyGoal);
-            },
-          ),
-        ),
-      ],
-    );
-  }
+  //           DailyGoal dailyGoal = DailyGoal(
+  //             period: goal['period'] as int,
+  //             record: goal['record'] as int,
+  //             content: goal['content'] as String,
+  //             result: results,
+  //           );
+  //           return DailyGoalPage(dailyGoal: dailyGoal);
+  //         },
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget buildEmptyGoals() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text(
-            "목표가 설정되지 않았습니다.",
-            style: TextStyle(fontSize: 20),
-          ),
-          const Text("자녀의 안전 보행을 위해", style: TextStyle(fontSize: 20)),
-          const Text("보행 목표를 설정해주세요!", style: TextStyle(fontSize: 20)),
-          const SizedBox(
-            height: 10,
-          ),
-          IconButton(
-            icon: const Icon(
-              Icons.add_circle_outline_sharp,
+    return Expanded(
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              "목표가 설정되지 않았습니다.",
+              style: TextStyle(fontSize: 20),
             ),
-            iconSize: 35,
-            onPressed: () {
-              _openRewardModal();
-            },
-          ),
-          const SizedBox(
-            height: 100,
-          )
-        ],
+            const Text("자녀의 안전 보행을 위해", style: TextStyle(fontSize: 20)),
+            const Text("보행 목표를 설정해주세요!", style: TextStyle(fontSize: 20)),
+            const SizedBox(
+              height: 10,
+            ),
+            IconButton(
+              icon: const Icon(
+                Icons.add_circle_outline_sharp,
+              ),
+              iconSize: 35,
+              onPressed: () {
+                _openRewardModal();
+              },
+            ),
+            const SizedBox(
+              height: 100,
+            )
+          ],
+        ),
       ),
     );
   }
@@ -177,18 +241,5 @@ class _GoalState extends State<Goal> {
             });
       },
     );
-  }
-
-  Future<void> fetchGoals() async {
-    try {
-      var result = await goalService.fetchGoals(selectedChildId);
-      setState(() {
-        goalData = result['data'];
-        dataAvailable = result['status'] == 200 && goalData.isNotEmpty;
-      });
-    } catch (e) {
-      debugPrint('Error fetching goals: $e');
-      setState(() => dataAvailable = false);
-    }
   }
 }

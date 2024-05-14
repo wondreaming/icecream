@@ -89,7 +89,6 @@ class UserService {
     }
   }
 
-
   // 자동 로그인
   Future<void> autoLogin(UserProvider userProvider) async {
     String deviceId = await getDeviceId();
@@ -108,12 +107,17 @@ class UserService {
         );
         if (response.statusCode == 200) {
           // 토큰 저장
+          print('User Data: ${response.data['data']}');
           await _saveTokens(
             response.data['data']['access_token'],
             response.data['data']['refresh_token'],
           );
 
           // 사용자 및 자녀 정보 Provider에 저장
+          userProvider.setUserData(response.data['data']);
+          print(
+              'User Data: ${response.data['data']}'); // userData는 provider에 저장된 데이터를 반환하는 가상의 프로퍼티입니다.
+          print('여기여깅');
         } else {
           userProvider.clearUserData();
           throw Exception('자동로그인에 실패했습니다');
@@ -122,8 +126,7 @@ class UserService {
         userProvider.clearUserData();
         throw Exception('자동로그인에 실패했습니다: $e');
       }
-    }
-    else {
+    } else {
       userProvider.clearUserData();
     }
   }
