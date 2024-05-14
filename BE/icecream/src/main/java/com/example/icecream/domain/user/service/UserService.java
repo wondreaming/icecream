@@ -78,7 +78,12 @@ public class UserService {
 
         List<User> children = parentChildMappingRepository.findChildrenByParentId(parentId);
         return children.stream()
-                .map(child -> new ChildrenResponseDto(child.getId(), child.getProfileImage(), child.getUsername(), child.getPhoneNumber()))
+                .map(child -> ChildrenResponseDto.builder()
+                        .userId(child.getId())
+                        .profileImage(child.getProfileImage())
+                        .username(child.getUsername())
+                        .phoneNumber(child.getPhoneNumber())
+                        .build())
                 .toList();
     }
 
@@ -103,7 +108,12 @@ public class UserService {
         }
 
         return children.stream()
-                .map(child -> new ChildrenResponseDto(child.getId(), child.getProfileImage(), child.getUsername(), child.getPhoneNumber()))
+                .map(child -> ChildrenResponseDto.builder()
+                        .userId(child.getId())
+                        .profileImage(child.getProfileImage())
+                        .username(child.getUsername())
+                        .phoneNumber(child.getPhoneNumber())
+                        .build())
                 .toList();
     }
 

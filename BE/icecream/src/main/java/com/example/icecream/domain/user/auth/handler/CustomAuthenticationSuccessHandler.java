@@ -41,7 +41,12 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         List<User> children = parentChildMappingRepository.findChildrenByParentId(user.getId());
 
         List<ChildrenResponseDto> childrenResponseDto = children.stream()
-                .map(child -> new ChildrenResponseDto(child.getId(), child.getProfileImage(), child.getUsername(), child.getPhoneNumber()))
+                .map(child -> ChildrenResponseDto.builder()
+                        .userId(child.getId())
+                        .profileImage(child.getProfileImage())
+                        .username(child.getUsername())
+                        .phoneNumber(child.getPhoneNumber())
+                        .build())
                 .toList();
 
         JwtTokenDto jwtToken = jwtUtil.generateTokenByFilterChain(authentication, user.getId());
