@@ -4,6 +4,8 @@ import 'package:icecream/provider/user_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../../com/const/dio_interceptor.dart';
+import 'package:flutter/services.dart';
+import 'package:icecream/child/service/timeset_service.dart';
 
 class UserService {
   final Dio _dio = CustomDio().createDio(); // CustomDio 인스턴스를 사용하여 Dio 객체 생성
@@ -103,48 +105,72 @@ class UserService {
     print(fcmToken);
 
     if (deviceId.isNotEmpty && fcmToken.isNotEmpty) {
-    Map<String, dynamic> postData = {
-      'device_id': deviceId,
-      'fcm_token': fcmToken,
-      'refresh_token': refreshToken.isNotEmpty ? refreshToken : ""
-    };
+      Map<String, dynamic> postData = {
+        'device_id': deviceId,
+        'fcm_token': fcmToken,
+        'refresh_token': refreshToken.isNotEmpty ? refreshToken : ""
+      };
 
-    try {
-      final response = await _dio.post(
-        '/auth/device/login',
-        data: postData,
-        options: Options(headers: {'no-token': true}),
-      );
-
-      if (response.statusCode == 200) {
-        // 토큰 저장
-        await _saveTokens(
-          response.data['data']['access_token'],
-          response.data['data']['refresh_token'],
+      try {
+        final response = await _dio.post(
+          '/auth/device/login',
+          data: postData,
+          options: Options(headers: {'no-token': true}),
         );
 
-        // 사용자 데이터 Provider에 저장
-        userProvider.setUserData(response.data['data']);
+        if (response.statusCode == 200) {
+          // 토큰 저장
+          await _saveTokens(
+            response.data['data']['access_token'],
+            response.data['data']['refresh_token'],
+          );
 
-        // 부모인지 자녀인지 구분
-        if (response.data['data'].containsKey('children')) {
-          // 부모 페이지로 이동 로직
-          print("User is a Parent");
+          // 사용자 데이터 Provider에 저장
+          userProvider.setUserData(response.data['data']);
+
+          // 자녀일 경우 추가 처리
+          if (!userProvider.isParent) {
+            print("User is a Child");
+
+            // user_id 저장
+            await _writeToSecureStorage(
+                'userId', response.data['data']['user_id'].toString());
+
+            // 자녀의 시간 설정 데이터 가져오기
+            TimeSetService timeSetService = TimeSetService();
+            List<TimeSet> timeSets = await timeSetService
+                .fetchTimeSets(userProvider.userId.toString());
+
+            // 시간 설정 데이터를 FlutterSecureStorage에 저장 (옵션)
+            await _writeToSecureStorage('timeSets',
+                jsonEncode(timeSets.map((e) => e.toJson()).toList()));
+
+            // LocationService 시작
+            startLocationService();
+          } else {
+            print("User is a Parent");
+            // 부모일 경우 추가 처리
+          }
         } else {
-          // 자녀 페이지로 이동 로직
-          print("User is a Child");
+          userProvider.clearUserData();
+          throw Exception('자동로그인에 실패했습니다');
         }
-      } else {
+      } catch (e) {
         userProvider.clearUserData();
-        throw Exception('자동로그인에 실패했습니다');
+        throw Exception('자동로그인에 실패했습니다: $e');
       }
-    } catch (e) {
+    } else {
       userProvider.clearUserData();
-      throw Exception('자동로그인에 실패했습니다: $e');
     }
-  } else {
-    userProvider.clearUserData();
   }
+
+  void startLocationService() async {
+    const platform = MethodChannel('com.example.icecream/locationService');
+    try {
+      await platform.invokeMethod('startService');
+    } on PlatformException catch (e) {
+      print("Failed to start service: '${e.message}'.");
+    }
   }
 
   // 로그인 ID 중복 확인

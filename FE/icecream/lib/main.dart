@@ -269,7 +269,7 @@ class _MyAppState extends State<MyApp> {
     _locationSubscription =
         _locationService.getLocationStream().listen((position) {
       _rabbitMQService.sendLocation(
-          position.latitude, position.longitude, 5, 1);
+          position.latitude, position.longitude, 68, 1);
       // _rabbitMQService.sendLocation(3, 3, 20);
     });
   }
@@ -291,25 +291,25 @@ class _MyAppState extends State<MyApp> {
   }
 
   @override
-Widget build(BuildContext context) {
-  return FutureBuilder<void>(
-    future: _autoLoginFuture,
-    builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        // 로딩 중일 때 로딩 화면 표시
-        return const MaterialApp(
-          home: Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          ),
-        );
-      } else {
-        // 자동 로그인 성공 여부에 따라 GoRouter 사용
-        return MaterialApp.router(
-          routerConfig: router,
-          debugShowCheckedModeBanner: false,
-        );
-      }
-    },
-  );
-}
+  Widget build(BuildContext context) {
+    return FutureBuilder<void>(
+      future: _autoLoginFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // 로딩 중일 때 로딩 화면 표시
+          return const MaterialApp(
+            home: Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            ),
+          );
+        } else {
+          // 자동 로그인 성공 여부에 따라 GoRouter 사용
+          return MaterialApp.router(
+            routerConfig: router,
+            debugShowCheckedModeBanner: false,
+          );
+        }
+      },
+    );
+  }
 }

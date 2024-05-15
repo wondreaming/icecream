@@ -3,6 +3,7 @@ import 'package:icecream/child/models/timeset_model.dart';
 import 'package:icecream/child/service/timeset_service.dart';
 import 'package:icecream/provider/user_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:icecream/child/widget/child_location_icon.dart';
 
 class ChildTimeSet extends StatefulWidget {
   const ChildTimeSet({super.key});
@@ -13,14 +14,15 @@ class ChildTimeSet extends StatefulWidget {
 
 class _ChildTimeSetState extends State<ChildTimeSet> {
   final TimeSetService _timeSetService = TimeSetService();
-  late Future<List<Data>> _timeSetData;
+  late Future<List<TimeSet>> _timeSetData;
   late UserProvider _userProvider;
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     _userProvider = Provider.of<UserProvider>(context, listen: false);
-    _timeSetData = _timeSetService.fetchTimeSets(_userProvider.loginId);
+    _timeSetData =
+        _timeSetService.fetchTimeSets(_userProvider.userId.toString());
   }
 
   @override
@@ -30,11 +32,11 @@ class _ChildTimeSetState extends State<ChildTimeSet> {
         children: [
           const SizedBox(height: 40),
           Expanded(
-            child: FutureBuilder<List<Data>>(
+            child: FutureBuilder<List<TimeSet>>(
               future: _timeSetData,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.done) {
-                  if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                  if (snapshot.hasData) {
                     return Column(
                       children: [
                         const Text(
@@ -47,6 +49,12 @@ class _ChildTimeSetState extends State<ChildTimeSet> {
                             itemCount: snapshot.data!.length,
                             itemBuilder: (context, index) {
                               final data = snapshot.data![index];
+                              // 아이콘의 인덱스가 리스트 범위 내에 있는지 확인
+                              Widget iconWidget = data.icon >= 0 &&
+                                      data.icon < locationIcons.length
+                                  ? locationIcons[data.icon - 1]
+                                  : const Icon(Icons.error); // 범위 밖이면 기본 아이콘 사용
+
                               return SizedBox(
                                 height: 120,
                                 child: Card(
@@ -56,8 +64,7 @@ class _ChildTimeSetState extends State<ChildTimeSet> {
                                       Container(
                                         width: 60,
                                         alignment: Alignment.center,
-                                        child:
-                                            const Icon(Icons.school, size: 32),
+                                        child: iconWidget,
                                       ),
                                       Expanded(
                                         child: Column(
@@ -70,20 +77,20 @@ class _ChildTimeSetState extends State<ChildTimeSet> {
                                               children: [
                                                 Expanded(
                                                   child: Text(
-                                                    data.name ?? '이름 없음',
+                                                    data.name,
                                                     style: const TextStyle(
                                                         fontSize: 14),
                                                   ),
                                                 ),
                                                 RichText(
                                                   text: TextSpan(
-                                                    children: _daysOfWeek(
-                                                        data.day ?? '0000000'),
+                                                    children:
+                                                        _daysOfWeek(data.day),
                                                     style: const TextStyle(
                                                         color: Colors.black),
                                                   ),
                                                 ),
-                                                const SizedBox(width: 20)
+                                                const SizedBox(width: 20),
                                               ],
                                             ),
                                             const SizedBox(height: 10),
@@ -91,7 +98,7 @@ class _ChildTimeSetState extends State<ChildTimeSet> {
                                               children: [
                                                 const SizedBox(width: 10),
                                                 Text(
-                                                  '${data.startTime ?? '시작 시간 없음'} ~ ${data.endTime ?? '종료 시간 없음'}',
+                                                  '${data.startTime} ~ ${data.endTime}',
                                                   style: const TextStyle(
                                                       fontSize: 32),
                                                 ),
@@ -109,16 +116,10 @@ class _ChildTimeSetState extends State<ChildTimeSet> {
                         ),
                       ],
                     );
-                  } else {
-                    return const Center(
-                      child: Text(
-                        '저장된 목적지가 없습니다.',
-                        style: TextStyle(fontSize: 18, color: Colors.grey),
-                      ),
-                    );
+                  } else if (snapshot.hasError) {
+                    print('Error: ${snapshot.error}');
+                    return Text('에러: ${snapshot.error}');
                   }
-                } else if (snapshot.hasError) {
-                  return Text('에러: ${snapshot.error}');
                 }
                 return const CircularProgressIndicator();
               },
@@ -132,10 +133,17 @@ class _ChildTimeSetState extends State<ChildTimeSet> {
   List<TextSpan> _daysOfWeek(String days) {
     List<TextSpan> spans = [];
     final dayNames = ['월', '화', '수', '목', '금', '토', '일'];
+
+    // TextStyle에 fontFamily를 'monospace'로 설정하여 모든 글자의 너비를 같게 함
+    const textStyleRegular =
+        TextStyle(color: Colors.grey, fontFamily: 'RobotoMono');
+    const textStyleActive =
+        TextStyle(color: Colors.blue, fontFamily: 'RobotoMono');
+
     for (int i = 0; i < 7; i++) {
       spans.add(TextSpan(
-        text: '${dayNames[i]}${days[i] == '1' ? '' : ' '}',
-        style: TextStyle(color: days[i] == '1' ? Colors.blue : Colors.grey),
+        text: dayNames[i] + (i < 6 ? "  " : ""), // 마지막 요일 후에는 공간 추가하지 않음
+        style: days[i] == '1' ? textStyleActive : textStyleRegular,
       ));
     }
     return spans;
