@@ -103,48 +103,48 @@ class UserService {
     print(fcmToken);
 
     if (deviceId.isNotEmpty && fcmToken.isNotEmpty) {
-    Map<String, dynamic> postData = {
-      'device_id': deviceId,
-      'fcm_token': fcmToken,
-      'refresh_token': refreshToken.isNotEmpty ? refreshToken : ""
-    };
+      Map<String, dynamic> postData = {
+        'device_id': deviceId,
+        'fcm_token': fcmToken,
+        'refresh_token': refreshToken.isNotEmpty ? refreshToken : ""
+      };
 
-    try {
-      final response = await _dio.post(
-        '/auth/device/login',
-        data: postData,
-        options: Options(headers: {'no-token': true}),
-      );
-
-      if (response.statusCode == 200) {
-        // 토큰 저장
-        await _saveTokens(
-          response.data['data']['access_token'],
-          response.data['data']['refresh_token'],
+      try {
+        final response = await _dio.post(
+          '/auth/device/login',
+          data: postData,
+          options: Options(headers: {'no-token': true}),
         );
 
-        // 사용자 데이터 Provider에 저장
-        userProvider.setUserData(response.data['data']);
+        if (response.statusCode == 200) {
+          // 토큰 저장
+          await _saveTokens(
+            response.data['data']['access_token'],
+            response.data['data']['refresh_token'],
+          );
 
-        // 부모인지 자녀인지 구분
-        if (response.data['data'].containsKey('children')) {
-          // 부모 페이지로 이동 로직
-          print("User is a Parent");
+          // 사용자 데이터 Provider에 저장
+          userProvider.setUserData(response.data['data']);
+
+          // 부모인지 자녀인지 구분
+          if (response.data['data'].containsKey('children')) {
+            // 부모 페이지로 이동 로직
+            print("User is a Parent");
+          } else {
+            // 자녀 페이지로 이동 로직
+            print("User is a Child");
+          }
         } else {
-          // 자녀 페이지로 이동 로직
-          print("User is a Child");
+          userProvider.clearUserData();
+          throw Exception('자동로그인에 실패했습니다');
         }
-      } else {
+      } catch (e) {
         userProvider.clearUserData();
-        throw Exception('자동로그인에 실패했습니다');
+        throw Exception('자동로그인에 실패했습니다: $e');
       }
-    } catch (e) {
+    } else {
       userProvider.clearUserData();
-      throw Exception('자동로그인에 실패했습니다: $e');
     }
-  } else {
-    userProvider.clearUserData();
-  }
   }
 
   // 로그인 ID 중복 확인
@@ -161,6 +161,20 @@ class UserService {
       };
     } catch (e) {
       return {'status': 500, 'message': '서버 에러가 발생했습니다.', 'isAvailable': false};
+    }
+  }
+
+  // 회원 탈퇴
+  Future<void> deleteUser() async {
+    try {
+      final response = await _dio.delete('/users');
+      if (response.statusCode == 200) {
+        print('회원 탈퇴 성공적');
+      } else {
+        throw Exception('Failed to delete user: ${response.data['message']}');
+      }
+    } catch (e) {
+      throw Exception('Failed to delete user: $e');
     }
   }
 }

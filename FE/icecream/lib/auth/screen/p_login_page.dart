@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../service/user_service.dart';
 import 'package:icecream/provider/user_provider.dart';
+import 'package:icecream/setting/widget/custom_text_field.dart';
+import 'package:icecream/setting/widget/custom_elevated_button.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -33,7 +35,8 @@ class _LoginPageState extends State<LoginPage> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
 
     if (loginId.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('로그인 ID와 비밀번호를 입력하세요')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('로그인 ID와 비밀번호를 입력하세요')));
       return;
     }
     debugPrint('loginId: $loginId');
@@ -41,33 +44,41 @@ class _LoginPageState extends State<LoginPage> {
     debugPrint('fcmToken: $_fcmToken');
     try {
       await _userService.loginUser(loginId, password, _fcmToken, userProvider);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('로그인 성공')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('로그인 성공')));
       context.go('/parents'); // 부모 유저 로그인 성공시 PHome으로 이동
     } catch (e) {
       debugPrint("$e");
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('로그인 실패: $e')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('로그인 실패: $e')));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('로그인')),
+      appBar: AppBar(title: const Text('로그인')),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           children: <Widget>[
-            TextField(
+            CustomTextField(
               controller: _loginIdController,
-              decoration: InputDecoration(labelText: '로그인 ID'),
+              hintText: '로그인 ID',
+              contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
             ),
-            TextField(
+            const SizedBox(height: 20),
+            CustomTextField(
               controller: _passwordController,
+              hintText: '비밀번호',
               obscureText: true,
-              decoration: InputDecoration(labelText: '비밀번호'),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
             ),
-            SizedBox(height: 20),
-            ElevatedButton(onPressed: _login, child: Text('로그인')),
+            const SizedBox(height: 20),
+            CustomElevatedButton(
+              onPressed: _login,
+              child: '로그인',
+            ),
           ],
         ),
       ),
