@@ -6,6 +6,7 @@ class RabbitMQService {
   Client? _client;
   Channel? _channel;
   Exchange? _exchange;
+  bool _isInitialized = false;
 
   Future<void> initRabbitMQ() async {
     bool isConnected = false;
@@ -34,8 +35,9 @@ class RabbitMQService {
       throw Exception(
           'Failed to connect to RabbitMQ after $maxAttempts attempts.');
     }
+    _isInitialized = true;
   }
-
+  bool get isInitialized => _isInitialized;
   Future<void> sendLocation(double latitude, double longitude, int userId, int destinationId) async {
     if (_exchange == null) {
       throw Exception('RabbitMQ not initialized.');
@@ -68,9 +70,11 @@ class RabbitMQService {
 
   void startSendingLocation(double latitude, double longitude, int userId, int destinationId) {
     print("Starting periodic location updates...");
-    Timer.periodic(const Duration(seconds: 1), (timer) {
-      print("Timer tick for sending location.");
-      sendLocation(latitude, longitude, userId, destinationId);
-    });
+    if (!_isInitialized) {
+      Timer.periodic(const Duration(seconds: 1), (timer) {
+        print("Timer tick for sending location.");
+        sendLocation(latitude, longitude, userId, destinationId);
+      });
+    }
   }
 }

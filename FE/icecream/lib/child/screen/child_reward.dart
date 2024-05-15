@@ -3,15 +3,14 @@ import 'package:icecream/child/widget/history_modal.dart';
 import 'package:icecream/child/widget/reward_modal.dart';
 import 'package:icecream/child/widget/child_daily_goal.dart';
 import 'package:icecream/goal/model/goal_model.dart';
-import 'package:dio/dio.dart';
-import 'package:icecream/child/service/reward_service.dart'; // RewardService import
+import 'package:icecream/child/service/goal_service.dart';
 import 'package:icecream/provider/user_provider.dart';
 import 'package:provider/provider.dart';
 
 class ChildReward extends StatelessWidget {
   ChildReward({super.key});
 
-  final RewardService _rewardService = RewardService(Dio()); // RewardService 인스턴스 생성
+  final GoalService _goalService = GoalService(); // 수정된 부분: 매개변수 없이 인스턴스 생성
 
   void showHistoryModal(BuildContext context) {
     showDialog(
@@ -26,11 +25,11 @@ class ChildReward extends StatelessWidget {
   void showRewardModal(BuildContext context) async {
     try {
       final userId = Provider.of<UserProvider>(context, listen: false).userId; // userId를 가져옵니다.
-      final goalData = await _rewardService.fetchGoal(userId.toString()); // 서버에서 목표 데이터를 받아옵니다.
+      final goalData = await _goalService.fetchGoal(userId.toString()); // 서버에서 목표 데이터를 받아옵니다.
       showDialog(
         context: context,
         builder: (BuildContext context) {
-          return RewardModal(goalData: goalData); // 받아온 데이터를 RewardModal에 전달
+          return RewardModal(goalData: goalData);
         },
         barrierDismissible: true,
       );
@@ -61,49 +60,71 @@ class ChildReward extends StatelessWidget {
         '2024-04-12': true,
       },
     );
-    int currentStreak = 4;
 
-    return Center(
-      child: Column(
-        children: [
-          const SizedBox(height: 30),
-          Padding(
-            padding: const EdgeInsets.all(5.0),
-            child: RichText(
-              text: TextSpan(
-                text: '현재 ',
-                style: DefaultTextStyle.of(context).style,
-                children: <TextSpan>[
-                  TextSpan(
-                    text: '$currentStreak일째',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+    return FutureBuilder<Map<String, dynamic>>(
+      future: _goalService.fetchGoal(
+          Provider.of<UserProvider>(context, listen: false).userId.toString()),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else if (!snapshot.hasData) {
+          return Center(child: Text('No data'));
+        } else {
+          final goalData = snapshot.data!;
+          final currentStreak = goalData['record'];
+
+          return Center(
+            child: Column(
+              children: [
+                const SizedBox(height: 30),
+                Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: RichText(
+                    text: TextSpan(
+                      text: '현재 ',
+                      style: DefaultTextStyle.of(context).style,
+                      children: <TextSpan>[
+                        TextSpan(
+                          text: '$currentStreak일째',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const TextSpan(text: ' 안전 보행 중입니다.'),
+                      ],
+                    ),
                   ),
-                  const TextSpan(text: ' 안전 보행 중입니다.'),
-                ],
-              ),
+                ),
+                const SizedBox(height: 15),
+                const Divider(thickness: 1, height: 1, color: Colors.grey),
+                SizedBox(
+                    height: maxHeight,
+                    child: ChildDailyGoal(dailyGoal: dailyGoal)),
+                const Divider(thickness: 1, height: 1, color: Colors.grey),
+                const SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: OutlinedButton(
+                    onPressed: () => showRewardModal(context),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: Theme.of(context).primaryColor),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30)),
+                    ),
+                    child: Padding(
+                      padding:
+                      const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: Text('보상 보기',
+                          style: TextStyle(
+                              color: Theme.of(context).primaryColor)),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 15),
-          const Divider(thickness: 1, height: 1, color: Colors.grey),
-          SizedBox(height: maxHeight, child: ChildDailyGoal(dailyGoal: dailyGoal)),
-          const Divider(thickness: 1, height: 1, color: Colors.grey),
-          const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: OutlinedButton(
-              onPressed: () => showRewardModal(context),
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(color: Theme.of(context).primaryColor),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: Text('보상 보기', style: TextStyle(color: Theme.of(context).primaryColor)),
-              ),
-            ),
-          ),
-        ],
-      ),
+          );
+        }
+      },
     );
   }
 }
