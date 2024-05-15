@@ -8,8 +8,8 @@ import 'package:icecream/setting/widget/custom_elevated_button.dart';
 import 'package:icecream/setting/widget/custom_text_container_v2.dart';
 
 class SearchScreen extends StatefulWidget {
-
-  const SearchScreen({super.key, });
+  final int user_id;
+  const SearchScreen({super.key, required this.user_id, });
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
@@ -45,7 +45,7 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
           GestureDetector(
             onTap: () {
-              context.goNamed('kpostal');
+              context.goNamed('kpostal', pathParameters: {'user_id': widget.user_id.toString()});
             },
             child: CustomTextContainerV2(),
           ),
@@ -54,7 +54,7 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
           CustomElevatedButton(
             onPressed: () {
-              context.pushNamed('map');
+              context.goNamed('map', pathParameters: {'user_id': widget.user_id.toString()});
             },
             child: '현재 위치로 찾기',
             backgroundColor: AppColors.background_color,
@@ -64,7 +64,7 @@ class _SearchScreenState extends State<SearchScreen> {
             height: 24.0,
           ),
           Container(
-            height: 90.0,
+            height: 100.0,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
