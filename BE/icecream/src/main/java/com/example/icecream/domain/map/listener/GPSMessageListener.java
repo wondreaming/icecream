@@ -24,6 +24,7 @@ public class GPSMessageListener {
     @RabbitListener(queues = "crosswalk")
     public void receiveMessage(GPSMessageDto gpsMessageDto) {
         try {
+            log.info("userId: {}, destinationId: {}, latitude: {}, longitude: {}", gpsMessageDto.getUserId(), gpsMessageDto.getDestinationId(), gpsMessageDto.getLatitude(), gpsMessageDto.getLongitude());
             crosswalkService.checkCrosswalkArea(gpsMessageDto.getUserId(), gpsMessageDto.getLatitude(), gpsMessageDto.getLongitude());
             destinationArrivalService.checkAndNotifyArrival(gpsMessageDto.getUserId(), gpsMessageDto.getDestinationId(), gpsMessageDto.getLatitude(), gpsMessageDto.getLongitude());
             jaywalkingCheckService.checkJaywalking(gpsMessageDto.getUserId(), gpsMessageDto.getLatitude(), gpsMessageDto.getLongitude());
