@@ -12,11 +12,14 @@ class Profile extends StatelessWidget {
   final String number;
   final String? imgUrl;
   final VoidCallback onPressed;
+  final int user_id;
   const Profile(
       {super.key,
       required this.name,
       required this.number,
-      this.imgUrl, required this.onPressed});
+      this.imgUrl,
+      required this.onPressed,
+      required this.user_id});
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +37,7 @@ class Profile extends StatelessWidget {
           children: [
             Flexible(
               child: ProfileImage(
+                user_id: user_id,
                 imgUrl: imgUrl,
                 width: 90,
                 height: 90,

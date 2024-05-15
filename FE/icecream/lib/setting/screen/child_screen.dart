@@ -37,6 +37,7 @@ class ChildScreen extends StatelessWidget {
                           },
                         );
                       },
+                      user_id: child.userId,
                       name: child.username,
                       number: child.phoneNumber,
                       imgUrl: child.profileImage,

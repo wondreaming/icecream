@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:icecream/setting/widget/profile_image.dart';
 
 class Child {
   final int userId;
@@ -50,6 +51,31 @@ class UserProvider extends ChangeNotifier {
   bool get isLoggedIn => _isLoggedIn;
   List<Child> get children => _children;
   int get userId => _userId; // userId getter 추가
+
+
+  // profileImage에 대한 setter 추가
+  set setProfileImage(String newImage) {
+    if (_profileImage != newImage) {
+      _profileImage = newImage;
+      notifyListeners();
+    }
+  }
+
+  // phoneNumber에 대한 setter 추가
+  set setPhoneNumber(String newPhoneNumber) {
+    if (_phoneNumber != newPhoneNumber) {
+      _phoneNumber = newPhoneNumber;
+      notifyListeners();
+    }
+  }
+
+  // 이름에 대한 setter 추가
+  set setUsername(String newUsername) {
+    if (_username != newUsername) {
+      _username = newUsername;
+      notifyListeners();
+    }
+  }
 
   void setUserData(Map<String, dynamic> userData) {
     _username = userData['username'];
