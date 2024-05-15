@@ -69,14 +69,6 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
-  // 이름에 대한 setter 추가
-  set setUsername(String newUsername) {
-    if (_username != newUsername) {
-      _username = newUsername;
-      notifyListeners();
-    }
-  }
-
   void setUserData(Map<String, dynamic> userData) {
     _username = userData['username'];
     _loginId = userData['login_id'] ?? '';
@@ -111,5 +103,50 @@ class UserProvider extends ChangeNotifier {
   void updateChildren(List<Child> children) {
     _children = children;
     notifyListeners();
+  }
+
+  // 특정 자녀의 프로필 업데이트
+  void updateChildProfileImage(int childId, String newProfileImage) {
+    int index = _children.indexWhere((child) => child.userId == childId);
+    if (index != -1) {
+      Child oldChild = _children[index];
+      _children[index] = Child(
+          userId: oldChild.userId,
+          profileImage: newProfileImage,
+          username: oldChild.username,
+          phoneNumber: oldChild.phoneNumber
+      );
+      notifyListeners();
+    }
+  }
+
+  // 특정 자녀의 이름 업데이트
+  void updateChildName(int childId, String newName) {
+    int index = _children.indexWhere((child) => child.userId == childId);
+    if (index != -1) {
+      Child oldChild = _children[index];
+      _children[index] = Child(
+          userId: oldChild.userId,
+          profileImage: oldChild.profileImage,
+          username: newName,
+          phoneNumber: oldChild.phoneNumber
+      );
+      notifyListeners();
+    }
+  }
+
+  // 특정 자녀의 전화번호 업데이트
+  void updateChildPhoneNumber(int childId, String newPhoneNumber) {
+    int index = _children.indexWhere((child) => child.userId == childId);
+    if (index != -1) {
+      Child oldChild = _children[index];
+      _children[index] = Child(
+          userId: oldChild.userId,
+          profileImage: oldChild.profileImage,
+          username: oldChild.username,
+          phoneNumber: newPhoneNumber
+      );
+      notifyListeners();
+    }
   }
 }

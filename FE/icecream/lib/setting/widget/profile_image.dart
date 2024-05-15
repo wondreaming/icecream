@@ -15,7 +15,7 @@ import 'package:icecream/setting/widget/custom_modal.dart';
 import 'package:icecream/setting/widget/custom_show_dialog.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:http_parser/http_parser.dart';
+import 'package:path/path.dart' as path;
 
 class ProfileImage extends StatefulWidget {
   final int user_id;
@@ -59,34 +59,35 @@ class _ProfileImageState extends State<ProfileImage> {
     if (_image == null) {
       throw Exception("이미지를 등록해주세요");
     }
-    File newImage = File(_image!.path);
-    MultipartFile multipartFile = await MultipartFile.fromFile(newImage.path,
-        filename: newImage.path.split('/').last, contentType: MediaType("image", "jpeg"));
-    print('111111111111111111 $newImage');
+    String fileName = path.basename(_image!.path);
+    FormData formData = await FormData.fromMap({
+      'profile_image':
+          await MultipartFile.fromFile(_image!.path, filename: fileName)
+    });
     ResponseModel response = await userRepository.postImage(
-        user_id: widget.user_id, profile_image: multipartFile!);
-
+        user_id: widget.user_id, formData: formData);
     return response;
   }
 
   void changeImgUrl() async {
     ResponseModel response;
     response = await postImgUrl();
-
-    if (response.status == 200) {
-      if (response.data != null) {
+    try {
+      if (response.status == 200 && response.data != null) {
         Provider.of<UserProvider>(context, listen: false).setProfileImage =
             response.data!;
+        final String message = response.message!;
+        showCustomDialog(context, message, isNo: false, onPressed: () {
+          context.pop();
+        });
+      } else {
+        final String message = response.message!;
+        showCustomDialog(context, message, isNo: false, onPressed: () {
+          context.pop();
+        });
       }
-      final String message = response.message;
-      showCustomDialog(context, message, isNo: false, onPressed: () {
-        context.pop();
-      });
-    } else {
-      final String message = response.message;
-      showCustomDialog(context, message, isNo: false, onPressed: () {
-        context.pop();
-      });
+    } catch (e) {
+      // 예외 발생시 에러 메시지 표시
     }
   }
 
@@ -159,7 +160,7 @@ class _ProfileImageState extends State<ProfileImage> {
                         );
                       },
                     ),
-                    480.0,
+                    500.0,
                   );
                 },
               ),
