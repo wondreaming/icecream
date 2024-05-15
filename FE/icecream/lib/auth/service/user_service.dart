@@ -76,6 +76,24 @@ class UserService {
     }
   }
 
+  // 자녀 정보 조회
+  Future<void> fetchChildren(UserProvider userProvider) async {
+    try {
+      final response = await _dio.get('/users/child');
+      if (response.statusCode == 200) {
+        List<dynamic> childrenData = response.data['data'];
+        List<Child> children =
+            childrenData.map((child) => Child.fromJson(child)).toList();
+        userProvider.updateChildren(children);
+      } else {
+        throw Exception(
+            'Failed to fetch children: ${response.data['message']}');
+      }
+    } catch (e) {
+      throw Exception('Failed to fetch children: $e');
+    }
+  }
+
   // 부모 로그인
   Future<void> loginUser(String loginId, String password, String fcmToken,
       UserProvider userProvider) async {
@@ -176,11 +194,11 @@ class UserService {
       final response = await _dio.get('/users/check',
           queryParameters: {'login_id': loginId},
           options: Options(headers: {'no-token': true}) // 토큰을 포함하지 않음
-          );
+      );
       return {
         'status': response.statusCode,
         'message': response.data['message'],
-        'isAvailable': response.statusCode == 200
+        'isAvailable': response.statusCode == 200 && response.data['message'] == "사용할 수 있는 아이디입니다"
       };
     } catch (e) {
       return {'status': 500, 'message': '서버 에러가 발생했습니다.', 'isAvailable': false};

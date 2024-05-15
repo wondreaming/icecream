@@ -15,20 +15,17 @@ class QRScanPage extends StatefulWidget {
 class _QRScanPageState extends State<QRScanPage> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   QRViewController? controller;
-  String _decryptedData = '';
 
   void _onQRViewCreated(QRViewController controller) {
     this.controller = controller;
     controller.scannedDataStream.listen((scanData) {
       controller.pauseCamera(); // 스캔 후 카메라 일시정지
-      setState(() {
-        _decryptedData = _decryptData(scanData.code);
-        if (_validateData(_decryptedData)) {
-          _navigateToChildRegisterPage();
-        } else {
-          _showErrorMessage();
-        }
-      });
+      final decryptedData = _decryptData(scanData.code);
+      if (_validateData(decryptedData)) {
+        _navigateToChildRegisterPage(decryptedData);
+      } else {
+        _showErrorMessage();
+      }
     });
   }
 
@@ -44,9 +41,8 @@ class _QRScanPageState extends State<QRScanPage> {
     }
   }
 
-  void _navigateToChildRegisterPage() {
-    controller?.pauseCamera();
-    final data = json.decode(_decryptedData);
+  void _navigateToChildRegisterPage(String decryptedData) {
+    final data = json.decode(decryptedData);
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -60,7 +56,7 @@ class _QRScanPageState extends State<QRScanPage> {
 
   void _showErrorMessage() {
     ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('잘못된 QR 코드입니다. 올바른 QR 코드를 스캔하세요.')));
+        const SnackBar(content: Text('잘못된 QR 코드입니다. 올바른 QR 코드를 스캔하세요.')));
     controller?.resumeCamera(); // SnackBar가 사라진 후 카메라 재개
   }
 
@@ -88,34 +84,18 @@ class _QRScanPageState extends State<QRScanPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('QR Scan Page'),
+        title: const Text('QR 코드 스캔'),
       ),
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            flex: 5,
-            child: QRView(
-              key: qrKey,
-              onQRViewCreated: _onQRViewCreated,
-              overlay: QrScannerOverlayShape(
-                borderColor: AppColors.custom_yellow,
-                borderRadius: 10,
-                borderLength: 30,
-                borderWidth: 10,
-                cutOutSize: MediaQuery.of(context).size.width * 0.8,
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Center(
-              child: Text(
-                'Decrypted Data: $_decryptedData',
-                textAlign: TextAlign.center,
-              ),
-            ),
-          )
-        ],
+      body: QRView(
+        key: qrKey,
+        onQRViewCreated: _onQRViewCreated,
+        overlay: QrScannerOverlayShape(
+          borderColor: AppColors.custom_yellow,
+          borderRadius: 10,
+          borderLength: 30,
+          borderWidth: 20,
+          cutOutSize: MediaQuery.of(context).size.width * 0.8,
+        ),
       ),
     );
   }

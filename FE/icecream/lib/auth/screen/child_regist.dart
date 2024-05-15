@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
+import 'package:icecream/provider/user_provider.dart';
+import 'package:provider/provider.dart';
 import '../service/user_service.dart';
 import 'package:icecream/setting/widget/custom_text_field.dart';
 import 'package:icecream/setting/widget/custom_elevated_button.dart';
@@ -15,6 +19,40 @@ class ChildRegisterPage extends StatefulWidget {
 
   @override
   _ChildRegisterPageState createState() => _ChildRegisterPageState();
+}
+
+class PhoneNumberFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    String formattedText = _getFormattedPhoneNumber(newValue.text);
+    return TextEditingValue(
+      text: formattedText,
+      selection: TextSelection.collapsed(offset: formattedText.length),
+    );
+  }
+
+  String _getFormattedPhoneNumber(String value) {
+    value = _cleanPhoneNumber(value);
+
+    if (value.length <= 3) {
+      // 010 입력 중
+      return value;
+    } else if (value.length <= 7) {
+      // 010-xxxx 포맷
+      return '${value.substring(0, 3)}-${value.substring(3)}';
+    } else if (value.length <= 11) {
+      // 010-xxxx-xxxx 포맷
+      return '${value.substring(0, 3)}-${value.substring(3, 7)}-${value.substring(7)}';
+    } else {
+      // 길이가 11자를 넘지 않도록 제한
+      return '${value.substring(0, 3)}-${value.substring(3, 7)}-${value.substring(7, 11)}';
+    }
+  }
+
+  String _cleanPhoneNumber(String value) {
+    return value.replaceAll(RegExp(r'[^0-9]'), '');
+  }
 }
 
 class _ChildRegisterPageState extends State<ChildRegisterPage> {
@@ -55,6 +93,12 @@ class _ChildRegisterPageState extends State<ChildRegisterPage> {
 
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('등록 성공: ${response.data}')));
+
+      // 자녀 정보 갱신
+      await _userService.fetchChildren(context.read<UserProvider>());
+
+      // 자녀 등록 성공시, 메인페이지로 이동
+      GoRouter.of(context).pushReplacement('/parents');
     } catch (e) {
       debugPrint("$e");
       ScaffoldMessenger.of(context)
@@ -73,13 +117,16 @@ class _ChildRegisterPageState extends State<ChildRegisterPage> {
             CustomTextField(
               controller: _nameController,
               hintText: '자녀의 이름',
-              contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
             ),
             const SizedBox(height: 16),
             CustomTextField(
               controller: _phoneController,
               hintText: '전화번호',
-              contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+              inputFormatters: [PhoneNumberFormatter()], // 전화번호 포맷터 추가
             ),
             const SizedBox(height: 16),
             CustomElevatedButton(

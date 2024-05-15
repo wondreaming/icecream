@@ -81,4 +81,9 @@ class UserProvider extends ChangeNotifier {
     _userId = 0; // userId 초기화
     notifyListeners();
   }
+  // 자녀 정보 업데이트
+  void updateChildren(List<Child> children) {
+    _children = children;
+    notifyListeners();
+  }
 }
