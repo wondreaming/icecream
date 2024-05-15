@@ -44,13 +44,14 @@ public class ScheduleGoalStatusComponent {
             Map<LocalDate, Integer> result = goalStatus.getResult();
             if (result.get(LocalDate.now().minusDays(1)) == 0) {
                 result.put(LocalDate.now().minusDays(1), 1);
-                goalStatusRepository.save(goalStatus);
 
                 Goal goal = goalRepository.findByUserIdAndIsActive(userId, true);
                 int record = goal.getRecord();
                 goal.updateRecord(record + 1);
                 goalRepository.save(goal);
             }
+            result.put(LocalDate.now(), 0);
+            goalStatusRepository.save(goalStatus);
 
             String key = "user_goal:" + userId;
             ops.set(key, 0, Duration.ofSeconds(86400));
