@@ -17,7 +17,8 @@
         android:icon="@mipmap/ic_launcher"
         android:requestLegacyExternalStorage="true" 
         android:usesCleartextTraffic="true"
-        android:enableOnBackInvokedCallback="true">
+        android:enableOnBackInvokedCallback="true"
+        android:hardwareAccelerated="false">
 
         <!-- gps로케이션 -->
         <service

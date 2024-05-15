@@ -43,14 +43,15 @@ class LocationService : Service() {
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                "Location Service Channel",
-                NotificationManager.IMPORTANCE_DEFAULT
-            )
-            channel.description = "Channel for Location Service"
-            val notificationManager = getSystemService(NotificationManager::class.java)
-            notificationManager?.createNotificationChannel(channel)
+            val name = getString(R.string.channel_name) // 채널 이름
+            val descriptionText = getString(R.string.channel_description) // 채널 설명
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+                description = descriptionText
+            }
+            val notificationManager: NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
         }
     }
 
@@ -61,7 +62,7 @@ class LocationService : Service() {
         val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Location Service")
             .setContentText("Running...")
-            .setSmallIcon(R.drawable.ic_notification)
+            .setSmallIcon(R.drawable.ic_notification) // 알림 아이콘
             .build()
 
         startForeground(1, notification)
@@ -149,9 +150,12 @@ class LocationService : Service() {
 
                     for (i in 0 until dataArray.length()) {
                         val item = dataArray.getJSONObject(i)
+                        val destinationId = item.getInt("destination_id")
                         val startTime = item.getString("start_time")
                         val endTime = item.getString("end_time")
-                        scheduleLocationUpdatesBasedOnTimeSettings(startTime, endTime)
+                        val day = item.getString("day")
+                        // 필요한 데이터를 저장하고, 시간 및 요일에 따라 위치 업데이트를 스케줄링합니다.
+                        scheduleLocationUpdatesBasedOnTimeSettings(startTime, endTime, day, destinationId)
                     }
                 }
             }
@@ -168,10 +172,15 @@ class LocationService : Service() {
         return sharedPref.getString("accessToken", "") ?: ""
     }
 
-    private fun scheduleLocationUpdatesBasedOnTimeSettings(startTime: String, endTime: String) {
+    private fun scheduleLocationUpdatesBasedOnTimeSettings(startTime: String, endTime: String, day: String, destinationId: Int) {
+        val calendar = Calendar.getInstance()
+        val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK) - 1 // Calendar.SUNDAY가 1이므로 1을 빼서 0부터 시작하게 함
+        val currentDayBit = day[dayOfWeek] == '1'
+
         val currentTime = getCurrentTime()
-        isWithinTimeRange = currentTime >= startTime && currentTime <= endTime
+        isWithinTimeRange = currentDayBit && currentTime >= startTime && currentTime <= endTime
         if (isWithinTimeRange) {
+            this.destinationId = destinationId
             startFrequentLocationUpdates()
         } else {
             startInfrequentLocationUpdates()
