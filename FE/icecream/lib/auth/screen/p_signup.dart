@@ -6,22 +6,38 @@ import 'package:icecream/setting/widget/custom_elevated_button.dart';
 
 class PhoneNumberFormatter extends TextInputFormatter {
   @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
-    final text = newValue.text;
-    if (text.length == 3) {
-      return newValue.copyWith(
-        text: '$text-',
-        selection: TextSelection.collapsed(offset: text.length + 1),
-      );
-    } else if (text.length == 8) {
-      return newValue.copyWith(
-        text: '${text.substring(0, 7)}-${text.substring(7)}',
-        selection: TextSelection.collapsed(offset: text.length + 1),
-      );
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    String formattedText = _getFormattedPhoneNumber(newValue.text);
+    return TextEditingValue(
+      text: formattedText,
+      selection: TextSelection.collapsed(offset: formattedText.length),
+    );
+  }
+
+  String _getFormattedPhoneNumber(String value) {
+    value = _cleanPhoneNumber(value);
+
+    if (value.length <= 3) {
+      // 010 입력 중
+      return value;
+    } else if (value.length <= 7) {
+      // 010-xxxx 포맷
+      return '${value.substring(0, 3)}-${value.substring(3)}';
+    } else if (value.length <= 11) {
+      // 010-xxxx-xxxx 포맷
+      return '${value.substring(0, 3)}-${value.substring(3, 7)}-${value.substring(7)}';
+    } else {
+      // 길이가 11자를 넘지 않도록 제한
+      return '${value.substring(0, 3)}-${value.substring(3, 7)}-${value.substring(7, 11)}';
     }
-    return newValue;
+  }
+
+  String _cleanPhoneNumber(String value) {
+    return value.replaceAll(RegExp(r'[^0-9]'), '');
   }
 }
+
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
