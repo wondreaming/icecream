@@ -24,12 +24,11 @@ import 'package:image/image.dart' as image;
 import 'package:permission_handler/permission_handler.dart';
 
 // gps
-import 'package:geolocator/geolocator.dart'; // 임포트 추가
+import 'package:geolocator/geolocator.dart';
 import 'package:icecream/gps/location_service.dart';
 import 'package:icecream/gps/rabbitmq_service.dart';
 import 'dart:async';
 import 'package:icecream/child/service/timeset_service.dart';
-import 'package:icecream/auth/service/user_service.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -242,7 +241,7 @@ Future<void> main() async {
     ),
   );
 
-  // runApp 호출 후 BuildContext를 사용하여 startLocationService 호출z
+  // runApp 호출 후 BuildContext를 사용하여 startLocationService 호출
 }
 
 Future<void> requestLocationPermission() async {
@@ -287,8 +286,12 @@ void startLocationService(BuildContext context, LocationService locationService,
 
       // 위치 스트림 리스너 설정
       var locationSubscription = locationService.getLocationStream().listen((position) {
-        debugPrint('Sending location: (${position.latitude}, ${position.longitude}) with destinationId: $destinationId');
-        rabbitMQService.sendLocation(position.latitude, position.longitude, userProvider.userId, destinationId);
+        if (rabbitMQService.isInitialized) {
+          debugPrint('Sending location: (${position.latitude}, ${position.longitude}) with destinationId: $destinationId');
+          rabbitMQService.sendLocation(position.latitude, position.longitude, userProvider.userId, destinationId);
+        } else {
+          debugPrint('RabbitMQ not initialized. Location not sent.');
+        }
       });
 
     } catch (e) {
@@ -319,7 +322,6 @@ int getDayIndex(String day) {
       throw Exception('Invalid day: $day');
   }
 }
-
 
 // 알림 응답을 처리
 void handleNotificationResponse(NotificationResponse response) async {
@@ -361,77 +363,32 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _autoLoginFuture = _autoLogin();
-    initServices();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (context != null) {
-        startLocationService(context, _locationService, _rabbitMQService);
-      }
-    });
+    _autoLoginFuture = _autoLoginAndInitServices();
   }
 
+  Future<void> _autoLoginAndInitServices() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    try {
+      await _userService.autoLogin(userProvider);
+      await initServices();
+      if (userProvider.isLoggedIn) {
+        startLocationService(context, _locationService, _rabbitMQService);
+      }
+    } catch (e) {
+      debugPrint('Auto-login or service initialization failed: $e');
+    }
+  }
 
   // 초기 서비스 설정
   Future<void> initServices() async {
     await _locationService.initLocationService();
     await _rabbitMQService.initRabbitMQ();
-    final userProvider = Provider.of<UserProvider>(context, listen: false); // UserProvider 인스턴스 접근
-
-    // 로그인 상태와 유저 ID 확인
-    if (true) {
-      var timeSetService = TimeSetService(); // TimeSetService 인스턴스 생성
-      try {
-        List<TimeSet> timeSets = await timeSetService.fetchTimeSets(userProvider.userId.toString()); // 시간 설정 데이터 요청
-        DateTime now = DateTime.now();
-        String currentDay = DateFormat('EEEE', 'ko_KR').format(now).toLowerCase(); // 현재 요일
-        String currentTime = DateFormat('HH:mm').format(now); // 현재 시간
-
-        int destinationId = -1; // 목적지 ID 초기화
-        int dayIndex = getDayIndex(currentDay);
-
-        for (var timeSet in timeSets) {
-          debugPrint('Checking TimeSet: ${timeSet.startTime} - ${timeSet.endTime} on days: ${timeSet.day}');
-          debugPrint('Day bit: ${timeSet.day[dayIndex]}');
-          if (timeSet.day[dayIndex] == '1' &&
-              timeSet.startTime.compareTo(currentTime) <= 0 &&
-              timeSet.endTime.compareTo(currentTime) >= 0) {
-            destinationId = timeSet.destinationId;
-            debugPrint('Match found: destinationId = $destinationId');
-            break;
-          }
-        }
-
-        if (destinationId == -1) {
-          debugPrint('No matching TimeSet found.');
-        }
-
-        // 위치 스트림 리스너 설정
-        _locationSubscription = _locationService.getLocationStream().listen((position) {
-          debugPrint('Sending location: (${position.latitude}, ${position.longitude}) with destinationId: $destinationId');
-          _rabbitMQService.sendLocation(position.latitude, position.longitude, userProvider.userId, destinationId);
-        });
-      } catch (e) {
-        print("TimeSet data fetch failed: $e");
-      }
-    } else {
-      print("User not logged in or user ID is not set.");
-    }
   }
 
   @override
   void dispose() {
-    _locationSubscription.cancel();
+    _locationSubscription?.cancel();
     super.dispose();
-  }
-
-  // 자동 로그인
-  Future<void> _autoLogin() async {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    try {
-      await _userService.autoLogin(userProvider);
-    } catch (e) {
-      debugPrint('Auto-login failed: $e');
-    }
   }
 
   @override
