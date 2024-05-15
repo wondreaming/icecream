@@ -21,19 +21,25 @@ import 'package:icecream/provider/user_provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as image;
+import 'package:permission_handler/permission_handler.dart';
 
 // gps
 import 'package:geolocator/geolocator.dart'; // 임포트 추가
 import 'package:icecream/gps/location_service.dart';
 import 'package:icecream/gps/rabbitmq_service.dart';
 import 'dart:async';
+import 'package:icecream/child/service/timeset_service.dart';
+import 'package:icecream/auth/service/user_service.dart';
+import 'dart:convert';
+import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-    FlutterLocalNotificationsPlugin();
+FlutterLocalNotificationsPlugin();
 
 // 알림 채널 high_importance_channel
 const AndroidNotificationChannel highImportanceChannel =
-    AndroidNotificationChannel(
+AndroidNotificationChannel(
   'high_importance_channel',
   'High Importance Notifications',
   description: 'This channel is used for important notifications.',
@@ -124,14 +130,14 @@ Future<void> _handleNotification(RemoteMessage message) async {
         .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
 
     final BigPictureStyleInformation bigPictureStyleInformation =
-        BigPictureStyleInformation(FilePathAndroidBitmap(filePath),
-            largeIcon:
-                const DrawableResourceAndroidBitmap('mipmap/ic_launcher'),
-            contentTitle: title,
-            summaryText: body,
-            htmlFormatContent: true,
-            htmlFormatContentTitle: true,
-            hideExpandedLargeIcon: true);
+    BigPictureStyleInformation(FilePathAndroidBitmap(filePath),
+        largeIcon:
+        const DrawableResourceAndroidBitmap('mipmap/ic_launcher'),
+        contentTitle: title,
+        summaryText: body,
+        htmlFormatContent: true,
+        htmlFormatContentTitle: true,
+        hideExpandedLargeIcon: true);
 
     // overspeed 알림일 때만 fullScreenIntent를 true로 설정
     androidDetails = AndroidNotificationDetails(
@@ -184,6 +190,8 @@ Future<void> main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await checkDeviceWithServerUsingDio();
 
+  await initializeDateFormatting('ko_KR', null);
+
   FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
@@ -193,9 +201,9 @@ Future<void> main() async {
 
   // 알림 초기화 설정
   const AndroidInitializationSettings initializationSettingsAndroid =
-      AndroidInitializationSettings('mipmap/ic_launcher');
+  AndroidInitializationSettings('mipmap/ic_launcher');
   const InitializationSettings initializationSettings =
-      InitializationSettings(android: initializationSettingsAndroid);
+  InitializationSettings(android: initializationSettingsAndroid);
 
   // 알림 초기화 및 대응 함수 설정
   await flutterLocalNotificationsPlugin.initialize(
@@ -206,7 +214,7 @@ Future<void> main() async {
   // high_importance_channel 생성
   await flutterLocalNotificationsPlugin
       .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>()
+      AndroidFlutterLocalNotificationsPlugin>()
       ?.createNotificationChannel(highImportanceChannel);
 
   // 알림 권한 요청
@@ -222,6 +230,7 @@ Future<void> main() async {
   FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
     await _handleNotification(message);
   });
+  await requestLocationPermission();
 
   runApp(
     MultiProvider(
@@ -232,7 +241,85 @@ Future<void> main() async {
       child: const MyApp(),
     ),
   );
+
+  // runApp 호출 후 BuildContext를 사용하여 startLocationService 호출z
 }
+
+Future<void> requestLocationPermission() async {
+  var status = await Permission.location.status;
+  if (!status.isGranted) {
+    await Permission.location.request();
+  }
+}
+
+void startLocationService(BuildContext context, LocationService locationService, RabbitMQService rabbitMQService) async {
+  var userProvider = Provider.of<UserProvider>(context, listen: false);
+  if (userProvider.userId != 0) {
+    var timeSetService = TimeSetService();
+    try {
+      List<TimeSet> timeSets = await timeSetService.fetchTimeSets(userProvider.userId.toString());
+      DateTime now = DateTime.now();
+      String currentDay = DateFormat('EEEE', 'ko_KR').format(now).toLowerCase();
+      String currentTime = DateFormat('HH:mm').format(now);
+
+      int destinationId = -1;
+      int dayIndex = getDayIndex(currentDay);
+
+      // 디버깅 로그 추가
+      debugPrint('Current day: $currentDay (index: $dayIndex)');
+      debugPrint('Current time: $currentTime');
+
+      for (var timeSet in timeSets) {
+        debugPrint('Checking TimeSet: ${timeSet.startTime} - ${timeSet.endTime} on days: ${timeSet.day}');
+        debugPrint('Day bit: ${timeSet.day[dayIndex]}');
+        if (timeSet.day[dayIndex] == '1' &&
+            timeSet.startTime.compareTo(currentTime) <= 0 &&
+            timeSet.endTime.compareTo(currentTime) >= 0) {
+          destinationId = timeSet.destinationId;
+          debugPrint('Match found: destinationId = $destinationId');
+          break;
+        }
+      }
+
+      if (destinationId == -1) {
+        debugPrint('No matching TimeSet found.');
+      }
+
+      // 위치 스트림 리스너 설정
+      var locationSubscription = locationService.getLocationStream().listen((position) {
+        debugPrint('Sending location: (${position.latitude}, ${position.longitude}) with destinationId: $destinationId');
+        rabbitMQService.sendLocation(position.latitude, position.longitude, userProvider.userId, destinationId);
+      });
+
+    } catch (e) {
+      print("TimeSet data fetch failed: $e");
+    }
+  } else {
+    print("User not logged in or user ID is not set.");
+  }
+}
+
+int getDayIndex(String day) {
+  switch (day) {
+    case '월요일':
+      return 0;
+    case '화요일':
+      return 1;
+    case '수요일':
+      return 2;
+    case '목요일':
+      return 3;
+    case '금요일':
+      return 4;
+    case '토요일':
+      return 5;
+    case '일요일':
+      return 6;
+    default:
+      throw Exception('Invalid day: $day');
+  }
+}
+
 
 // 알림 응답을 처리
 void handleNotificationResponse(NotificationResponse response) async {
@@ -242,16 +329,16 @@ void handleNotificationResponse(NotificationResponse response) async {
       case 'overspeed-1':
       case 'overspeed-2':
       case 'overspeed-3':
-        // Handle overspeed notification
+      // Handle overspeed notification
         break;
       case 'created':
-        // runApp(MyApp(initialRoute: '/c_home'));
+      // runApp(MyApp(initialRoute: '/c_home'));
         break;
       case 'arrival':
-        // runApp(MyApp(initialRoute: '/noti'));
+      // runApp(MyApp(initialRoute: '/noti'));
         break;
       case 'goal':
-        // runApp(MyApp(initialRoute: '/goal'));
+      // runApp(MyApp(initialRoute: '/goal'));
         break;
     }
   }
@@ -276,17 +363,59 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     _autoLoginFuture = _autoLogin();
     initServices();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (context != null) {
+        startLocationService(context, _locationService, _rabbitMQService);
+      }
+    });
   }
 
+
+  // 초기 서비스 설정
   Future<void> initServices() async {
     await _locationService.initLocationService();
     await _rabbitMQService.initRabbitMQ();
-    _locationSubscription =
-        _locationService.getLocationStream().listen((position) {
-      _rabbitMQService.sendLocation(
-          position.latitude, position.longitude, 68, 1);
-      // _rabbitMQService.sendLocation(3, 3, 20);
-    });
+    final userProvider = Provider.of<UserProvider>(context, listen: false); // UserProvider 인스턴스 접근
+
+    // 로그인 상태와 유저 ID 확인
+    if (true) {
+      var timeSetService = TimeSetService(); // TimeSetService 인스턴스 생성
+      try {
+        List<TimeSet> timeSets = await timeSetService.fetchTimeSets(userProvider.userId.toString()); // 시간 설정 데이터 요청
+        DateTime now = DateTime.now();
+        String currentDay = DateFormat('EEEE', 'ko_KR').format(now).toLowerCase(); // 현재 요일
+        String currentTime = DateFormat('HH:mm').format(now); // 현재 시간
+
+        int destinationId = -1; // 목적지 ID 초기화
+        int dayIndex = getDayIndex(currentDay);
+
+        for (var timeSet in timeSets) {
+          debugPrint('Checking TimeSet: ${timeSet.startTime} - ${timeSet.endTime} on days: ${timeSet.day}');
+          debugPrint('Day bit: ${timeSet.day[dayIndex]}');
+          if (timeSet.day[dayIndex] == '1' &&
+              timeSet.startTime.compareTo(currentTime) <= 0 &&
+              timeSet.endTime.compareTo(currentTime) >= 0) {
+            destinationId = timeSet.destinationId;
+            debugPrint('Match found: destinationId = $destinationId');
+            break;
+          }
+        }
+
+        if (destinationId == -1) {
+          debugPrint('No matching TimeSet found.');
+        }
+
+        // 위치 스트림 리스너 설정
+        _locationSubscription = _locationService.getLocationStream().listen((position) {
+          debugPrint('Sending location: (${position.latitude}, ${position.longitude}) with destinationId: $destinationId');
+          _rabbitMQService.sendLocation(position.latitude, position.longitude, userProvider.userId, destinationId);
+        });
+      } catch (e) {
+        print("TimeSet data fetch failed: $e");
+      }
+    } else {
+      print("User not logged in or user ID is not set.");
+    }
   }
 
   @override
@@ -304,8 +433,6 @@ class _MyAppState extends State<MyApp> {
       debugPrint('Auto-login failed: $e');
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {

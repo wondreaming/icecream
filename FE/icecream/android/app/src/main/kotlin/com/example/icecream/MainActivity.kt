@@ -1,39 +1,38 @@
 package com.example.icecream
-
-import android.content.Intent
-import android.os.Bundle
-import io.flutter.embedding.android.FlutterActivity
-import io.flutter.plugin.common.MethodChannel
-import io.flutter.embedding.engine.FlutterEngine
-import com.google.gson.Gson
+import android.content.Context
 import android.util.Log
+import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
-    private val CHANNEL = "com.example.icecream/locationService"
+    private val LOCATION_CHANNEL = "com.example.icecream/locationService"
+    private val USERDATA_CHANNEL = "com.example.icecream/userdata"
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
-            Log.d("MainActivity", "Method called: ${call.method}")
-            when (call.method) {
-                "sendTimeSets" -> {
-                    val timeSetsJson = call.argument<String>("timeSets")
-                    val timeSets = Gson().fromJson(timeSetsJson, Array<TimeSet>::class.java).toList()
-                    val serviceIntent = Intent(this, LocationService::class.java).apply {
-                        putExtra("timeSets", ArrayList(timeSets)) // ArrayList로 캐스팅
-                    }
-                    startForegroundService(serviceIntent)
-                    result.success("Time Sets Received and Service Started")
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, USERDATA_CHANNEL).setMethodCallHandler { call, result ->
+            if (call.method == "sendUserId") {
+                val userId = call.argument<String>("userId")
+                if (userId != null) {
+                    saveUserId(userId)
+                    Log.d("MainActivity", "Received user ID: $userId")
+                    result.success("User ID saved successfully")
+                } else {
+                    Log.d("MainActivity", "User ID is null")
+                    result.error("ERROR", "User ID is null", null)
                 }
-                "startService" -> {
-                    val serviceIntent = Intent(this, LocationService::class.java)
-                    startForegroundService(serviceIntent)
-                    result.success("Service Started")
-                }
-                else -> {
-                    result.notImplemented()
-                }
+            } else {
+                result.notImplemented()
             }
+        }
+    }
+
+    private fun saveUserId(userId: String?) {
+        val sharedPref = getSharedPreferences("AppData", Context.MODE_PRIVATE)
+        with(sharedPref.edit()) {
+            putString("userId", userId)
+            apply()
         }
     }
 }
