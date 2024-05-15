@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icecream/auth/screen/c_qrcode.dart';
 import 'package:icecream/auth/screen/p_login_page.dart';
@@ -15,18 +16,33 @@ import 'package:icecream/setting/screen/map_screen.dart';
 import 'package:icecream/setting/screen/my_page.dart';
 import 'package:icecream/setting/screen/search_screen.dart';
 import 'package:icecream/setting/screen/setting.dart';
+import 'package:icecream/setting/widget/kpostal_wrapper.dart';
 import 'package:kpostal/kpostal.dart';
 import 'package:provider/provider.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+bool _initialRedirectPerformed = false;
+
 final router = GoRouter(
+  navigatorKey: navigatorKey,
   initialLocation: '/',
   redirect: (context, state) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    // 자동 로그인이 완료된 후에는 리디렉션을 수행하지 않도록 함
+    if (_initialRedirectPerformed) {
+      return null;
+    }
+
+    // 자동 로그인 후 첫 리디렉션 처리
     if (!userProvider.isLoggedIn) {
-      return '/p_login';
+      _initialRedirectPerformed = true;
+      return '/';
     } else if (userProvider.isParent) {
+      _initialRedirectPerformed = true;
       return '/parents';
     } else {
+      _initialRedirectPerformed = true;
       return '/child';
     }
   },
@@ -72,11 +88,15 @@ final router = GoRouter(
                     routes: [
                       // setting의 자녀 1명 페이지
                       GoRoute(
-                        path: 'child',
+                        path: 'child/:user_id',
                         name: 'child',
-                        builder: (context, state) => const ChildDetailScreen(
-                          user_id: 58,
-                        ),
+                        builder: (context, state) {
+                          final userId =
+                              int.parse(state.pathParameters['user_id']!);
+                          return ChildDetailScreen(
+                            user_id: userId,
+                          );
+                        },
                         routes: [
                           GoRoute(
                             path: 'destination',
@@ -86,7 +106,8 @@ final router = GoRouter(
                               final data =
                                   state.extra as Map<String, dynamic>? ?? null;
                               return DestinationScreen(
-                                user_id: 58,
+                                user_id:
+                                    int.parse(state.pathParameters['user_id']!),
                                 data: data,
                               );
                             },
@@ -94,25 +115,38 @@ final router = GoRouter(
                               GoRoute(
                                 path: 'query_parameter',
                                 name: 'search',
-                                builder: (context, state) => SearchScreen(),
+                                builder: (context, state) {
+                                  final user_id = int.parse(state.pathParameters['user_id']!);
+                                  return SearchScreen(user_id: user_id);
+                                },
                               ),
                               GoRoute(
                                 path: 'map',
                                 name: 'map',
-                                builder: (context, state) => MapScreen(),
+                                builder: (context, state)  {
+                                  final user_id = int.parse(state.pathParameters['user_id']!);
+                                  return MapScreen(user_id: user_id);
+                                },
                               ),
                               GoRoute(
                                 path: 'kpostal',
                                 name: 'kpostal',
-                                builder: (context, state) => KpostalView(
-                                  callback: (Kpostal result) {
-                                    Provider.of<Destination>(context, listen: false)
-                                        .changeTheValue(result.address, result.latitude!,
-                                        result.longitude!);
-                                  },
-                                ),
+                                builder: (context, state)  {
+                                  final user_id = int.parse(state.pathParameters['user_id']!);
+                                  return KpostalWrapper(user_id: user_id);
+                                },
+                                // builder: (context, state) => KpostalView(
+                                //   callback: (Kpostal result) {
+                                //     Provider.of<Destination>(context,
+                                //         listen: false)
+                                //         .changeTheValue(
+                                //         result.address,
+                                //         result.latitude!,
+                                //         result.longitude!);
+                                //   },
+                                // ),
                               ),
-                            ],
+                            ]
                           ),
                         ],
                       ),

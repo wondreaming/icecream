@@ -19,11 +19,11 @@ class _UserRespository implements UserRespository {
   String? baseUrl;
 
   @override
-  Future<ResponseModel> postLogout() async {
+  Future<ResponseModel> postLogout({required String refreashToken}) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final Map<String, dynamic>? _data = null;
+    final _data = refreashToken;
     final _result = await _dio
         .fetch<Map<String, dynamic>>(_setStreamType<ResponseModel>(Options(
       method: 'POST',
@@ -171,6 +171,35 @@ class _UserRespository implements UserRespository {
             .compose(
               _dio.options,
               '/users/password',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = ResponseModel.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<ResponseModel> patchPhoneNumber(
+      {required UserPhoneNumberModel userPhoneNumber}) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(userPhoneNumber.toJson());
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<ResponseModel>(Options(
+      method: 'PATCH',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/users/phone',
               queryParameters: queryParameters,
               data: _data,
             )

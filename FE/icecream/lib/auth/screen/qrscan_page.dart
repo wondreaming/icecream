@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:icecream/auth/screen/child_regist.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:icecream/com/const/color.dart';
 import 'package:encrypt/encrypt.dart' as en;
 import 'dart:convert';
 
@@ -59,30 +60,29 @@ class _QRScanPageState extends State<QRScanPage> {
 
   void _showErrorMessage() {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('잘못된 QR 코드입니다. 올바른 QR 코드를 스캔하세요.'))
-    );
-    controller?.resumeCamera();  // SnackBar가 사라진 후 카메라 재개
+        SnackBar(content: Text('잘못된 QR 코드입니다. 올바른 QR 코드를 스캔하세요.')));
+    controller?.resumeCamera(); // SnackBar가 사라진 후 카메라 재개
   }
 
   String _decryptData(String? encryptedData) {
-  if (encryptedData == null) return "No data found";
+    if (encryptedData == null) return "No data found";
 
-  final key = en.Key.fromUtf8('1996100219961002');
-  final parts = encryptedData.split('::');  // IV를 포함하여 전송된 데이터 분리
-  if (parts.length != 2) return "Invalid data";
+    final key = en.Key.fromUtf8('1996100219961002');
+    final parts = encryptedData.split('::'); // IV를 포함하여 전송된 데이터 분리
+    if (parts.length != 2) return "Invalid data";
 
-  final iv = en.IV.fromBase64(parts[1]);  // IV 추출
-  final encrypter = en.Encrypter(en.AES(key, mode: en.AESMode.cbc));
+    final iv = en.IV.fromBase64(parts[1]); // IV 추출
+    final encrypter = en.Encrypter(en.AES(key, mode: en.AESMode.cbc));
 
-  try {
-    final decrypted = encrypter.decrypt64(parts[0], iv: iv);  // 복호화 시 같은 IV 사용
-    debugPrint("Decrypted Info: $decrypted");
-    return decrypted;
-  } catch (e) {
-    debugPrint("Decryption Error: $e");
-    return "복호화 실패: $e";
+    try {
+      final decrypted = encrypter.decrypt64(parts[0], iv: iv); // 복호화 시 같은 IV 사용
+      debugPrint("Decrypted Info: $decrypted");
+      return decrypted;
+    } catch (e) {
+      debugPrint("Decryption Error: $e");
+      return "복호화 실패: $e";
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +98,7 @@ class _QRScanPageState extends State<QRScanPage> {
               key: qrKey,
               onQRViewCreated: _onQRViewCreated,
               overlay: QrScannerOverlayShape(
-                borderColor: Colors.red,
+                borderColor: AppColors.custom_yellow,
                 borderRadius: 10,
                 borderLength: 30,
                 borderWidth: 10,
