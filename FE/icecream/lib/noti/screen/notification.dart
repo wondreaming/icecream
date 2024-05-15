@@ -42,6 +42,7 @@ class _NotiState extends State<Noti> {
   @override
   Widget build(BuildContext context) {
     return DefaultLayout(
+      automaticallyImplyLeading: false,
       title: '알림',
       child: _isLoading
           ? const CircularProgressIndicator()

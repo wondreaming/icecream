@@ -5,6 +5,8 @@ import '../service/user_service.dart';
 import 'package:icecream/setting/widget/custom_text_field.dart';
 import 'package:icecream/setting/widget/custom_elevated_button.dart';
 
+import 'p_login_page.dart';
+
 class PhoneNumberFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
@@ -149,7 +151,7 @@ class _SignUpPageState extends State<SignUpPage> {
         SnackBar(content: Text('회원가입 성공: ${response.data}')),
       );
       // 회원가입 성공 시 로그인 페이지로 이동
-      GoRouter.of(context).pushReplacement('/p_login');
+      GoRouter.of(context).pushReplacementNamed('p_login');
     } catch (e) {
       debugPrint("$e");
       ScaffoldMessenger.of(context).showSnackBar(

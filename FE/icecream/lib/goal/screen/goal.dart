@@ -88,6 +88,7 @@ class _GoalState extends State<Goal> {
   @override
   Widget build(BuildContext context) {
     return DefaultLayout(
+      automaticallyImplyLeading: false,
       padding: EdgeInsets.zero,
       title: '부모 리워드',
       child: Column(
