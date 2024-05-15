@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import '../service/user_service.dart';
 import 'package:icecream/setting/widget/custom_text_field.dart';
 import 'package:icecream/setting/widget/custom_elevated_button.dart';
@@ -121,6 +122,8 @@ class _SignUpPageState extends State<SignUpPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('회원가입 성공: ${response.data}')),
       );
+      // 회원가입 성공 시 로그인 페이지로 이동
+      GoRouter.of(context).pushReplacement('/p_login');
     } catch (e) {
       debugPrint("$e");
       ScaffoldMessenger.of(context).showSnackBar(
