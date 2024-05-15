@@ -8,6 +8,7 @@ import 'package:icecream/goal/widget/daily_goal.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:icecream/goal/widget/reward_modal.dart';
 import 'package:icecream/goal/service/goal_service.dart';
+import 'package:icecream/goal/widget/update_reward_modal.dart';
 
 class Goal extends StatefulWidget {
   const Goal({super.key});
@@ -25,6 +26,8 @@ class _GoalState extends State<Goal> {
   List<dynamic> goalData = [];
   GoalService goalService = GoalService();
   DailyGoal? dailyGoal;
+  int currentStreak = 0;
+  int goalId = 0;
 
   @override
   void initState() {
@@ -36,7 +39,7 @@ class _GoalState extends State<Goal> {
 
   void loadChildData() {
     UserProvider userProvider =
-        Provider.of<UserProvider>(context, listen: false);
+    Provider.of<UserProvider>(context, listen: false);
     if (userProvider.children.isNotEmpty) {
       childrenData = userProvider.children;
       updateChildSelection(childrenData.first);
@@ -61,6 +64,8 @@ class _GoalState extends State<Goal> {
 
         if (dataAvailable && goalData.isNotEmpty) {
           var goal = goalData.first;
+          goalId = goal['id']; // goalId 설정
+          currentStreak = goal['record']; // currentStreak 설정
           Map<String, bool>? results = goal['result'] != null
               ? Map<String, bool>.from(goal['result'])
               : {};
@@ -99,33 +104,45 @@ class _GoalState extends State<Goal> {
           Expanded(
             child: dataAvailable && dailyGoal != null
                 ? Column(
-                    children: [
-                      const Text('현재 ~일째 안전 보행중'),
-                      Expanded(
-                        flex: 6, // 길이를 줄이기 위해 flex 비율 조정
-                        child: DailyGoalPage(dailyGoal: dailyGoal!),
+              children: [
+                RichText(
+                  text: TextSpan(
+                    text: '현재 ',
+                    style: DefaultTextStyle.of(context).style,
+                    children: <TextSpan>[
+                      TextSpan(
+                        text: '$currentStreak일째',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      Expanded(
-                        flex: 1, // RewardModal 버튼을 추가
-                        child: Center(
-                          child: ElevatedButton(
-                            onPressed: _openRewardModal,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  const Color.fromARGB(255, 25, 243, 116),
-                            ),
-                            child: const Text('보상 수정하기'),
-                          ),
-                        ),
-                      ),
-                      const Expanded(
-                        flex: 1,
-                        child: SizedBox(
-                          height: 10,
-                        ),
-                      )
+                      const TextSpan(text: ' 안전 보행 중입니다.'),
                     ],
-                  )
+                  ),
+                ),
+                Expanded(
+                  flex: 6, // 길이를 줄이기 위해 flex 비율 조정
+                  child: DailyGoalPage(dailyGoal: dailyGoal!),
+                ),
+                Expanded(
+                  flex: 1, // RewardModal 버튼을 추가
+                  child: Center(
+                    child: ElevatedButton(
+                      onPressed: _openUpdateRewardModal,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                        const Color.fromARGB(255, 25, 243, 116),
+                      ),
+                      child: const Text('보상 수정하기'),
+                    ),
+                  ),
+                ),
+                const Expanded(
+                  flex: 1,
+                  child: SizedBox(
+                    height: 10,
+                  ),
+                )
+              ],
+            )
                 : buildEmptyGoals(),
           ),
         ],
@@ -154,13 +171,13 @@ class _GoalState extends State<Goal> {
               value: selectedChild,
               items: childrenItems
                   .map((item) => DropdownMenuItem<String>(
-                        value: item,
-                        child: Text(item, style: const TextStyle(fontSize: 14)),
-                      ))
+                value: item,
+                child: Text(item, style: const TextStyle(fontSize: 14)),
+              ))
                   .toList(),
               onChanged: (value) {
                 Child selected =
-                    childrenData.firstWhere((child) => child.username == value);
+                childrenData.firstWhere((child) => child.username == value);
                 updateChildSelection(selected);
               },
             ),
@@ -169,34 +186,6 @@ class _GoalState extends State<Goal> {
       ],
     );
   }
-
-  // Widget buildGoalsList() {
-  //   return Expanded(
-  //     child: SizedBox(
-  //       // ListView가 차지할 수 있는 최대 높이를 명시적으로 지정
-  //       height: MediaQuery.of(context).size.height -
-  //           200, // 200은 다른 요소들이 차지하는 높이를 예상한 값
-  //       child: ListView.builder(
-  //         itemCount: goalData.length,
-  //         itemBuilder: (context, index) {
-  //           var goal = goalData[index];
-  //           Map<String, bool> results = goal['result'] != null
-  //               ? (goal['result'] as Map).map<String, bool>(
-  //                   (key, value) => MapEntry(key as String, value as bool))
-  //               : {};
-
-  //           DailyGoal dailyGoal = DailyGoal(
-  //             period: goal['period'] as int,
-  //             record: goal['record'] as int,
-  //             content: goal['content'] as String,
-  //             result: results,
-  //           );
-  //           return DailyGoalPage(dailyGoal: dailyGoal);
-  //         },
-  //       ),
-  //     ),
-  //   );
-  // }
 
   Widget buildEmptyGoals() {
     return Expanded(
@@ -240,6 +229,22 @@ class _GoalState extends State<Goal> {
             onSaved: () {
               fetchGoals();
             });
+      },
+    );
+  }
+
+  void _openUpdateRewardModal() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return UpdateRewardModal(
+          goalId: goalId.toString(), // goalId를 전달
+          period: dailyGoal?.period ?? 1, // 현재 period를 전달
+          content: dailyGoal?.content ?? '', // 현재 content를 전달
+          onSaved: () {
+            fetchGoals();
+          },
+        );
       },
     );
   }
