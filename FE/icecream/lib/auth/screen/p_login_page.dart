@@ -46,7 +46,7 @@ class _LoginPageState extends State<LoginPage> {
       await _userService.loginUser(loginId, password, _fcmToken, userProvider);
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('로그인 성공')));
-      context.go('/parents'); // 부모 유저 로그인 성공시 PHome으로 이동
+      context.goNamed('parents'); // 부모 유저 로그인 성공시 PHome으로 이동
     } catch (e) {
       debugPrint("$e");
       ScaffoldMessenger.of(context)
@@ -57,7 +57,9 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('로그인')),
+      appBar: AppBar(
+          automaticallyImplyLeading: false,
+          title: const Text('로그인')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
