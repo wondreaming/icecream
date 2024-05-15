@@ -1,27 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import '../service/user_service.dart';
 import 'package:icecream/setting/widget/custom_text_field.dart';
 import 'package:icecream/setting/widget/custom_elevated_button.dart';
 
 class PhoneNumberFormatter extends TextInputFormatter {
   @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
-    final text = newValue.text;
-    if (text.length == 3) {
-      return newValue.copyWith(
-        text: '$text-',
-        selection: TextSelection.collapsed(offset: text.length + 1),
-      );
-    } else if (text.length == 8) {
-      return newValue.copyWith(
-        text: '${text.substring(0, 7)}-${text.substring(7)}',
-        selection: TextSelection.collapsed(offset: text.length + 1),
-      );
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    String formattedText = _getFormattedPhoneNumber(newValue.text);
+    return TextEditingValue(
+      text: formattedText,
+      selection: TextSelection.collapsed(offset: formattedText.length),
+    );
+  }
+
+  String _getFormattedPhoneNumber(String value) {
+    value = _cleanPhoneNumber(value);
+
+    if (value.length <= 3) {
+      // 010 입력 중
+      return value;
+    } else if (value.length <= 7) {
+      // 010-xxxx 포맷
+      return '${value.substring(0, 3)}-${value.substring(3)}';
+    } else if (value.length <= 11) {
+      // 010-xxxx-xxxx 포맷
+      return '${value.substring(0, 3)}-${value.substring(3, 7)}-${value.substring(7)}';
+    } else {
+      // 길이가 11자를 넘지 않도록 제한
+      return '${value.substring(0, 3)}-${value.substring(3, 7)}-${value.substring(7, 11)}';
     }
-    return newValue;
+  }
+
+  String _cleanPhoneNumber(String value) {
+    return value.replaceAll(RegExp(r'[^0-9]'), '');
   }
 }
+
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -48,6 +65,8 @@ class _SignUpPageState extends State<SignUpPage> {
   String? _passwordError;
   String? _passwordCheckError;
 
+  Color? _loginIdBorderColor;
+
   bool _passwordVisible = false; // 비밀번호 가리기/보이기 상태 변수 추가
   bool _passwordCheckVisible = false;
 
@@ -70,16 +89,40 @@ class _SignUpPageState extends State<SignUpPage> {
     }
   }
 
-  void _checkLoginIdAvailability() async {
-    if (!_loginIdFocusNode.hasFocus) {
-      String loginId = _loginIdController.text;
-      if (loginId.isEmpty) {
-        setState(() => _loginIdError = '로그인 ID를 입력하세요');
-        return;
-      }
+  Future<void> _checkLoginIdAvailability() async {
+    String loginId = _loginIdController.text;
+    if (loginId.isEmpty) {
+      setState(() {
+        _loginIdError = '로그인 ID를 입력하세요';
+        _loginIdBorderColor = Colors.red;
+      });
+      return;
+    }
+
+    try {
       var result = await _userService.checkLoginIdAvailability(loginId);
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(result['message'])));
+      if (result['isAvailable']) {
+        setState(() {
+          _loginIdError = null;
+          _loginIdBorderColor = Colors.green;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['message'])),
+        );
+      } else {
+        setState(() {
+          _loginIdError = result['message'];
+          _loginIdBorderColor = Colors.red;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _loginIdError = '아이디 중복 검사에 실패했습니다';
+        _loginIdBorderColor = Colors.red;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('아이디 중복 검사에 실패했습니다: $e')),
+      );
     }
   }
 
@@ -105,6 +148,8 @@ class _SignUpPageState extends State<SignUpPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('회원가입 성공: ${response.data}')),
       );
+      // 회원가입 성공 시 로그인 페이지로 이동
+      GoRouter.of(context).pushReplacement('/p_login');
     } catch (e) {
       debugPrint("$e");
       ScaffoldMessenger.of(context).showSnackBar(
@@ -233,8 +278,9 @@ class _SignUpPageState extends State<SignUpPage> {
               CustomTextField(
                 controller: _loginIdController,
                 hintText: '로그인 ID',
-                // focusNode: _loginIdFocusNode,
+                focusNode: _loginIdFocusNode,
                 errorText: _loginIdError,
+                borderColor: _loginIdBorderColor,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
               ),
               SizedBox(height: 10),
