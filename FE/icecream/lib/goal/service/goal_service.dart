@@ -8,7 +8,7 @@ class GoalService {
   Future<Map<String, dynamic>> fetchGoals(String userId) async {
     try {
       final response =
-          await _dio.get('/goal', queryParameters: {'user_id': userId});
+      await _dio.get('/goal', queryParameters: {'user_id': userId});
       if (response.statusCode == 200) {
         return {
           'status': response.statusCode,
@@ -31,6 +31,16 @@ class GoalService {
     } catch (e) {
       print('Failed to add goal: $e');
       throw Exception('Failed to add goal');
+    }
+  }
+
+  // 목표 수정
+  Future<Response> patchGoal(Map<String, dynamic> goalData) async {
+    try {
+      return await _dio.patch('/goal', data: goalData);
+    } catch (e) {
+      print('Failed to patch goal: $e');
+      throw Exception('Failed to patch goal');
     }
   }
 }
