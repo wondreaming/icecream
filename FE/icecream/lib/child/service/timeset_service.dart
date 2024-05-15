@@ -1,29 +1,78 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
-import 'package:icecream/child/models/timeset_model.dart';
 
 class TimeSetService {
-  final Dio _dio = Dio(); // 필요한 인터셉터와 기본 URL을 설정하여 Dio 인스턴스 구성
+  final Dio _dio = Dio();
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
-  Future<List<Data>> fetchTimeSets(String userId) async {
+  Future<List<TimeSet>> fetchTimeSets(String userId) async {
     try {
+      print('Fetching time sets for user ID: $userId');
       String token = await _secureStorage.read(key: 'accessToken') ?? '';
       final response = await _dio.get(
-        'http://k10e202.p.ssafy.io:8080/api/goal?user_id=$userId',
+        'http://k10e202.p.ssafy.io:8080/api/destination?user_id=$userId',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       if (response.statusCode == 200) {
-        List<Data> timeSets = (response.data['data'] as List)
-            .map((item) => Data.fromJson(item))
+        List<TimeSet> timeSets = (response.data['data'] as List)
+            .map((item) => TimeSet.fromJson(item))
             .toList();
         return timeSets;
       } else {
-        throw Exception('시간 설정 데이터를 불러오는 데 실패했습니다');
+        throw Exception(
+            'Failed to fetch time sets with status code: ${response.statusCode}');
       }
     } catch (e) {
-      throw Exception('데이터를 가져오는 데 실패했습니다: $e');
+      throw Exception('Failed to fetch time sets: $e');
     }
+  }
+}
+
+class TimeSet {
+  final int destinationId;
+  final String name;
+  final int icon; // 아이콘을 정수로 변경 (인덱스로 사용하기 위함)
+  final double latitude;
+  final double longitude;
+  final String startTime;
+  final String endTime;
+  final String day;
+
+  TimeSet({
+    required this.destinationId,
+    required this.name,
+    required this.icon,
+    required this.latitude,
+    required this.longitude,
+    required this.startTime,
+    required this.endTime,
+    required this.day,
+  });
+
+  factory TimeSet.fromJson(Map<String, dynamic> json) {
+    return TimeSet(
+      destinationId: json['destination_id'],
+      name: json['name'],
+      icon: json['icon'], // 동적 타입 처리
+      latitude: (json['latitude'] as num).toDouble(), // 타입 캐스팅을 통해 double로 변환
+      longitude: (json['longitude'] as num).toDouble(), // 타입 캐스팅을 통해 double로 변환
+      startTime: json['start_time'],
+      endTime: json['end_time'],
+      day: json['day'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'destination_id': destinationId,
+      'name': name,
+      'icon': icon,
+      'latitude': latitude,
+      'longitude': longitude,
+      'start_time': startTime,
+      'end_time': endTime,
+      'day': day,
+    };
   }
 }
