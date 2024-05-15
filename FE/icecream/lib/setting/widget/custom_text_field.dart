@@ -41,7 +41,7 @@ class CustomTextField extends StatelessWidget {
     return TextField(
       readOnly: readOnly,
       controller: controller,
-      maxLines: obscureText ? 1 : maxLines,
+      maxLines: 1,
       // maxLines: maxLines, // 최대 출력되는 라인 수
       onChanged: onChanged,
       obscureText: obscureText, // 비밀번호 감추기 때, 사용
