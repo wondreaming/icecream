@@ -16,6 +16,7 @@ import 'package:icecream/setting/screen/map_screen.dart';
 import 'package:icecream/setting/screen/my_page.dart';
 import 'package:icecream/setting/screen/search_screen.dart';
 import 'package:icecream/setting/screen/setting.dart';
+import 'package:icecream/setting/widget/kpostal_wrapper.dart';
 import 'package:kpostal/kpostal.dart';
 import 'package:provider/provider.dart';
 
@@ -84,30 +85,6 @@ final router = GoRouter(
                     name: 'children',
                     builder: (context, state) => const ChildScreen(),
                     routes: [
-                      GoRoute(
-                        path: 'query_parameter',
-                        name: 'search',
-                        builder: (context, state) => SearchScreen(),
-                      ),
-                      GoRoute(
-                        path: 'map',
-                        name: 'map',
-                        builder: (context, state) => MapScreen(),
-                      ),
-                      GoRoute(
-                        path: 'kpostal',
-                        name: 'kpostal',
-                        builder: (context, state) => KpostalView(
-                          callback: (Kpostal result) {
-                            Provider.of<Destination>(context,
-                                listen: false)
-                                .changeTheValue(
-                                result.address,
-                                result.latitude!,
-                                result.longitude!);
-                          },
-                        ),
-                      ),
                       // setting의 자녀 1명 페이지
                       GoRoute(
                         path: 'child/:user_id',
@@ -133,6 +110,42 @@ final router = GoRouter(
                                 data: data,
                               );
                             },
+                            routes: [
+                              GoRoute(
+                                path: 'query_parameter',
+                                name: 'search',
+                                builder: (context, state) {
+                                  final user_id = int.parse(state.pathParameters['user_id']!);
+                                  return SearchScreen(user_id: user_id);
+                                },
+                              ),
+                              GoRoute(
+                                path: 'map',
+                                name: 'map',
+                                builder: (context, state)  {
+                                  final user_id = int.parse(state.pathParameters['user_id']!);
+                                  return MapScreen(user_id: user_id);
+                                },
+                              ),
+                              GoRoute(
+                                path: 'kpostal',
+                                name: 'kpostal',
+                                builder: (context, state)  {
+                                  final user_id = int.parse(state.pathParameters['user_id']!);
+                                  return KpostalWrapper(user_id: user_id);
+                                },
+                                // builder: (context, state) => KpostalView(
+                                //   callback: (Kpostal result) {
+                                //     Provider.of<Destination>(context,
+                                //         listen: false)
+                                //         .changeTheValue(
+                                //         result.address,
+                                //         result.latitude!,
+                                //         result.longitude!);
+                                //   },
+                                // ),
+                              ),
+                            ]
                           ),
                         ],
                       ),
