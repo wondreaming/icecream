@@ -30,7 +30,7 @@ class ChildScreen extends StatelessWidget {
                   return Column(children: [
                     Profile(
                       onPressed: () {
-                        context.goNamed(
+                        context.pushNamed(
                           'child',
                           pathParameters: {
                             "user_id": child.userId.toString(),
@@ -53,7 +53,7 @@ class ChildScreen extends StatelessWidget {
               AddContainer(
                 mention: '자녀를 추가해주세요',
                 onPressed: () {
-                  context.push('/qrscan_page');
+                  context.pushNamed('qrscan_page');
                 }, //QR로 이동하는 go_router 작성
               ),
             ],

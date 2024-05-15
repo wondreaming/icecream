@@ -15,6 +15,7 @@ import 'package:icecream/setting/widget/location_Icons.dart';
 import 'package:icecream/setting/widget/custom_map.dart';
 
 class DestinationContainer extends StatefulWidget {
+  final int? user_id;
   final int destination_id;
   final String name; // 목적지 이름
   final int icon; // 목적지 아이콘
@@ -36,10 +37,10 @@ class DestinationContainer extends StatefulWidget {
       required this.start_time,
       required this.end_time,
       required this.day,
-      this.onDeleted});
+      this.onDeleted, this.user_id});
 
   factory DestinationContainer.fromModel(
-      {required DestinationModel model, required VoidCallback onDeleted}) {
+      {required DestinationModel model, required VoidCallback onDeleted, required int user_id}) {
     return DestinationContainer(
       destination_id: model.destination_id,
       name: model.name,
@@ -51,6 +52,7 @@ class DestinationContainer extends StatefulWidget {
       end_time: model.end_time,
       day: model.day,
       onDeleted: onDeleted,
+      user_id: user_id,
     );
   }
 
@@ -229,8 +231,8 @@ class _DestinationContainerState extends State<DestinationContainer> {
                               child: CustomElevatedButton(
                                 onPressed: () {
                                   final destinationMap = widget.toMap();
-                                  context.goNamed('destination',
-                                      extra: destinationMap);
+                                  context.pushNamed('destination',
+                                      extra: destinationMap, pathParameters: {'user_id': widget.user_id.toString()});
                                   print(destinationMap);
                                 },
                                 child: '수정하기',

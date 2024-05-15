@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:icecream/setting/provider/destination_provider.dart';
 import 'package:kpostal/kpostal.dart';
 import 'package:provider/provider.dart';
@@ -17,6 +18,7 @@ class KpostalWrapper extends StatelessWidget {
             .changeTheValue(result.address, result.latitude!, result.longitude!);
         // 추가적으로 userId를 사용하는 로직을 여기에 구현
         debugPrint("User ID: $user_id");
+        context.pop();
       },
     );
   }

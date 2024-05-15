@@ -189,7 +189,7 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
           },
           thirdOnTap: () {
             // QR 찍는 페이지로 이동
-            context.push('/qrscan_page');
+            context.pushNamed('qrscan_page');
           },
           fourthOnTap: () {
             showCustomDialog(context, '연결 해제 하시겠습니까?', onPressed: () {
@@ -259,6 +259,7 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
                       itemBuilder: (_, index) {
                         final pItem = snapshot.data![index];
                         return DestinationContainer.fromModel(
+                          user_id: child.userId,
                           model: pItem,
                           onDeleted: refresh,
                         );
@@ -277,7 +278,7 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
               AddContainer(
                 mention: '안심 보행지를 추가해주세요',
                 onPressed: () {
-                  context.goNamed('destination',
+                  context.pushNamed('destination',
                       pathParameters: {'user_id': widget.user_id.toString()});
                   onDataSaved:
                   () {
