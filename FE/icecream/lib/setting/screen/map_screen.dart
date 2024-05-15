@@ -14,7 +14,8 @@ import 'package:kakao_map_plugin/kakao_map_plugin.dart';
 import 'package:provider/provider.dart';
 
 class MapScreen extends StatefulWidget {
-  const MapScreen({super.key});
+  final int user_id;
+  const MapScreen({super.key, required this.user_id,});
 
   @override
   State<MapScreen> createState() => _MapScreenState();

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:icecream/provider/user_provider.dart';
+import 'package:icecream/setting/model/refresh_token_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../../com/const/dio_interceptor.dart';
@@ -29,6 +30,17 @@ class UserService {
   // FCM 토큰 가져오기
   Future<String> getFCMToken() async {
     return await _readFromSecureStorage('fcmToken');
+  }
+
+  // refreshToken 가져가기
+  Future<RefreashTokenModel> getRefreashToken() async {
+    final token = await _readFromSecureStorage('refreshToken');
+    return RefreashTokenModel(refreashToken: token);
+  }
+
+  // 모든 데이터 삭제
+  Future<void> deleteAll() async {
+    await _secureStorage.deleteAll();
   }
 
   // 토큰 저장
@@ -128,28 +140,13 @@ class UserService {
           // 사용자 데이터 Provider에 저장
           userProvider.setUserData(response.data['data']);
 
-          // 자녀일 경우 추가 처리
-          if (!userProvider.isParent) {
-            print("User is a Child");
-
-            // user_id 저장
-            await _writeToSecureStorage(
-                'userId', response.data['data']['user_id'].toString());
-
-            // 자녀의 시간 설정 데이터 가져오기
-            TimeSetService timeSetService = TimeSetService();
-            List<TimeSet> timeSets = await timeSetService
-                .fetchTimeSets(userProvider.userId.toString());
-
-            // 시간 설정 데이터를 FlutterSecureStorage에 저장 (옵션)
-            await _writeToSecureStorage('timeSets',
-                jsonEncode(timeSets.map((e) => e.toJson()).toList()));
-
-            // LocationService 시작
-            startLocationService();
-          } else {
+          // 부모인지 자녀인지 구분
+          if (response.data['data'].containsKey('children')) {
+            // 부모 페이지로 이동 로직
             print("User is a Parent");
-            // 부모일 경우 추가 처리
+          } else {
+            // 자녀 페이지로 이동 로직
+            print("User is a Child");
           }
         } else {
           userProvider.clearUserData();
@@ -187,6 +184,20 @@ class UserService {
       };
     } catch (e) {
       return {'status': 500, 'message': '서버 에러가 발생했습니다.', 'isAvailable': false};
+    }
+  }
+
+  // 회원 탈퇴
+  Future<void> deleteUser() async {
+    try {
+      final response = await _dio.delete('/users');
+      if (response.statusCode == 200) {
+        print('회원 탈퇴 성공적');
+      } else {
+        throw Exception('Failed to delete user: ${response.data['message']}');
+      }
+    } catch (e) {
+      throw Exception('Failed to delete user: $e');
     }
   }
 }

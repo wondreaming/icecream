@@ -6,15 +6,22 @@ class DetailProfile extends StatelessWidget {
   final String? name;
   final String id;
   final String number;
+  final String? imgUrl;
   final bool is_parents;
   const DetailProfile(
-      {super.key, this.name, required this.id, required this.number, this.is_parents = true});
+      {super.key,
+      this.name,
+      required this.id,
+      required this.number,
+      this.is_parents = true,
+      this.imgUrl});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         ProfileImage(
+          imgUrl: imgUrl,
           width: 200,
           height: 200,
           detail: true,
@@ -23,18 +30,18 @@ class DetailProfile extends StatelessWidget {
           height: 20.0,
         ),
         if (is_parents)
-        Text(
-          name!,
-          style: TextStyle(
-            fontFamily: 'GmarketSans',
-            fontSize: 28.0,
-            fontWeight: FontWeight.w500,
+          Text(
+            name!,
+            style: TextStyle(
+              fontFamily: 'GmarketSans',
+              fontSize: 28.0,
+              fontWeight: FontWeight.w500,
+            ),
           ),
-        ),
         if (is_parents)
-        SizedBox(
-          height: 20.0,
-        ),
+          SizedBox(
+            height: 20.0,
+          ),
         CustomTextContainer(frontIcon: Icons.person, text: id),
         CustomTextContainer(frontIcon: Icons.phone_android, text: number),
       ],

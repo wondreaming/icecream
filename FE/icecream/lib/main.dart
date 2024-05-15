@@ -59,6 +59,7 @@ Future<void> _handleNotification(RemoteMessage message) async {
   AndroidNotificationDetails androidDetails;
   NotificationDetails platformChannelSpecifics;
 
+  final UserService _userService = UserService();
   // content에 따른 알림 설정
   switch (content) {
     case 'overspeed-1':
@@ -85,6 +86,20 @@ Future<void> _handleNotification(RemoteMessage message) async {
     case 'created':
       title = message.data['title'] ?? '알림';
       body = message.data['body'] ?? '등록되었습니다!';
+      // 자동 로그인 로직 호출
+      try {
+        final userProvider = Provider.of<UserProvider>(navigatorKey.currentContext!, listen: false);
+        await _userService.autoLogin(userProvider);
+        if (userProvider.isLoggedIn) {
+          if (userProvider.isParent) {
+            router.go('/parents');
+          } else {
+            router.go('/child');
+          }
+        }
+      } catch (e) {
+        debugPrint('Auto-login failed: $e');
+      }
       break;
     case 'arrival':
       title = message.data['title'] ?? '알림';
@@ -289,6 +304,8 @@ class _MyAppState extends State<MyApp> {
       debugPrint('Auto-login failed: $e');
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {

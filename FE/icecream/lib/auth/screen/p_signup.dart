@@ -1,5 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../service/user_service.dart';
+import 'package:icecream/setting/widget/custom_text_field.dart';
+import 'package:icecream/setting/widget/custom_elevated_button.dart';
+
+class PhoneNumberFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+    final text = newValue.text;
+    if (text.length == 3) {
+      return newValue.copyWith(
+        text: '$text-',
+        selection: TextSelection.collapsed(offset: text.length + 1),
+      );
+    } else if (text.length == 8) {
+      return newValue.copyWith(
+        text: '${text.substring(0, 7)}-${text.substring(7)}',
+        selection: TextSelection.collapsed(offset: text.length + 1),
+      );
+    }
+    return newValue;
+  }
+}
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -14,13 +36,20 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _loginIdController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _passwordCheckController =
-      TextEditingController();
-  // final TextEditingController _deviceIdController = TextEditingController();
+  final TextEditingController _passwordCheckController = TextEditingController();
+
   String _deviceId = '';
   bool _isLoading = false;
   final UserService _userService = UserService();
   final FocusNode _loginIdFocusNode = FocusNode();
+  String? _usernameError;
+  String? _phoneNumberError;
+  String? _loginIdError;
+  String? _passwordError;
+  String? _passwordCheckError;
+
+  bool _passwordVisible = false; // 비밀번호 가리기/보이기 상태 변수 추가
+  bool _passwordCheckVisible = false;
 
   @override
   void initState() {
@@ -37,7 +66,6 @@ class _SignUpPageState extends State<SignUpPage> {
 
   void _onLoginIdFocusChange() {
     if (!_loginIdFocusNode.hasFocus) {
-      // 포커스가 사라졌을 때 실행할 로직
       _checkLoginIdAvailability();
     }
   }
@@ -46,8 +74,7 @@ class _SignUpPageState extends State<SignUpPage> {
     if (!_loginIdFocusNode.hasFocus) {
       String loginId = _loginIdController.text;
       if (loginId.isEmpty) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('로그인 ID를 입력하세요')));
+        setState(() => _loginIdError = '로그인 ID를 입력하세요');
         return;
       }
       var result = await _userService.checkLoginIdAvailability(loginId);
@@ -57,7 +84,8 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   Future<void> registerUser() async {
-    if (!_formKey.currentState!.validate() || _isLoading) {
+    bool isValid = _validateFormFields();
+    if (!isValid || _isLoading) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('입력 정보를 확인하세요.')));
       return;
@@ -85,43 +113,174 @@ class _SignUpPageState extends State<SignUpPage> {
     }
   }
 
+  bool _validateFormFields() {
+    bool isValid = true;
+
+    String? usernameError = _validateUsername(_usernameController.text);
+    String? phoneNumberError = _validatePhoneNumber(_phoneNumberController.text);
+    String? loginIdError = _validateLoginId(_loginIdController.text);
+    String? passwordError = _validatePassword(_passwordController.text);
+    String? passwordCheckError = _validatePasswordCheck(_passwordCheckController.text);
+
+    setState(() {
+      _usernameError = usernameError;
+      _phoneNumberError = phoneNumberError;
+      _loginIdError = loginIdError;
+      _passwordError = passwordError;
+      _passwordCheckError = passwordCheckError;
+    });
+
+    if (usernameError != null ||
+        phoneNumberError != null ||
+        loginIdError != null ||
+        passwordError != null ||
+        passwordCheckError != null) {
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  String? _validateUsername(String? value) {
+    if (value == null || value.isEmpty) {
+      return '이름을 입력하세요';
+    }
+    final regex = RegExp(r'^[a-zA-Z가-힣]+$');
+    if (!regex.hasMatch(value)) {
+      return '이름은 한글 또는 영어만 가능합니다';
+    }
+    return null;
+  }
+
+  String? _validatePhoneNumber(String? value) {
+    if (value == null || value.isEmpty) {
+      return '전화번호를 입력하세요';
+    }
+    final regex = RegExp(r'^010-\d{4}-\d{4}$');
+    if (!regex.hasMatch(value)) {
+      return '전화번호 형식이 올바르지 않습니다. (010-0000-0000)';
+    }
+    return null;
+  }
+
+  String? _validateLoginId(String? value) {
+    if (value == null || value.isEmpty) {
+      return '로그인 ID를 입력하세요';
+    }
+    final regex = RegExp(r'^[a-zA-Z0-9]{6,20}$');
+    if (!regex.hasMatch(value)) {
+      return '로그인 ID는 영문과 숫자를 포함한 6~20자리여야 합니다';
+    }
+    return null;
+  }
+
+  String? _validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return '비밀번호를 입력하세요';
+    }
+    final regex = RegExp(r'^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d!@#$%^&*]{8,20}$');
+    if (!regex.hasMatch(value)) {
+      return '비밀번호는 영문과 숫자를 포함한 8~20자리여야 합니다';
+    }
+    return null;
+  }
+
+  String? _validatePasswordCheck(String? value) {
+    if (value != _passwordController.text) {
+      return '비밀번호가 일치하지 않습니다';
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('회원가입')),
+      appBar: AppBar(
+        title: Text('회원가입', style: TextStyle(fontFamily: 'GmarketSans', fontSize: 24)),
+        centerTitle: true,
+      ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(20),
         child: Form(
           key: _formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextFormField(
-                  controller: _usernameController,
-                  decoration: InputDecoration(labelText: '이름'),
-                  validator: (value) => value!.isEmpty ? '이름을 입력하세요' : null),
-              TextFormField(
-                  controller: _phoneNumberController,
-                  decoration: InputDecoration(labelText: '전화번호'),
-                  validator: (value) => value!.isEmpty ? '전화번호를 입력하세요' : null),
-              TextFormField(
-                  controller: _loginIdController,
-                  decoration: InputDecoration(labelText: '로그인 ID'),
-                  validator: (value) =>
-                      value!.isEmpty ? '로그인 ID를 입력하세요' : null),
-              TextFormField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: InputDecoration(labelText: '비밀번호'),
-                  validator: (value) => value!.isEmpty ? '비밀번호를 입력하세요' : null),
-              TextFormField(
-                  controller: _passwordCheckController,
-                  obscureText: true,
-                  decoration: InputDecoration(labelText: '비밀번호 확인'),
-                  validator: (value) => value != _passwordController.text
-                      ? '비밀번호가 일치하지 않습니다'
-                      : null),
+              Text(
+                '회원가입',
+                style: TextStyle(
+                  fontFamily: 'GmarketSans',
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 10),
+              CustomTextField(                
+                controller: _usernameController,
+                hintText: '이름',
+                errorText: _usernameError,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+              ),
+              SizedBox(height: 10),
+              CustomTextField(
+                controller: _phoneNumberController,
+                hintText: '전화번호',
+                errorText: _phoneNumberError,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+                inputFormatters: [PhoneNumberFormatter()], // 전화번호 포맷터 추가
+              ),
+              SizedBox(height: 10),
+              CustomTextField(
+                controller: _loginIdController,
+                hintText: '로그인 ID',
+                // focusNode: _loginIdFocusNode,
+                errorText: _loginIdError,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+              ),
+              SizedBox(height: 10),
+              CustomTextField(
+                controller: _passwordController,
+                obscureText: !_passwordVisible, // 비밀번호 가리기/보이기 상태 연결
+                hintText: '비밀번호',
+                errorText: _passwordError,
+                maxLines: 1,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _passwordVisible ? Icons.visibility : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _passwordVisible = !_passwordVisible;
+                    });
+                  },
+                ),
+              ),
+              SizedBox(height: 10),
+              CustomTextField(
+                controller: _passwordCheckController,
+                obscureText: !_passwordVisible,
+                hintText: '비밀번호 확인',
+                errorText: _passwordCheckError,
+                maxLines: 1,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _passwordVisible ? Icons.visibility : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _passwordVisible = !_passwordVisible;
+                    });
+                  },
+                ),
+              ),
               SizedBox(height: 20),
-              ElevatedButton(onPressed: registerUser, child: Text('회원가입')),
+              CustomElevatedButton(
+                onPressed: registerUser,
+                child: '회원가입',
+                width: double.infinity,
+              ),
             ],
           ),
         ),
