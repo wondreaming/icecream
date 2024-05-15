@@ -204,6 +204,7 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
           child: Column(
             children: [
               DetailProfile(
+                user_id: child.userId,
                 is_parents: false,
                 id: child.username,
                 number: child.phoneNumber,
