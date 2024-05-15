@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icecream/auth/screen/c_qrcode.dart';
+import 'package:icecream/auth/screen/fork_page.dart';
 import 'package:icecream/auth/screen/p_login_page.dart';
 import 'package:icecream/auth/screen/p_signup.dart';
 import 'package:icecream/auth/screen/qrscan_page.dart';
@@ -48,57 +49,62 @@ final router = GoRouter(
   },
   routes: [
     GoRoute(
-        path: '/',
-        builder: (context, state) {
-          return const Temp();
-        },
-        routes: [
-          GoRoute(
-              path: 'c_qrcode',
-              builder: (context, state) => const QRCodePage()),
-          GoRoute(
-              path: 'p_login', builder: (context, state) => const LoginPage()),
-          GoRoute(
-              path: 'signup', builder: (context, state) => const SignUpPage()),
-          GoRoute(
-              path: 'qrscan_page',
-              builder: (context, state) => const QRScanPage()),
-          GoRoute(path: 'child', builder: (context, state) => const CHome()),
-          GoRoute(
-            path: 'parents',
-            builder: (context, state) => const PHome(),
-            routes: [
-              // setting 페이지
-              GoRoute(
-                path: 'setting',
-                name: 'setting',
-                builder: (context, state) => const Setting(),
-                routes: [
-                  // setting 페이지의 마이페이지
-                  GoRoute(
-                    path: 'my_page',
-                    name: 'my_page',
-                    builder: (context, state) => const MyPage(),
-                  ),
-                  // setting 페이지의 자녀 관리 페이지
-                  GoRoute(
-                    path: 'children',
-                    name: 'children',
-                    builder: (context, state) => const ChildScreen(),
-                    routes: [
-                      // setting의 자녀 1명 페이지
-                      GoRoute(
-                        path: 'child/:user_id',
-                        name: 'child',
-                        builder: (context, state) {
-                          final userId =
-                              int.parse(state.pathParameters['user_id']!);
-                          return ChildDetailScreen(
-                            user_id: userId,
-                          );
-                        },
-                        routes: [
-                          GoRoute(
+      path: '/',
+      builder: (context, state) {
+        return const ForkPage();
+      },
+      routes: [
+        GoRoute(
+          name: 'signup',
+          path: 'signup',
+          builder: (context, state) => const SignUpPage(),
+        ),
+        GoRoute(
+          name: 'p_login',
+          path: 'p_login',
+          builder: (context, state) => const LoginPage(),
+          routes: [
+            GoRoute(
+                name: 'qrscan_page',
+                path: 'qrscan_page',
+                builder: (context, state) => const QRScanPage()),
+            GoRoute(
+              name: 'parents',
+              path: 'parents',
+              builder: (context, state) => const PHome(),
+            ),
+
+            // setting 페이지
+            GoRoute(
+              path: 'setting',
+              name: 'setting',
+              builder: (context, state) => const Setting(),
+              routes: [
+                // setting 페이지의 마이페이지
+                GoRoute(
+                  path: 'my_page',
+                  name: 'my_page',
+                  builder: (context, state) => const MyPage(),
+                ),
+                // setting 페이지의 자녀 관리 페이지
+                GoRoute(
+                  path: 'children',
+                  name: 'children',
+                  builder: (context, state) => const ChildScreen(),
+                  routes: [
+                    // setting의 자녀 1명 페이지
+                    GoRoute(
+                      path: 'child/:user_id',
+                      name: 'child',
+                      builder: (context, state) {
+                        final userId =
+                            int.parse(state.pathParameters['user_id']!);
+                        return ChildDetailScreen(
+                          user_id: userId,
+                        );
+                      },
+                      routes: [
+                        GoRoute(
                             path: 'destination',
                             name: 'destination',
                             builder: (context, state) {
@@ -116,52 +122,48 @@ final router = GoRouter(
                                 path: 'query_parameter',
                                 name: 'search',
                                 builder: (context, state) {
-                                  final user_id = int.parse(state.pathParameters['user_id']!);
+                                  final user_id = int.parse(
+                                      state.pathParameters['user_id']!);
                                   return SearchScreen(user_id: user_id);
                                 },
                               ),
                               GoRoute(
                                 path: 'map',
                                 name: 'map',
-                                builder: (context, state)  {
-                                  final user_id = int.parse(state.pathParameters['user_id']!);
+                                builder: (context, state) {
+                                  final user_id = int.parse(
+                                      state.pathParameters['user_id']!);
                                   return MapScreen(user_id: user_id);
                                 },
                               ),
                               GoRoute(
                                 path: 'kpostal',
                                 name: 'kpostal',
-                                builder: (context, state)  {
-                                  final user_id = int.parse(state.pathParameters['user_id']!);
+                                builder: (context, state) {
+                                  final user_id = int.parse(
+                                      state.pathParameters['user_id']!);
                                   return KpostalWrapper(user_id: user_id);
                                 },
-                                // builder: (context, state) => KpostalView(
-                                //   callback: (Kpostal result) {
-                                //     Provider.of<Destination>(context,
-                                //         listen: false)
-                                //         .changeTheValue(
-                                //         result.address,
-                                //         result.latitude!,
-                                //         result.longitude!);
-                                //   },
-                                // ),
                               ),
-                            ]
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-          GoRoute(
-            path: 'children',
-            builder: (context, state) {
-              return const CHome();
-            },
-          ),
-        ]),
+                            ]),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        GoRoute(
+          path: 'c_qrcode',
+          name: 'c_qrcode',
+          builder: (context, state) => const QRCodePage(),
+        ),
+        GoRoute(
+          path: 'child',
+          builder: (context, state) => const CHome(),
+        ),
+      ],
+    ),
   ],
 );
