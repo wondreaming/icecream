@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
+import 'package:icecream/provider/user_provider.dart';
+import 'package:provider/provider.dart';
 import '../service/user_service.dart';
 import 'package:icecream/setting/widget/custom_text_field.dart';
 import 'package:icecream/setting/widget/custom_elevated_button.dart';
@@ -52,7 +55,6 @@ class PhoneNumberFormatter extends TextInputFormatter {
   }
 }
 
-
 class _ChildRegisterPageState extends State<ChildRegisterPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
@@ -91,6 +93,12 @@ class _ChildRegisterPageState extends State<ChildRegisterPage> {
 
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('등록 성공: ${response.data}')));
+
+      // 자녀 정보 갱신
+      await _userService.fetchChildren(context.read<UserProvider>());
+
+      // 자녀 등록 성공시, 메인페이지로 이동
+      GoRouter.of(context).pushReplacement('/parents');
     } catch (e) {
       debugPrint("$e");
       ScaffoldMessenger.of(context)
@@ -109,13 +117,15 @@ class _ChildRegisterPageState extends State<ChildRegisterPage> {
             CustomTextField(
               controller: _nameController,
               hintText: '자녀의 이름',
-              contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
             ),
             const SizedBox(height: 16),
             CustomTextField(
               controller: _phoneController,
               hintText: '전화번호',
-              contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
               inputFormatters: [PhoneNumberFormatter()], // 전화번호 포맷터 추가
             ),
             const SizedBox(height: 16),

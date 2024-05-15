@@ -76,6 +76,24 @@ class UserService {
     }
   }
 
+  // 자녀 정보 조회
+  Future<void> fetchChildren(UserProvider userProvider) async {
+    try {
+      final response = await _dio.get('/users/child');
+      if (response.statusCode == 200) {
+        List<dynamic> childrenData = response.data['data'];
+        List<Child> children =
+            childrenData.map((child) => Child.fromJson(child)).toList();
+        userProvider.updateChildren(children);
+      } else {
+        throw Exception(
+            'Failed to fetch children: ${response.data['message']}');
+      }
+    } catch (e) {
+      throw Exception('Failed to fetch children: $e');
+    }
+  }
+
   // 부모 로그인
   Future<void> loginUser(String loginId, String password, String fcmToken,
       UserProvider userProvider) async {
