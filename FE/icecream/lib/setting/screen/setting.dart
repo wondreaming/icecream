@@ -22,12 +22,17 @@ class Setting extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Profile(
-              imgUrl: userProvider.profileImage,
-              number: userProvider.phoneNumber,
-              name: userProvider.username,
-              onPressed: () {
-                context.goNamed('my_page');
+            Consumer<UserProvider>(
+              builder: (context, userProvider, child) {
+                return Profile(
+                  user_id: userProvider.userId,
+                  imgUrl: userProvider.profileImage,
+                  number: userProvider.phoneNumber,
+                  name: userProvider.username,
+                  onPressed: () {
+                    context.goNamed('my_page');
+                  },
+                );
               },
             ),
             SizedBox(

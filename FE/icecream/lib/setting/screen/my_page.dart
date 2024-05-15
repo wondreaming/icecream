@@ -109,7 +109,8 @@ class _MyPageState extends State<MyPage> {
     final refreshTokenModel = await UserService().getRefreashToken();
     print('222222222222222222 ${refreshTokenModel.refreashToken}');
     final refreashToken = refreshTokenModel.refreashToken;
-    ResponseModel response = await userRepository.postLogout(refreashToken: refreashToken);
+    ResponseModel response =
+        await userRepository.postLogout(refreashToken: refreashToken);
     print('111111111111111111 $response');
     return response;
   }
@@ -161,8 +162,10 @@ class _MyPageState extends State<MyPage> {
     final dio = CustomDio().createDio();
     final userRepository = UserRespository(dio);
 
-    UserPhoneNumberModel newPhoneNumber = UserPhoneNumberModel(user_id: user_id, phone_number: phone_number);
-    ResponseModel response = await userRepository.patchPhoneNumber(userPhoneNumber: newPhoneNumber);
+    UserPhoneNumberModel newPhoneNumber =
+        UserPhoneNumberModel(user_id: user_id, phone_number: phone_number);
+    ResponseModel response =
+        await userRepository.patchPhoneNumber(userPhoneNumber: newPhoneNumber);
     return response;
   }
 
@@ -253,25 +256,26 @@ class _MyPageState extends State<MyPage> {
                   phoneNumberController.clear();
                 },
                 child: StatefulBuilder(
-                    builder: (BuildContext context, StateSetter setState) {
-                  return Column(
-                    children: [
-                      SizedBox(height: 16.0),
-                      CustomTextField(
-                        controller: phoneNumberController,
-                        onChanged: (String value) {
-                          phone_number = value;
-                        },
-                        hintText: '-를 포함해서 전화번호를 입력해주세요',
-                      ),
-                      SizedBox(height: 16.0),
-                      CustomElevatedButton(
-                          onPressed: () {
-                            patchPhoneNumber();
+                  builder: (BuildContext context, StateSetter setState) {
+                    return Column(
+                      children: [
+                        SizedBox(height: 16.0),
+                        CustomTextField(
+                          controller: phoneNumberController,
+                          onChanged: (String value) {
+                            phone_number = value;
                           },
-                          child: '저장'),
-                    ],
-                  );},
+                          hintText: '-를 포함해서 전화번호를 입력해주세요',
+                        ),
+                        SizedBox(height: 16.0),
+                        CustomElevatedButton(
+                            onPressed: () {
+                              patchPhoneNumber();
+                            },
+                            child: '저장'),
+                      ],
+                    );
+                  },
                 ),
               ),
               160.0,
@@ -289,11 +293,16 @@ class _MyPageState extends State<MyPage> {
           },
         ),
       ],
-      child: DetailProfile(
-        imgUrl: userProvider.profileImage,
-        name: userProvider.username,
-        id: userProvider.loginId,
-        number: userProvider.phoneNumber,
+      child: Consumer<UserProvider>(
+        builder: (context, userProvider, child) {
+          return DetailProfile(
+            user_id: userProvider.userId,
+            imgUrl: userProvider.profileImage,
+            name: userProvider.username,
+            id: userProvider.loginId,
+            number: userProvider.phoneNumber,
+          );
+        },
       ),
     );
   }
