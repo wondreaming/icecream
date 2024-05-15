@@ -10,8 +10,10 @@ ResponseModel _$ResponseModelFromJson(Map<String, dynamic> json) =>
     ResponseModel(
       timestamp: json['timestamp'] as String?,
       status: (json['status'] as num).toInt(),
-      message: json['message'] as String,
+      message: json['message'] as String?,
       data: json['data'] as String?,
+      error: json['error'] as String?,
+      path: json['path'] as String?,
     );
 
 Map<String, dynamic> _$ResponseModelToJson(ResponseModel instance) =>
@@ -20,4 +22,6 @@ Map<String, dynamic> _$ResponseModelToJson(ResponseModel instance) =>
       'status': instance.status,
       'message': instance.message,
       'data': instance.data,
+      'error': instance.error,
+      'path': instance.path,
     };
