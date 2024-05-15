@@ -67,7 +67,7 @@ class _MyPageState extends State<MyPage> {
       context.pop();
       changePasswordModal(context);
     } else {
-      final String message = response.message;
+      final String message = response.message!;
       showCustomDialog(
         context,
         message,
@@ -95,7 +95,7 @@ class _MyPageState extends State<MyPage> {
       passwordController.clear();
       context.pop();
     } else {
-      final String message = response.message;
+      final String message = response.message!;
       showCustomDialog(context, message, isNo: false, onPressed: () {
         context.pop();
       });
@@ -120,7 +120,7 @@ class _MyPageState extends State<MyPage> {
     response = await postLogout();
 
     if (response.status == 200) {
-      final String message = response.message;
+      final String message = response.message!;
       showCustomDialog(context, message, isNo: false, onPressed: () {
         context.pop();
       });
@@ -145,12 +145,12 @@ class _MyPageState extends State<MyPage> {
     response = await deleteUser();
 
     if (response.status == 200) {
-      final String message = response.message;
+      final String message = response.message!;
       showCustomDialog(context, message, isNo: false, onPressed: () {
         context.pop();
       });
     } else {
-      final String message = response.message;
+      final String message = response.message!;
       showCustomDialog(context, message, isNo: false, onPressed: () {
         context.pop();
       });
@@ -175,7 +175,8 @@ class _MyPageState extends State<MyPage> {
 
     if (response.status == 200) {
       phoneNumberController.clear();
-      final String message = response.message;
+      final String message = response.message!;
+      userProvider.setPhoneNumber = phone_number;
       showCustomDialog(context, message, isNo: false, onPressed: () {
         context.pop();
       });
@@ -243,7 +244,7 @@ class _MyPageState extends State<MyPage> {
                   );
                 }),
               ),
-              160.0,
+              180.0,
             );
           },
           secoundOnTap: () {
@@ -270,7 +271,9 @@ class _MyPageState extends State<MyPage> {
                         SizedBox(height: 16.0),
                         CustomElevatedButton(
                             onPressed: () {
+
                               patchPhoneNumber();
+
                             },
                             child: '저장'),
                       ],
@@ -283,12 +286,15 @@ class _MyPageState extends State<MyPage> {
           },
           thirdOnTap: () {
             showCustomDialog(context, '로그아웃하시겠습니까?', onPressed: () {
-              logout();
+              UserService().deleteAll();
+              context.go('/');
             });
           },
           fourthOnTap: () {
             showCustomDialog(context, '회원 탈퇴하시겠습니까?', onPressed: () {
-              deleteChild();
+              UserService().deleteAll();
+              UserService().deleteUser();
+              context.go('/');
             });
           },
         ),
@@ -350,7 +356,6 @@ void changePasswordModal(BuildContext context) {
             maxLines: 1,
             suffixIcon: IconButton(
               onPressed: () {
-                print('숨김이 될까요? $_isHidden2');
                 setState(() {
                   _isHidden2 = !_isHidden2;
                 });
@@ -365,6 +370,12 @@ void changePasswordModal(BuildContext context) {
                 if (password1 == password2) {
                   changePassword(context, password1);
                   context.pop();
+                } else {
+                  showCustomDialog(
+                    context,
+                    '비밀번호가 일치하지 않습니다',
+                    isNo: false,
+                  );
                 }
               },
               child: '저장'),
@@ -375,18 +386,28 @@ void changePasswordModal(BuildContext context) {
   );
 }
 
-void changePassword(context, password) async {
+void changePassword(BuildContext context, String password) async {
   ResponseModel response;
   response = await patchPassword(password);
-  print('변경이 잘 되었나 ${response.status}');
+  print(response.message);
+
   if (response.status == 200) {
-  } else {
-    final String message = response.message;
+    final String message = response.message!;
+    if (Navigator.of(context, rootNavigator: true).canPop()) {
     showCustomDialog(
       context,
       message,
       isNo: false,
-    );
+    );}
+  } else {
+    final String message = response.message!;
+    if (Navigator.of(context).canPop()) {
+      showCustomDialog(
+        context,
+        message,
+        isNo: false,
+      );
+    }
   }
 }
 

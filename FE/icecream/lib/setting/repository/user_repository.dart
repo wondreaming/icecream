@@ -53,5 +53,5 @@ abstract class UserRespository {
   @POST('/users/profile')
   Future<ResponseModel> postImage(
       {@Query('user_id') required int user_id,
-      @Body() required MultipartFile profile_image});
+      @Body() required FormData formData});
 }

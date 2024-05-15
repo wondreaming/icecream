@@ -276,7 +276,7 @@ class _DestinationScreenState extends State<DestinationScreen> {
       widget.onDataSaved?.call();
       context.pop();
     } else {
-      final String message = response.message;
+      final String message = response.message!;
       showCustomDialog(context, message, isNo: false, onPressed: (){context.pop();});
     }
   }
