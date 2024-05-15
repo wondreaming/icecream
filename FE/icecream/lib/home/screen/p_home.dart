@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:icecream/main/screen/p_main.dart';
 import 'package:icecream/goal/screen/goal.dart';
 import 'package:icecream/noti/screen/notification.dart';
@@ -56,24 +55,27 @@ class _PHomeState extends State<PHome> with SingleTickerProviderStateMixin {
     return SafeArea(
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        body: CustomNav(
-          currentPage: currentPage,
-          tabController: tabController,
-          colors: colors,
-          unselectedColor: Colors.white,
-          barColor: Colors.black,
-          start: 10,
-          end: 2,
-          child: TabBarView(
-            controller: tabController,
-            dragStartBehavior: DragStartBehavior.down,
-            physics: const NeverScrollableScrollPhysics(),
-            children: const [
-              PMain(), // 첫 번째 탭 (홈)
-              Goal(), // 두 번째 탭 (목표)
-              Noti(), // 세 번째 탭 (알림)
-              Setting(), // 네 번째 탭 (설정)
-            ],
+        body: PopScope(
+          canPop: false,
+          child: CustomNav(
+            currentPage: currentPage,
+            tabController: tabController,
+            colors: colors,
+            unselectedColor: Colors.white,
+            barColor: Colors.black,
+            start: 10,
+            end: 2,
+            child: TabBarView(
+              controller: tabController,
+              dragStartBehavior: DragStartBehavior.down,
+              physics: const NeverScrollableScrollPhysics(),
+              children: const [
+                PMain(), // 첫 번째 탭 (홈)
+                Goal(), // 두 번째 탭 (목표)
+                Noti(), // 세 번째 탭 (알림)
+                Setting(), // 네 번째 탭 (설정)
+              ],
+            ),
           ),
         ),
       ),
