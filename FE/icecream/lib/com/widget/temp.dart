@@ -18,7 +18,6 @@ class _TempState extends State<Temp> {
   @override
   void initState() {
     super.initState();
-    _loadAndShowToken();
   }
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
 

@@ -65,6 +65,8 @@ class _SignUpPageState extends State<SignUpPage> {
   String? _passwordError;
   String? _passwordCheckError;
 
+  Color? _loginIdBorderColor;
+
   bool _passwordVisible = false; // 비밀번호 가리기/보이기 상태 변수 추가
   bool _passwordCheckVisible = false;
 
@@ -87,16 +89,40 @@ class _SignUpPageState extends State<SignUpPage> {
     }
   }
 
-  void _checkLoginIdAvailability() async {
-    if (!_loginIdFocusNode.hasFocus) {
-      String loginId = _loginIdController.text;
-      if (loginId.isEmpty) {
-        setState(() => _loginIdError = '로그인 ID를 입력하세요');
-        return;
-      }
+  Future<void> _checkLoginIdAvailability() async {
+    String loginId = _loginIdController.text;
+    if (loginId.isEmpty) {
+      setState(() {
+        _loginIdError = '로그인 ID를 입력하세요';
+        _loginIdBorderColor = Colors.red;
+      });
+      return;
+    }
+
+    try {
       var result = await _userService.checkLoginIdAvailability(loginId);
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(result['message'])));
+      if (result['isAvailable']) {
+        setState(() {
+          _loginIdError = null;
+          _loginIdBorderColor = Colors.green;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['message'])),
+        );
+      } else {
+        setState(() {
+          _loginIdError = result['message'];
+          _loginIdBorderColor = Colors.red;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _loginIdError = '아이디 중복 검사에 실패했습니다';
+        _loginIdBorderColor = Colors.red;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('아이디 중복 검사에 실패했습니다: $e')),
+      );
     }
   }
 
@@ -252,8 +278,9 @@ class _SignUpPageState extends State<SignUpPage> {
               CustomTextField(
                 controller: _loginIdController,
                 hintText: '로그인 ID',
-                // focusNode: _loginIdFocusNode,
+                focusNode: _loginIdFocusNode,
                 errorText: _loginIdError,
+                borderColor: _loginIdBorderColor,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
               ),
               SizedBox(height: 10),
