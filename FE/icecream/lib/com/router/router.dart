@@ -36,7 +36,8 @@ final router = GoRouter(
 
     // 자동 로그인 후 첫 리디렉션 처리
     if (!userProvider.isLoggedIn) {
-      return '/p_login';
+      _initialRedirectPerformed = true;
+      return '/';
     } else if (userProvider.isParent) {
       _initialRedirectPerformed = true;
       return '/parents';
