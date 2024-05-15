@@ -30,9 +30,9 @@ class TimesetModel {
 class Data {
   int? destinationId;
   String? name;
-  String? icon;
-  int? latitude;
-  int? longitude;
+  dynamic icon; // dynamic 타입으로 변경
+  double? latitude; // 일반적으로 위도와 경도는 double 타입입니다.
+  double? longitude;
   String? startTime;
   String? endTime;
   String? day;
@@ -50,9 +50,10 @@ class Data {
   Data.fromJson(Map<String, dynamic> json) {
     destinationId = json['destination_id'];
     name = json['name'];
-    icon = json['icon'];
-    latitude = json['latitude'];
-    longitude = json['longitude'];
+    icon = json['icon']; // 동적 타입 처리
+    latitude = (json['latitude'] as num?)?.toDouble(); // 타입 캐스팅을 통해 double로 변환
+    longitude =
+        (json['longitude'] as num?)?.toDouble(); // 타입 캐스팅을 통해 double로 변환
     startTime = json['start_time'];
     endTime = json['end_time'];
     day = json['day'];
@@ -62,7 +63,7 @@ class Data {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['destination_id'] = destinationId;
     data['name'] = name;
-    data['icon'] = icon;
+    data['icon'] = icon; // 동적 타입 그대로 저장
     data['latitude'] = latitude;
     data['longitude'] = longitude;
     data['start_time'] = startTime;

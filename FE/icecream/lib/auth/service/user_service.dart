@@ -5,6 +5,8 @@ import 'package:icecream/setting/model/refresh_token_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../../com/const/dio_interceptor.dart';
+import 'package:flutter/services.dart';
+import 'package:icecream/child/service/timeset_service.dart';
 
 class UserService {
   final Dio _dio = CustomDio().createDio(); // CustomDio 인스턴스를 사용하여 Dio 객체 생성
@@ -156,6 +158,15 @@ class UserService {
       }
     } else {
       userProvider.clearUserData();
+    }
+  }
+
+  void startLocationService() async {
+    const platform = MethodChannel('com.example.icecream/locationService');
+    try {
+      await platform.invokeMethod('startService');
+    } on PlatformException catch (e) {
+      print("Failed to start service: '${e.message}'.");
     }
   }
 

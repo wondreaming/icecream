@@ -36,8 +36,7 @@ class RabbitMQService {
     }
   }
 
-  Future<void> sendLocation(
-      double latitude, double longitude, int userId, int destinationId) async {
+  Future<void> sendLocation(double latitude, double longitude, int userId, int destinationId) async {
     if (_exchange == null) {
       throw Exception('RabbitMQ not initialized.');
     }
@@ -49,6 +48,13 @@ class RabbitMQService {
         'longitude': longitude,
         'timestamp': DateTime.now().toIso8601String()
       };
+      // 메시지를 RabbitMQ로 전송하기 전에 로그를 찍습니다.
+      print('Sending location to RabbitMQ:');
+      print('Latitude: $latitude');
+      print('Longitude: $longitude');
+      print('User ID: $userId');
+      print('Destination ID: $destinationId');
+
       _exchange!.publish(jsonEncode(locationData), "Busan.ocean");
     } catch (e) {
       print('Failed to send message: $e');
@@ -60,9 +66,10 @@ class RabbitMQService {
     _client?.close();
   }
 
-  void startSendingLocation(
-      double latitude, double longitude, int userId, int destinationId) {
+  void startSendingLocation(double latitude, double longitude, int userId, int destinationId) {
+    print("Starting periodic location updates...");
     Timer.periodic(const Duration(seconds: 1), (timer) {
+      print("Timer tick for sending location.");
       sendLocation(latitude, longitude, userId, destinationId);
     });
   }

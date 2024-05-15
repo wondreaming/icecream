@@ -1,33 +1,29 @@
 import 'package:flutter/material.dart';
 
 class RewardModal extends StatelessWidget {
-  const RewardModal({super.key});
+  final Map<String, dynamic> goalData;
+  const RewardModal({super.key, required this.goalData});
 
   @override
   Widget build(BuildContext context) {
+    final period = goalData['period'].toString();
+    final content = goalData['content'];
+
     return Dialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 15.0),
       child: SizedBox(
         height: MediaQuery.of(context).size.height * 0.3,
         child: Column(
           children: [
-            const SizedBox(
-              height: 30,
+            const SizedBox(height: 30),
+            Text(
+              '$period일 달성시',
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
             ),
-            const Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text(
-                    '보상 보기',
-                    style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 20), // 추가된 텍스트와 닫기 버튼 사이의 간격 조절
-                ],
-              ),
-            ),
+            SizedBox(height: 20),
+            Text(content),
             Padding(
-              padding: const EdgeInsets.only(bottom: 16.0), // 닫기 버튼과 모달 하단 간격
+              padding: const EdgeInsets.only(bottom: 16.0),
               child: TextButton(
                 onPressed: () => Navigator.pop(context),
                 child: const Text('닫기', style: TextStyle(color: Colors.blue)),
