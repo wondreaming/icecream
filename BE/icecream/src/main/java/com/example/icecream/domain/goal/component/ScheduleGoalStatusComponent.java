@@ -49,19 +49,29 @@ public class ScheduleGoalStatusComponent {
                 Goal goal = goalRepository.findByUserIdAndIsActive(userId, true);
                 int record = goal.getRecord();
                 goal.updateRecord(record + 1);
-                if (record + 1 == goal.getPeriod()) {
-                    goal.deactivateGoal();
-
-                    int parentId = parentChildMappingRepository.findByChildId(userId).getParent().getId();
-                    List<Integer> userArray = Arrays.asList(userId, parentId);
-                    FcmRequestDto2 fcmRequestDto2 = new FcmRequestDto2(userArray, "목표 달성", user.getUsername() + "님, 목표를 달성하였습니다. 축하합니다!", "goal");
-                    notificationService.sendMessageToUsers(fcmRequestDto2);
-                }
                 goalRepository.save(goal);
             }
 
             String key = "user_goal:" + userId;
             ops.set(key, 0, Duration.ofSeconds(86400));
+        });
+    }
+
+    @Scheduled(cron = "00 0 8 * * *")
+    public void sendGoalAchievementNotification() {
+        List<User> users = userRepository.findAllByIsParentAndIsDeletedFalse(false);
+
+        users.forEach(user -> {
+            int userId = user.getId();
+            Goal goal = goalRepository.findByUserIdAndIsActive(userId, true);
+            if (goal.getRecord() == goal.getPeriod()) {
+                goal.deactivateGoal();
+                int parentId = parentChildMappingRepository.findByChildId(userId).getParent().getId();
+                List<Integer> userArray = Arrays.asList(userId, parentId);
+                FcmRequestDto2 fcmRequestDto2 = new FcmRequestDto2(userArray, "목표 달성", user.getUsername() + "님, 목표를 달성하였습니다. 축하합니다!", "goal");
+                notificationService.sendMessageToUsers(fcmRequestDto2);
+                goalRepository.save(goal);
+            }
         });
     }
 }

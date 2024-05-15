@@ -85,7 +85,6 @@ public class LoggingFilter extends OncePerRequestFilter {
             Object jsonObject = objectMapper.readValue(json, Object.class);
             return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
         } catch (IOException e) {
-            log.error("Failed to pretty print JSON", e);
             return json;
         }
     }
