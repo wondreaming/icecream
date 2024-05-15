@@ -64,7 +64,7 @@ class _CHomeState extends State<CHome> with SingleTickerProviderStateMixin {
               child: TabBarView(
                 controller: _tabController,
                 children: [
-                  const ChildReward(),
+                  ChildReward(),
                   ChildTimeSet(),
                 ],
               ),
