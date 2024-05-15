@@ -6,8 +6,7 @@ import com.example.icecream.domain.goal.repository.mongodb.GoalStatusRepository;
 import com.example.icecream.domain.goal.repository.postgres.GoalRepository;
 import com.example.icecream.domain.map.entity.Road;
 import com.example.icecream.domain.map.repository.RoadRepository;
-import com.example.icecream.domain.notification.document.FcmToken;
-import com.example.icecream.domain.notification.dto.FcmRequestDto;
+import com.example.icecream.domain.notification.dto.FcmRequestDto2;
 import com.example.icecream.domain.notification.repository.FcmTokenRepository;
 import com.example.icecream.domain.notification.service.NotificationService;
 import com.example.icecream.domain.user.entity.User;
@@ -23,6 +22,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -49,17 +50,17 @@ public class JaywalkingCheckService {
                     goalStatus.getResult().put(LocalDate.now(), -1);
                     goalStatusRepository.save(goalStatus);
 
+                    int parentId = parentChildMappingRepository.findByChildId(userId).getParent().getId();
+                    User user = userRepository.findById(userId).orElseThrow();
+                    List<Integer> userArray = Arrays.asList(userId, parentId);
+                    FcmRequestDto2 fcmRequestDto2 = new FcmRequestDto2(userArray, "목표 달성 현황 초기화", user.getUsername() + "님이 무단횡단하였습니다.", "goal");
+                    notificationService.sendMessageToUsers(fcmRequestDto2);
+
+                    ops.set("user_goal:" + userId, 1);
+
                     Goal goal = goalRepository.findByUserIdAndIsActive(userId, true);
                     goal.updateRecord(0);
                     goalRepository.save(goal);
-
-                    int parentId = parentChildMappingRepository.findByChildId(userId).getParent().getId();
-                    User user = userRepository.findById(userId).orElseThrow();
-                    FcmToken fcmToken = fcmTokenRepository.findByUserId(parentId);
-                    FcmRequestDto fcmRequestDto = new FcmRequestDto(fcmToken.getToken(), "목표 달성 현황 초기화", user.getUsername() + "님이 무단횡단하였습니다.", "goal");
-                    notificationService.sendMessageTo(fcmRequestDto);
-
-                    ops.set("user_goal:" + userId, 1);
                 }
             }
         }
