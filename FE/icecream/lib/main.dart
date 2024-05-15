@@ -21,6 +21,7 @@ import 'package:icecream/provider/user_provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as image;
+import 'package:rive/rive.dart';
 
 // gps
 import 'package:geolocator/geolocator.dart'; // 임포트 추가
@@ -88,7 +89,9 @@ Future<void> _handleNotification(RemoteMessage message) async {
       body = message.data['body'] ?? '등록되었습니다!';
       // 자동 로그인 로직 호출
       try {
-        final userProvider = Provider.of<UserProvider>(navigatorKey.currentContext!, listen: false);
+        final userProvider = Provider.of<UserProvider>(
+            navigatorKey.currentContext!,
+            listen: false);
         await _userService.autoLogin(userProvider);
         if (userProvider.isLoggedIn) {
           if (userProvider.isParent) {
@@ -276,7 +279,16 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     _autoLoginFuture = _autoLogin();
     initServices();
+    _navigateAfterDelay();
   }
+
+  Future<void> _navigateAfterDelay() async {
+    await Future.delayed(Duration(seconds: 3)); // 5초 동안 지연
+    setState(() {
+      _isSplashScreenVisible = false; // 상태를 업데이트하여 스플래시 화면을 숨김
+    });
+  }
+  bool _isSplashScreenVisible = true;
 
   Future<void> initServices() async {
     await _locationService.initLocationService();
@@ -305,18 +317,25 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<void>(
       future: _autoLoginFuture,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        if (_isSplashScreenVisible) {
           // 로딩 중일 때 로딩 화면 표시
           return const MaterialApp(
             home: Scaffold(
-              body: Center(child: CircularProgressIndicator()),
+              body: Center(
+                child: SizedBox(
+                  width: 200,
+                  height: 200,
+                  child: RiveAnimation.asset(
+                    'asset/img/icecreamloop.riv',
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
             ),
           );
         } else {
