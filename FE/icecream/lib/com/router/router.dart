@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icecream/auth/screen/c_qrcode.dart';
 import 'package:icecream/auth/screen/p_login_page.dart';
@@ -18,15 +19,29 @@ import 'package:icecream/setting/screen/setting.dart';
 import 'package:kpostal/kpostal.dart';
 import 'package:provider/provider.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+bool _initialRedirectPerformed = false;
+
 final router = GoRouter(
+  navigatorKey: navigatorKey,
   initialLocation: '/',
   redirect: (context, state) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    // 자동 로그인이 완료된 후에는 리디렉션을 수행하지 않도록 함
+    if (_initialRedirectPerformed) {
+      return null;
+    }
+
+    // 자동 로그인 후 첫 리디렉션 처리
     if (!userProvider.isLoggedIn) {
-      return '/p_login';
+      _initialRedirectPerformed = true;
+      return '/';
     } else if (userProvider.isParent) {
+      _initialRedirectPerformed = true;
       return '/parents';
     } else {
+      _initialRedirectPerformed = true;
       return '/child';
     }
   },

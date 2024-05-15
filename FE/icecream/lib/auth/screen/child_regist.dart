@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../service/user_service.dart';
+import 'package:icecream/setting/widget/custom_text_field.dart';
+import 'package:icecream/setting/widget/custom_elevated_button.dart';
 
 class ChildRegisterPage extends StatefulWidget {
   final String deviceId;
@@ -30,13 +32,13 @@ class _ChildRegisterPageState extends State<ChildRegisterPage> {
     final String phonenum = _phoneController.text.trim();
     if (name.isEmpty) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('이름을 입력하세요')));
+          .showSnackBar(const SnackBar(content: Text('이름을 입력하세요')));
       return;
     }
 
     if (phonenum.isEmpty) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('전화번호를 입력하세요')));
+          .showSnackBar(const SnackBar(content: Text('전화번호를 입력하세요')));
       return;
     }
 
@@ -63,24 +65,27 @@ class _ChildRegisterPageState extends State<ChildRegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('자녀 등록')),
+      appBar: AppBar(title: const Text('자녀 등록')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            TextField(
+            CustomTextField(
               controller: _nameController,
-              decoration: InputDecoration(
-                  labelText: '자녀의 이름', border: OutlineInputBorder()),
+              hintText: '자녀의 이름',
+              contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
             ),
-            SizedBox(height: 16),
-            TextField(
+            const SizedBox(height: 16),
+            CustomTextField(
               controller: _phoneController,
-              decoration: InputDecoration(
-                  labelText: '전화번호', border: OutlineInputBorder()),
+              hintText: '전화번호',
+              contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
             ),
-            SizedBox(height: 16),
-            ElevatedButton(onPressed: _registerChild, child: Text('등록하기')),
+            const SizedBox(height: 16),
+            CustomElevatedButton(
+              onPressed: _registerChild,
+              child: '등록하기',
+            ),
           ],
         ),
       ),
