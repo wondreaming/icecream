@@ -15,6 +15,6 @@ public interface GoalService {
     void updateGoal(UpdateGoalDto updateGoalDto, Integer parentId);
     List<Goal> getGoals(int userId, Integer selfId);
     void createGoalStatus(int userId);
-    GoalStatusDto getGoalStatus(int userId, LocalDate date);
+    GoalStatusDto getGoalStatus(int userId);
     void updateGoalStatus(UpdateGoalStatusDto updateGoalStatusDto, Integer parentId);
 }
