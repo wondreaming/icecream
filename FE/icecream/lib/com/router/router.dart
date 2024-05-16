@@ -41,7 +41,7 @@ final router = GoRouter(
       return '/';
     } else if (userProvider.isParent) {
       _initialRedirectPerformed = true;
-      return '/parents';
+      return '/p_login/parents';
     } else {
       _initialRedirectPerformed = true;
       return '/child';
