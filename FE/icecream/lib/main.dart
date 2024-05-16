@@ -367,33 +367,17 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     _autoLoginFuture = _autoLogin();
-    initServices();
     _navigateAfterDelay();
   }
 
   Future<void> _navigateAfterDelay() async {
-    await Future.delayed(Duration(seconds: 5)); // 5초 동안 지연
+    await Future.delayed(Duration(seconds: 10)); // 5초 동안 지연
     setState(() {
       _isSplashScreenVisible = false; // 상태를 업데이트하여 스플래시 화면을 숨김
     });
   }
   bool _isSplashScreenVisible = true;
 
-    _autoLoginFuture = _autoLoginAndInitServices();
-  }
-
-  Future<void> _autoLoginAndInitServices() async {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    try {
-      await _userService.autoLogin(userProvider);
-      await initServices();
-      if (userProvider.isLoggedIn) {
-        startLocationService(context, _locationService, _rabbitMQService);
-      }
-    } catch (e) {
-      debugPrint('Auto-login or service initialization failed: $e');
-    }
-  }
 
   // 초기 서비스 설정
   Future<void> initServices() async {
@@ -412,6 +396,10 @@ class _MyAppState extends State<MyApp> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     try {
       await _userService.autoLogin(userProvider);
+      await initServices();
+      if (userProvider.isLoggedIn) {
+        startLocationService(context, _locationService, _rabbitMQService);
+      }
     } catch (e) {
       debugPrint('Auto-login failed: $e');
     }
