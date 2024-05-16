@@ -283,7 +283,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> _navigateAfterDelay() async {
-    await Future.delayed(Duration(seconds: 3)); // 5초 동안 지연
+    await Future.delayed(Duration(seconds: 5)); // 5초 동안 지연
     setState(() {
       _isSplashScreenVisible = false; // 상태를 업데이트하여 스플래시 화면을 숨김
     });
@@ -328,8 +328,8 @@ class _MyAppState extends State<MyApp> {
             home: Scaffold(
               body: Center(
                 child: SizedBox(
-                  width: 200,
-                  height: 200,
+                  width: 150,
+                  height: 150,
                   child: RiveAnimation.asset(
                     'asset/img/icecreamloop.riv',
                     fit: BoxFit.cover,
