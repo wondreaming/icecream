@@ -46,9 +46,11 @@ public class ScheduleGoalStatusComponent {
                 result.put(LocalDate.now().minusDays(1), 1);
 
                 Goal goal = goalRepository.findByUserIdAndIsActive(userId, true);
-                int record = goal.getRecord();
-                goal.updateRecord(record + 1);
-                goalRepository.save(goal);
+                if (goal != null){
+                    int record = goal.getRecord();
+                    goal.updateRecord(record + 1);
+                    goalRepository.save(goal);
+                }
             }
             result.put(LocalDate.now(), 0);
             goalStatusRepository.save(goalStatus);

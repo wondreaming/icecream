@@ -105,29 +105,37 @@ public class GoalServiceImpl implements GoalService {
     }
 
     @Override
-    public GoalStatusDto getGoalStatus(int userId, LocalDate date) {
-        if (LocalDate.now().isBefore(date)) {
-            throw new BadRequestException(GoalErrorCode.GET_FUTURE_GOAL_STATUS.getMessage());
-        } else if (goalStatusRepository.findByUserId(userId).getResult().get(date) == null) {
+    public GoalStatusDto getGoalStatus(int userId) {
+        if (goalStatusRepository.findByUserId(userId) == null) {
             throw new NotFoundException(GoalErrorCode.NOT_FOUND_GOAL_STATUS.getMessage());
         }
         GoalStatus goalStatus = goalStatusRepository.findByUserId(userId);
         Map<LocalDate, Integer> allResult = goalStatus.getResult();
-        int allResultSize = allResult.size();
-
-        LocalDate todayDate = LocalDate.now();
-        int period = Period.between(date, todayDate).getDays();
-
-        Map<LocalDate, Integer> result = new HashMap<>();
-        for (int i = period; i < period + 3; i++) {
-            if (i >= allResultSize) {
-                break;
-            }
-            result.put(date.minusDays(i), allResult.get(date.minusDays(i)));
-        }
         return GoalStatusDto.builder()
-                .goalStatusMap(result)
+                .goalStatusMap(allResult)
                 .build();
+//        if (LocalDate.now().isBefore(date)) {
+//            throw new BadRequestException(GoalErrorCode.GET_FUTURE_GOAL_STATUS.getMessage());
+//        } else if (goalStatusRepository.findByUserId(userId).getResult().get(date) == null) {
+//            throw new NotFoundException(GoalErrorCode.NOT_FOUND_GOAL_STATUS.getMessage());
+//        }
+//        GoalStatus goalStatus = goalStatusRepository.findByUserId(userId);
+//        Map<LocalDate, Integer> allResult = goalStatus.getResult();
+//        int allResultSize = allResult.size();
+//
+//        LocalDate todayDate = LocalDate.now();
+//        int period = Period.between(date, todayDate).getDays();
+//
+//        Map<LocalDate, Integer> result = new HashMap<>();
+//        for (int i = period; i < period + 31; i++) {
+//            if (i >= allResultSize) {
+//                break;
+//            }
+//            result.put(date.minusDays(i), allResult.get(date.minusDays(i)));
+//        }
+//        return GoalStatusDto.builder()
+//                .goalStatusMap(result)
+//                .build();
     }
 
     @Override
