@@ -291,9 +291,9 @@ class _MyPageState extends State<MyPage> {
             });
           },
           fourthOnTap: () {
-            showCustomDialog(context, '회원 탈퇴하시겠습니까?', onPressed: () {
-              UserService().deleteAll();
-              UserService().deleteUser();
+            showCustomDialog(context, '회원 탈퇴하시겠습니까?', onPressed: () async {
+              await UserService().deleteAll();
+              await UserService().deleteUser();
               context.go('/');
             });
           },
