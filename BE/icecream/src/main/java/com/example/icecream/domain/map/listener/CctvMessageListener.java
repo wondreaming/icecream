@@ -8,11 +8,13 @@ import com.example.icecream.domain.notification.service.NotificationService;
 
 import lombok.RequiredArgsConstructor;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 @Component
 public class CctvMessageListener {
@@ -23,6 +25,7 @@ public class CctvMessageListener {
 
     @RabbitListener(queues = "hello")
     public void receiveMessage(CctvMessageDto cctvMessageDto) {
+        log.info("CCTV Name: {}, Speed: {}", cctvMessageDto.getCctvName(), cctvMessageDto.getSpeed());
         String CrosswalkName = cctvMessageListenService.findCrosswalk(cctvMessageDto);
         List<Integer> UserArray = redisListenService.getRedisValue(CrosswalkName);
         String message = "overspeed-1";
