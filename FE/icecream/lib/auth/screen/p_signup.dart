@@ -312,16 +312,6 @@ class _SignUpPageState extends State<SignUpPage> {
                 errorText: _passwordCheckError,
                 maxLines: 1,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _passwordVisible ? Icons.visibility : Icons.visibility_off,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _passwordVisible = !_passwordVisible;
-                    });
-                  },
-                ),
               ),
               SizedBox(height: 20),
               CustomElevatedButton(
