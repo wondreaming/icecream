@@ -198,7 +198,7 @@ class UserService {
       return {
         'status': response.statusCode,
         'message': response.data['message'],
-        'isAvailable': response.statusCode == 200 && response.data['message'] == "사용할 수 있는 아이디입니다"
+        'isAvailable': response.statusCode == 200 && response.data['message'] == "사용 가능한 ID 입니다."
       };
     } catch (e) {
       return {'status': 500, 'message': '서버 에러가 발생했습니다.', 'isAvailable': false};
