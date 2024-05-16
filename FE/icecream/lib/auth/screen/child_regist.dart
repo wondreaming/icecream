@@ -98,7 +98,7 @@ class _ChildRegisterPageState extends State<ChildRegisterPage> {
       await _userService.fetchChildren(context.read<UserProvider>());
 
       // 자녀 등록 성공시, 메인페이지로 이동
-      GoRouter.of(context).pushReplacement('/parents');
+      context.goNamed('parents');
     } catch (e) {
       debugPrint("$e");
       ScaffoldMessenger.of(context)
