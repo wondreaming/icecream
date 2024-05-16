@@ -45,7 +45,7 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
           GestureDetector(
             onTap: () {
-              context.goNamed('kpostal', pathParameters: {'user_id': widget.user_id.toString()});
+              context.pushNamed('kpostal', pathParameters: {'user_id': widget.user_id.toString()});
             },
             child: CustomTextContainerV2(),
           ),
@@ -54,7 +54,7 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
           CustomElevatedButton(
             onPressed: () {
-              context.goNamed('map', pathParameters: {'user_id': widget.user_id.toString()});
+              context.pushNamed('map', pathParameters: {'user_id': widget.user_id.toString()});
             },
             child: '현재 위치로 찾기',
             backgroundColor: AppColors.background_color,

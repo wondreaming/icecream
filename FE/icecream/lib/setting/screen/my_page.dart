@@ -67,7 +67,7 @@ class _MyPageState extends State<MyPage> {
       context.pop();
       changePasswordModal(context);
     } else {
-      final String message = response.message;
+      final String message = response.message!;
       showCustomDialog(
         context,
         message,
@@ -95,7 +95,7 @@ class _MyPageState extends State<MyPage> {
       passwordController.clear();
       context.pop();
     } else {
-      final String message = response.message;
+      final String message = response.message!;
       showCustomDialog(context, message, isNo: false, onPressed: () {
         context.pop();
       });
@@ -109,7 +109,8 @@ class _MyPageState extends State<MyPage> {
     final refreshTokenModel = await UserService().getRefreashToken();
     print('222222222222222222 ${refreshTokenModel.refreashToken}');
     final refreashToken = refreshTokenModel.refreashToken;
-    ResponseModel response = await userRepository.postLogout(refreashToken: refreashToken);
+    ResponseModel response =
+        await userRepository.postLogout(refreashToken: refreashToken);
     print('111111111111111111 $response');
     return response;
   }
@@ -119,7 +120,7 @@ class _MyPageState extends State<MyPage> {
     response = await postLogout();
 
     if (response.status == 200) {
-      final String message = response.message;
+      final String message = response.message!;
       showCustomDialog(context, message, isNo: false, onPressed: () {
         context.pop();
       });
@@ -144,12 +145,12 @@ class _MyPageState extends State<MyPage> {
     response = await deleteUser();
 
     if (response.status == 200) {
-      final String message = response.message;
+      final String message = response.message!;
       showCustomDialog(context, message, isNo: false, onPressed: () {
         context.pop();
       });
     } else {
-      final String message = response.message;
+      final String message = response.message!;
       showCustomDialog(context, message, isNo: false, onPressed: () {
         context.pop();
       });
@@ -161,8 +162,10 @@ class _MyPageState extends State<MyPage> {
     final dio = CustomDio().createDio();
     final userRepository = UserRespository(dio);
 
-    UserPhoneNumberModel newPhoneNumber = UserPhoneNumberModel(user_id: user_id, phone_number: phone_number);
-    ResponseModel response = await userRepository.patchPhoneNumber(userPhoneNumber: newPhoneNumber);
+    UserPhoneNumberModel newPhoneNumber =
+        UserPhoneNumberModel(user_id: user_id, phone_number: phone_number);
+    ResponseModel response =
+        await userRepository.patchPhoneNumber(userPhoneNumber: newPhoneNumber);
     return response;
   }
 
@@ -172,7 +175,8 @@ class _MyPageState extends State<MyPage> {
 
     if (response.status == 200) {
       phoneNumberController.clear();
-      final String message = response.message;
+      final String message = response.message!;
+      userProvider.setPhoneNumber = phone_number;
       showCustomDialog(context, message, isNo: false, onPressed: () {
         context.pop();
       });
@@ -240,7 +244,7 @@ class _MyPageState extends State<MyPage> {
                   );
                 }),
               ),
-              160.0,
+              180.0,
             );
           },
           secoundOnTap: () {
@@ -253,25 +257,28 @@ class _MyPageState extends State<MyPage> {
                   phoneNumberController.clear();
                 },
                 child: StatefulBuilder(
-                    builder: (BuildContext context, StateSetter setState) {
-                  return Column(
-                    children: [
-                      SizedBox(height: 16.0),
-                      CustomTextField(
-                        controller: phoneNumberController,
-                        onChanged: (String value) {
-                          phone_number = value;
-                        },
-                        hintText: '-를 포함해서 전화번호를 입력해주세요',
-                      ),
-                      SizedBox(height: 16.0),
-                      CustomElevatedButton(
-                          onPressed: () {
-                            patchPhoneNumber();
+                  builder: (BuildContext context, StateSetter setState) {
+                    return Column(
+                      children: [
+                        SizedBox(height: 16.0),
+                        CustomTextField(
+                          controller: phoneNumberController,
+                          onChanged: (String value) {
+                            phone_number = value;
                           },
-                          child: '저장'),
-                    ],
-                  );},
+                          hintText: '-를 포함해서 전화번호를 입력해주세요',
+                        ),
+                        SizedBox(height: 16.0),
+                        CustomElevatedButton(
+                            onPressed: () {
+
+                              patchPhoneNumber();
+
+                            },
+                            child: '저장'),
+                      ],
+                    );
+                  },
                 ),
               ),
               160.0,
@@ -279,21 +286,29 @@ class _MyPageState extends State<MyPage> {
           },
           thirdOnTap: () {
             showCustomDialog(context, '로그아웃하시겠습니까?', onPressed: () {
-              logout();
+              UserService().deleteAll();
+              context.go('/');
             });
           },
           fourthOnTap: () {
             showCustomDialog(context, '회원 탈퇴하시겠습니까?', onPressed: () {
-              deleteChild();
+              UserService().deleteAll();
+              UserService().deleteUser();
+              context.go('/');
             });
           },
         ),
       ],
-      child: DetailProfile(
-        imgUrl: userProvider.profileImage,
-        name: userProvider.username,
-        id: userProvider.loginId,
-        number: userProvider.phoneNumber,
+      child: Consumer<UserProvider>(
+        builder: (context, userProvider, child) {
+          return DetailProfile(
+            user_id: userProvider.userId,
+            imgUrl: userProvider.profileImage,
+            name: userProvider.username,
+            id: userProvider.loginId,
+            number: userProvider.phoneNumber,
+          );
+        },
       ),
     );
   }
@@ -341,7 +356,6 @@ void changePasswordModal(BuildContext context) {
             maxLines: 1,
             suffixIcon: IconButton(
               onPressed: () {
-                print('숨김이 될까요? $_isHidden2');
                 setState(() {
                   _isHidden2 = !_isHidden2;
                 });
@@ -356,6 +370,12 @@ void changePasswordModal(BuildContext context) {
                 if (password1 == password2) {
                   changePassword(context, password1);
                   context.pop();
+                } else {
+                  showCustomDialog(
+                    context,
+                    '비밀번호가 일치하지 않습니다',
+                    isNo: false,
+                  );
                 }
               },
               child: '저장'),
@@ -366,18 +386,28 @@ void changePasswordModal(BuildContext context) {
   );
 }
 
-void changePassword(context, password) async {
+void changePassword(BuildContext context, String password) async {
   ResponseModel response;
   response = await patchPassword(password);
-  print('변경이 잘 되었나 ${response.status}');
+  print(response.message);
+
   if (response.status == 200) {
-  } else {
-    final String message = response.message;
+    final String message = response.message!;
+    if (Navigator.of(context, rootNavigator: true).canPop()) {
     showCustomDialog(
       context,
       message,
       isNo: false,
-    );
+    );}
+  } else {
+    final String message = response.message!;
+    if (Navigator.of(context).canPop()) {
+      showCustomDialog(
+        context,
+        message,
+        isNo: false,
+      );
+    }
   }
 }
 

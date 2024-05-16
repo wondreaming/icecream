@@ -161,6 +161,7 @@ class _MapScreenState extends State<MapScreen> {
                       Provider.of<Destination>(context, listen: false)
                           .changeTheValue(currentAddress, latitude, longitude);
                       context.pop();
+                      context.pop();
                     },
                     child: '이 위치로 주소 등록',
                   ),

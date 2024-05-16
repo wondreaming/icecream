@@ -8,6 +8,7 @@ import 'package:icecream/setting/model/refresh_token_model.dart';
 import 'package:icecream/setting/model/response_model.dart';
 import 'package:icecream/setting/model/destination_model.dart';
 import 'package:icecream/setting/model/user_phone_number_model.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:retrofit/http.dart';
 import 'package:retrofit/retrofit.dart';
 part 'user_repository.g.dart';
@@ -18,13 +19,11 @@ abstract class UserRespository {
 
   // 로그아웃
   @POST('/auth/logout')
-  Future<ResponseModel> postLogout(
-      {@Body() required String refreashToken});
+  Future<ResponseModel> postLogout({@Body() required String refreashToken});
 
   // 자녀 이름 수정
   @PATCH('/users/child')
-  Future<ResponseModel> patchChild(
-      {@Body() required ChildNameModel childName});
+  Future<ResponseModel> patchChild({@Body() required ChildNameModel childName});
 
   // 자녀 해제
   @DELETE('/users/child')
@@ -38,8 +37,7 @@ abstract class UserRespository {
 
   // 비밀번호 확인
   @POST('/users/password')
-  Future<ResponseModel> postPassword(
-      {@Body() required PasswordModel password});
+  Future<ResponseModel> postPassword({@Body() required PasswordModel password});
 
   // 비밀번호 확인
   @PATCH('/users/password')
@@ -50,4 +48,10 @@ abstract class UserRespository {
   @PATCH('/users/phone')
   Future<ResponseModel> patchPhoneNumber(
       {@Body() required UserPhoneNumberModel userPhoneNumber});
+
+  // 프로필 이미지 등록/수정
+  @POST('/users/profile')
+  Future<ResponseModel> postImage(
+      {@Query('user_id') required int user_id,
+      @Body() required FormData formData});
 }

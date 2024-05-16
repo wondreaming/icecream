@@ -3,6 +3,7 @@ import 'package:icecream/setting/widget/custom_text_container.dart';
 import 'package:icecream/setting/widget/profile_image.dart';
 
 class DetailProfile extends StatelessWidget {
+  final int user_id;
   final String? name;
   final String id;
   final String number;
@@ -14,13 +15,14 @@ class DetailProfile extends StatelessWidget {
       required this.id,
       required this.number,
       this.is_parents = true,
-      this.imgUrl});
+      this.imgUrl, required this.user_id});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         ProfileImage(
+          user_id: user_id,
           imgUrl: imgUrl,
           width: 200,
           height: 200,

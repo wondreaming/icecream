@@ -47,6 +47,7 @@ class _PMainState extends State<PMain> {
   @override
   Widget build(BuildContext context) {
     return DefaultLayout(
+      automaticallyImplyLeading: false,
       title: '보호자 메인',
       padding: EdgeInsets.zero,
       child: Scaffold(

@@ -212,6 +212,45 @@ class _UserRespository implements UserRespository {
     return value;
   }
 
+  @override
+  Future<ResponseModel> postImage({
+    required int user_id,
+    required FormData formData,
+  }) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r'user_id': user_id};
+    final _headers = <String, dynamic>{};
+    final _data = formData;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<ResponseModel>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/users/profile',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+
+    if (_result.statusCode != 200) {
+      throw Exception('Failed to upload image. Server responded with status code: ${_result.statusCode}');
+    }
+
+    if (_result.data == null) {
+      throw Exception('No data received from the server');
+    }
+
+    final value = ResponseModel.fromJson(_result.data!);
+    return value;
+  }
+
   RequestOptions _setStreamType<T>(RequestOptions requestOptions) {
     if (T != dynamic &&
         !(requestOptions.responseType == ResponseType.bytes ||
