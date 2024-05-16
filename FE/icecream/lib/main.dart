@@ -21,6 +21,7 @@ import 'package:icecream/provider/user_provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as image;
+import 'package:rive/rive.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 // gps
@@ -93,7 +94,9 @@ Future<void> _handleNotification(RemoteMessage message) async {
       body = message.data['body'] ?? '등록되었습니다!';
       // 자동 로그인 로직 호출
       try {
-        final userProvider = Provider.of<UserProvider>(navigatorKey.currentContext!, listen: false);
+        final userProvider = Provider.of<UserProvider>(
+            navigatorKey.currentContext!,
+            listen: false);
         await _userService.autoLogin(userProvider);
         if (userProvider.isLoggedIn) {
           if (userProvider.isParent) {
@@ -363,6 +366,19 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+    _autoLoginFuture = _autoLogin();
+    initServices();
+    _navigateAfterDelay();
+  }
+
+  Future<void> _navigateAfterDelay() async {
+    await Future.delayed(Duration(seconds: 5)); // 5초 동안 지연
+    setState(() {
+      _isSplashScreenVisible = false; // 상태를 업데이트하여 스플래시 화면을 숨김
+    });
+  }
+  bool _isSplashScreenVisible = true;
+
     _autoLoginFuture = _autoLoginAndInitServices();
   }
 
@@ -391,17 +407,37 @@ class _MyAppState extends State<MyApp> {
     super.dispose();
   }
 
+  // 자동 로그인
+  Future<void> _autoLogin() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    try {
+      await _userService.autoLogin(userProvider);
+    } catch (e) {
+      debugPrint('Auto-login failed: $e');
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return
       FutureBuilder<void>(
       future: _autoLoginFuture,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        if (_isSplashScreenVisible) {
           // 로딩 중일 때 로딩 화면 표시
           return const MaterialApp(
             home: Scaffold(
-              body: Center(child: CircularProgressIndicator()),
+              body: Center(
+                child: SizedBox(
+                  width: 150,
+                  height: 150,
+                  child: RiveAnimation.asset(
+                    'asset/img/icecreamloop.riv',
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
             ),
           );
         } else {
