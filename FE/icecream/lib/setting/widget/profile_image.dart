@@ -1,14 +1,24 @@
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:go_router/go_router.dart';
 import 'package:icecream/com/const/color.dart';
+import 'package:icecream/com/const/dio_interceptor.dart';
+import 'package:icecream/provider/user_provider.dart';
+import 'package:icecream/setting/model/response_model.dart';
+import 'package:icecream/setting/repository/user_repository.dart';
 import 'package:icecream/setting/widget/custom_elevated_button.dart';
 import 'package:icecream/setting/widget/custom_modal.dart';
+import 'package:icecream/setting/widget/custom_show_dialog.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+import 'package:path/path.dart' as path;
 
 class ProfileImage extends StatefulWidget {
+  final int user_id;
   final double width;
   final double height;
   final String? imgUrl;
@@ -18,7 +28,8 @@ class ProfileImage extends StatefulWidget {
       required this.width,
       required this.height,
       this.imgUrl,
-      this.detail = false});
+      this.detail = false,
+      required this.user_id});
 
   @override
   State<ProfileImage> createState() => _ProfileImageState();
@@ -29,15 +40,54 @@ class _ProfileImageState extends State<ProfileImage> {
   final ImagePicker picker = ImagePicker(); // ImagePicker 초기화
 
   // 이미지를 가져오는 함수
-  Future getImage(ImageSource imageSource) async {
+  Future getImage(ImageSource imageSource, StateSetter setModalState) async {
     // pickedFile에 ImagePricker로 가져온 이미지가 담김
     final XFile? pickedFile = await picker.pickImage(source: imageSource);
     if (pickedFile != null) {
-      setState(() {
+      setModalState(() {
         _image = XFile(pickedFile.path);
       });
     } else {
       return null;
+    }
+  }
+
+  // 이미지 프로필 수정 api
+  Future<ResponseModel> postImgUrl() async {
+    final dio = CustomDio().createDio();
+    final userRepository = UserRespository(dio);
+    if (_image == null) {
+      throw Exception("이미지를 등록해주세요");
+    }
+    String fileName = path.basename(_image!.path);
+    FormData formData = await FormData.fromMap({
+      'profile_image':
+          await MultipartFile.fromFile(_image!.path, filename: fileName)
+    });
+    ResponseModel response = await userRepository.postImage(
+        user_id: widget.user_id, formData: formData);
+    return response;
+  }
+
+  void changeImgUrl() async {
+    ResponseModel response;
+    response = await postImgUrl();
+    try {
+      if (response.status == 200 && response.data != null) {
+        Provider.of<UserProvider>(context, listen: false).setProfileImage =
+            response.data!;
+        final String message = response.message!;
+        showCustomDialog(context, message, isNo: false, onPressed: () {
+          context.pop();
+        });
+      } else {
+        final String message = response.message!;
+        showCustomDialog(context, message, isNo: false, onPressed: () {
+          context.pop();
+        });
+      }
+    } catch (e) {
+      // 예외 발생시 에러 메시지 표시
     }
   }
 
@@ -48,8 +98,8 @@ class _ProfileImageState extends State<ProfileImage> {
         ClipRRect(
           borderRadius: BorderRadius.circular(100),
           child: widget.imgUrl != null && widget.imgUrl!.isNotEmpty
-              ? Image.asset(
-                  widget.imgUrl!,
+              ? Image(
+                  image: NetworkImage(widget.imgUrl!),
                   fit: BoxFit.cover,
                   width: widget.width,
                   height: widget.height,
@@ -62,8 +112,8 @@ class _ProfileImageState extends State<ProfileImage> {
         ),
         if (widget.detail)
           Positioned(
-            bottom: 15,
-            right: 15,
+            bottom: 5,
+            right: 5,
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(100),
@@ -72,23 +122,45 @@ class _ProfileImageState extends State<ProfileImage> {
               child: IconButton(
                 icon: Icon(Icons.edit),
                 onPressed: () {
+                  // 모달을 열기 전에 _image를 null로 설정
+                  setState(() {
+                    _image = null;
+                  });
                   showCustomModal(
                     context,
                     '프로필 사진 수정',
-                    Column(
-                      children: [
-                        SizedBox(height: 50.0),
-                        _buildPhoto(),
-                        SizedBox(height: 50.0),
-                        _buildButton(),
-                        SizedBox(height: 16.0),
-                        CustomElevatedButton(
-                          child: '저장',
-                          onPressed: () {},
-                        ),
-                      ],
+                    StatefulBuilder(
+                      builder:
+                          (BuildContext context, StateSetter setModalState) {
+                        return Column(
+                          children: [
+                            SizedBox(height: 50.0),
+                            _buildPhoto(setModalState),
+                            SizedBox(height: 50.0),
+                            _buildButton(setModalState),
+                            SizedBox(height: 16.0),
+                            CustomElevatedButton(
+                              child: '저장',
+                              onPressed: () {
+                                changeImgUrl();
+                              },
+                            ),
+                            SizedBox(height: 10.0),
+                            CustomElevatedButton(
+                              backgroundColor: AppColors.input_border_color,
+                              child: '삭제',
+                              onPressed: () {
+                                Provider.of<UserProvider>(context,
+                                        listen: false)
+                                    .setProfileImage = '';
+                                context.pop();
+                              },
+                            ),
+                          ],
+                        );
+                      },
                     ),
-                    450.0,
+                    500.0,
                   );
                 },
               ),
@@ -98,7 +170,7 @@ class _ProfileImageState extends State<ProfileImage> {
     );
   }
 
-  Widget _buildPhoto() {
+  Widget _buildPhoto(StateSetter setModalState) {
     return _image != null
         ? ClipRRect(
             borderRadius: BorderRadius.circular(100),
@@ -119,14 +191,14 @@ class _ProfileImageState extends State<ProfileImage> {
           );
   }
 
-  Widget _buildButton() {
+  Widget _buildButton(StateSetter setModalState) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Flexible(
           child: CustomElevatedButton(
             onPressed: () {
-              getImage(ImageSource.camera);
+              getImage(ImageSource.camera, setModalState);
             }, // 카메라에서 찍은 사진 가져오기
             child: '카메라',
             backgroundColor: AppColors.input_border_color,
@@ -139,7 +211,7 @@ class _ProfileImageState extends State<ProfileImage> {
         Flexible(
           child: CustomElevatedButton(
             onPressed: () {
-              getImage(ImageSource.gallery);
+              getImage(ImageSource.gallery, setModalState);
             }, // 갤러리에서 사진 가져오기
             child: '갤러리',
             backgroundColor: AppColors.input_border_color,

@@ -15,6 +15,7 @@ class Setting extends StatelessWidget {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
 
     return DefaultLayout(
+      automaticallyImplyLeading: false,
       title: '설정',
       child: Container(
         padding: const EdgeInsets.symmetric(
@@ -22,12 +23,17 @@ class Setting extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Profile(
-              imgUrl: userProvider.profileImage,
-              number: userProvider.phoneNumber,
-              name: userProvider.username,
-              onPressed: () {
-                context.goNamed('my_page');
+            Consumer<UserProvider>(
+              builder: (context, userProvider, child) {
+                return Profile(
+                  user_id: userProvider.userId,
+                  imgUrl: userProvider.profileImage,
+                  number: userProvider.phoneNumber,
+                  name: userProvider.username,
+                  onPressed: () {
+                    context.pushNamed('my_page');
+                  },
+                );
               },
             ),
             SizedBox(
@@ -35,7 +41,7 @@ class Setting extends StatelessWidget {
             ),
             GestureDetector(
               onTap: () {
-                context.goNamed('children');
+                context.pushNamed('children');
               },
               child: CustomTextContainer(
                 backIcon: Icons.arrow_forward_ios_rounded,

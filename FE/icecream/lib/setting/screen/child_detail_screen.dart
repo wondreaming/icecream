@@ -8,6 +8,7 @@ import 'package:icecream/provider/user_provider.dart';
 import 'package:icecream/setting/model/child_name_model.dart';
 import 'package:icecream/setting/model/destination_model.dart';
 import 'package:icecream/setting/model/response_model.dart';
+import 'package:icecream/setting/model/user_phone_number_model.dart';
 import 'package:icecream/setting/repository/destination_repository.dart';
 import 'package:icecream/setting/repository/user_repository.dart';
 import 'package:icecream/setting/widget/add_container.dart';
@@ -40,6 +41,8 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
 
   late String username = '';
   TextEditingController usernameController = TextEditingController();
+  late String phoneNumber = '';
+  TextEditingController phoneNumberController = TextEditingController();
 
   // 자녀 이름 수정
   Future<ResponseModel> patchChild() async {
@@ -82,7 +85,6 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
   Future<void> refresh() async {
     await getDestination();
     setState(() {
-      getDestination();
     });
   }
 
@@ -92,7 +94,10 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
     response = await deleteChild();
 
     if (response.status == 200) {
-      context.pop();
+      final String message = response.message!;
+      showCustomDialog(context, message, isNo: false, onPressed: () {
+        context.pop();
+      });
     } else {
       final String message = response.message!;
       showCustomDialog(context, message, isNo: false, onPressed: () {
@@ -108,14 +113,46 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
 
     if (response.status == 200) {
       usernameController.clear();
+      Provider.of<UserProvider>(context, listen: false).updateChildName(widget.user_id, username);
       context.pop();
     } else {
-      final String message = response.message;
+      final String message = response.message!;
       showCustomDialog(context, message, isNo: false, onPressed: () {
         context.pop();
       });
     }
   }
+
+  // 전화 번호 변경 api
+  Future<ResponseModel> changePhoneNumber() async {
+    final dio = CustomDio().createDio();
+    final userRepository = UserRespository(dio);
+
+    UserPhoneNumberModel newPhoneNumber =
+    UserPhoneNumberModel(user_id: widget.user_id, phone_number: phoneNumber);
+    ResponseModel response =
+    await userRepository.patchPhoneNumber(userPhoneNumber: newPhoneNumber);
+    return response;
+  }
+
+  void patchPhoneNumber() async {
+    ResponseModel response;
+    response = await changePhoneNumber();
+
+    if (response.status == 200) {
+      phoneNumberController.clear();
+      final String message = response.message!;
+      Provider.of<UserProvider>(context, listen: false).updateChildPhoneNumber(widget.user_id, phoneNumber);
+      showCustomDialog(context, message, isNo: false, onPressed: () {
+        context.pop();
+      });
+    } else {
+      showCustomDialog(context, '전화번호 수정이 실패했습니다', isNo: false, onPressed: () {
+        context.pop();
+      });
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -174,12 +211,16 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
                 children: [
                   SizedBox(height: 16.0),
                   CustomTextField(
+                    controller: phoneNumberController,
+                    onChanged: (String value) {
+                      phoneNumber = value;
+                    },
                     hintText: '현재 전화번호를 입력해주세요',
                   ),
                   SizedBox(height: 16.0),
                   CustomElevatedButton(
                       onPressed: () {
-                        context.pop();
+                        patchPhoneNumber();
                       },
                       child: '저장'),
                 ],
@@ -189,7 +230,7 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
           },
           thirdOnTap: () {
             // QR 찍는 페이지로 이동
-            context.push('/qrscan_page');
+            context.pushNamed('qrscan_page');
           },
           fourthOnTap: () {
             showCustomDialog(context, '연결 해제 하시겠습니까?', onPressed: () {
@@ -204,6 +245,7 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
           child: Column(
             children: [
               DetailProfile(
+                user_id: child.userId,
                 is_parents: false,
                 id: child.username,
                 number: child.phoneNumber,
@@ -258,6 +300,7 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
                       itemBuilder: (_, index) {
                         final pItem = snapshot.data![index];
                         return DestinationContainer.fromModel(
+                          user_id: child.userId,
                           model: pItem,
                           onDeleted: refresh,
                         );
@@ -276,7 +319,7 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
               AddContainer(
                 mention: '안심 보행지를 추가해주세요',
                 onPressed: () {
-                  context.goNamed('destination',
+                  context.pushNamed('destination',
                       pathParameters: {'user_id': widget.user_id.toString()});
                   onDataSaved:
                   () {

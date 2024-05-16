@@ -8,7 +8,7 @@ class TimeSetService {
 
   Future<List<TimeSet>> fetchTimeSets(String userId) async {
     try {
-      print('Fetching time sets for user ID: $userId');
+      print('여기Fetching time sets for user ID: $userId');
       String token = await _secureStorage.read(key: 'accessToken') ?? '';
       final response = await _dio.get(
         'http://k10e202.p.ssafy.io:8080/api/destination?user_id=$userId',
