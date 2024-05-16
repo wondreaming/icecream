@@ -47,9 +47,8 @@ public class GoalController {
 
     @GetMapping("/goal/status")
     public ResponseEntity<ApiResponseDto<Map<LocalDate, Integer>>> getGoalStatus(
-            @RequestParam("user_id") int userId,
-            @RequestParam("date") LocalDate date) {
-        GoalStatusDto goalStatus = goalService.getGoalStatus(userId, date);
+            @RequestParam("user_id") int userId) {
+        GoalStatusDto goalStatus = goalService.getGoalStatus(userId);
         return ApiResponseDto.success("목표 상태를 불러왔습니다.", goalStatus.getGoalStatusMap());
     }
 

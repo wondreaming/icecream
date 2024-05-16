@@ -59,8 +59,10 @@ public class JaywalkingCheckService {
                     ops.set("user_goal:" + userId, 1);
 
                     Goal goal = goalRepository.findByUserIdAndIsActive(userId, true);
-                    goal.updateRecord(0);
-                    goalRepository.save(goal);
+                    if (goal != null) {
+                        goal.updateRecord(0);
+                        goalRepository.save(goal);
+                    }
                 }
             }
         }
