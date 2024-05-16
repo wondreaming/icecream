@@ -15,12 +15,10 @@ class ForkPage extends StatefulWidget {
 
 class _ForkPageState extends State<ForkPage> {
   final UserService _userService = UserService();
-  late Future<void> _autoLoginFuture;
 
   @override
   void initState() {
     super.initState();
-    _autoLoginFuture = _autoLogin();
   }
 
   // 자동 로그인
@@ -35,17 +33,6 @@ class _ForkPageState extends State<ForkPage> {
 
   @override
   Widget build(BuildContext context) {
-    // return FutureBuilder(
-    //   future: _autoLoginFuture,
-    //   builder: (context, snapshot) {
-    //     if (snapshot.connectionState == ConnectionState.waiting) {
-    //       // 로딩 중일 때 로딩 화면 표시
-    //       return const MaterialApp(
-    //         home: Scaffold(
-    //           body: Center(child: CircularProgressIndicator()),
-    //         ),
-    //       );
-    //     } else {
           return DefaultLayout(
             title: '',
             child: Center(
