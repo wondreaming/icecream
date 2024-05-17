@@ -35,11 +35,11 @@ import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-FlutterLocalNotificationsPlugin();
+    FlutterLocalNotificationsPlugin();
 
 // 알림 채널 high_importance_channel
 const AndroidNotificationChannel highImportanceChannel =
-AndroidNotificationChannel(
+    AndroidNotificationChannel(
   'high_importance_channel',
   'High Importance Notifications',
   description: 'This channel is used for important notifications.',
@@ -69,25 +69,9 @@ Future<void> _handleNotification(RemoteMessage message) async {
   // content에 따른 알림 설정
   switch (content) {
     case 'overspeed-1':
-      imageAssetPath = 'asset/img/overspeed.png';
-      title = message.data['title'] ?? 'Overspeed Stage 1';
-      body = message.data['body'] ?? 'You are speeding!';
-      isOverspeed = true; // overspeed 알림을 식별
-      notificationColor = Colors.greenAccent; // overspeed-1 알림 색상
-      break;
     case 'overspeed-2':
-      imageAssetPath = 'asset/img/overspeed.png';
-      title = message.data['title'] ?? 'Overspeed Stage 2';
-      body = message.data['body'] ?? 'You are speeding excessively!';
-      isOverspeed = true; // overspeed 알림을 식별
-      notificationColor = Colors.amberAccent; // overspeed-2 알림 색상
-      break;
     case 'overspeed-3':
-      imageAssetPath = 'asset/img/overspeed.png';
-      title = message.data['title'] ?? 'Overspeed Stage 3';
-      body = message.data['body'] ?? 'Extreme overspeed detected!';
-      isOverspeed = true; // overspeed 알림을 식별
-      notificationColor = Colors.redAccent; // overspeed-3 알림 색상
+      isOverspeed = true;
       break;
     case 'created':
       title = message.data['title'] ?? '알림';
@@ -123,38 +107,39 @@ Future<void> _handleNotification(RemoteMessage message) async {
   }
 
   // overspeed 알림일 때만 이미지 로드 및 BigPictureStyle 설정
-  if (isOverspeed && imageAssetPath != null) {
-    final byteData = await rootBundle.load(imageAssetPath);
-    final directory = await getTemporaryDirectory();
-    final filePath = '${directory.path}/${imageAssetPath.split('/').last}';
-    final file = File(filePath);
-    await file.writeAsBytes(byteData.buffer
-        .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+  // if (isOverspeed && imageAssetPath != null) {
+  //   final byteData = await rootBundle.load(imageAssetPath);
+  //   final directory = await getTemporaryDirectory();
+  //   final filePath = '${directory.path}/${imageAssetPath.split('/').last}';
+  //   final file = File(filePath);
+  //   await file.writeAsBytes(byteData.buffer
+  //       .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
 
-    final BigPictureStyleInformation bigPictureStyleInformation =
-    BigPictureStyleInformation(FilePathAndroidBitmap(filePath),
-        largeIcon:
-        const DrawableResourceAndroidBitmap('mipmap/ic_launcher'),
-        contentTitle: title,
-        summaryText: body,
-        htmlFormatContent: true,
-        htmlFormatContentTitle: true,
-        hideExpandedLargeIcon: true);
+  //   final BigPictureStyleInformation bigPictureStyleInformation =
+  //       BigPictureStyleInformation(FilePathAndroidBitmap(filePath),
+  //           largeIcon:
+  //               const DrawableResourceAndroidBitmap('mipmap/ic_launcher'),
+  //           contentTitle: title,
+  //           summaryText: body,
+  //           htmlFormatContent: true,
+  //           htmlFormatContentTitle: true,
+  //           hideExpandedLargeIcon: true);
 
-    // overspeed 알림일 때만 fullScreenIntent를 true로 설정
-    androidDetails = AndroidNotificationDetails(
-      'high_importance_channel',
-      'High Importance Notifications',
-      channelDescription: 'This channel is used for important notifications.',
-      styleInformation: bigPictureStyleInformation,
-      importance: Importance.max,
-      priority: Priority.high,
-      fullScreenIntent: true,
-      icon: 'mipmap/ic_launcher',
-      color: notificationColor,
-      colorized: true,
-    );
-  } else {
+  //   // overspeed 알림일 때만 fullScreenIntent를 true로 설정
+  //   androidDetails = AndroidNotificationDetails(
+  //     'high_importance_channel',
+  //     'High Importance Notifications',
+  //     channelDescription: 'This channel is used for important notifications.',
+  //     styleInformation: bigPictureStyleInformation,
+  //     importance: Importance.max,
+  //     priority: Priority.high,
+  //     fullScreenIntent: true,
+  //     icon: 'mipmap/ic_launcher',
+  //     color: notificationColor,
+  //     colorized: true,
+  //   );
+  // }
+  if (!isOverspeed) {
     // overspeed 이외의 알림일 때 fullScreenIntent를 false로 설정
     androidDetails = const AndroidNotificationDetails(
       'high_importance_channel',
@@ -165,18 +150,29 @@ Future<void> _handleNotification(RemoteMessage message) async {
       fullScreenIntent: false,
       icon: 'mipmap/ic_launcher',
     );
+
+    platformChannelSpecifics = NotificationDetails(android: androidDetails);
+
+    // 알림을 표시
+    await flutterLocalNotificationsPlugin.show(
+      message.hashCode,
+      title,
+      body,
+      platformChannelSpecifics,
+      payload: content,
+    );
   }
 
-  platformChannelSpecifics = NotificationDetails(android: androidDetails);
-
-  // 알림을 표시
-  await flutterLocalNotificationsPlugin.show(
-    message.hashCode,
-    title,
-    body,
-    platformChannelSpecifics,
-    payload: content,
-  );
+  // 알림을 클릭하지 않아도 특정 화면으로 이동
+  if (navigatorKey.currentState != null) {
+    if (content == 'overspeed-1') {
+      GoRouter.of(navigatorKey.currentContext!).push('/overspeed1');
+    } else if (content == 'overspeed-2') {
+      GoRouter.of(navigatorKey.currentContext!).push('/overspeed2');
+    } else if (content == 'overspeed-3') {
+      GoRouter.of(navigatorKey.currentContext!).push('/overspeed3');
+    }
+  }
 }
 
 // 디바이스 ID를 가져오고 이를 서버로 전송하는 함수
@@ -203,9 +199,9 @@ Future<void> main() async {
 
   // 알림 초기화 설정
   const AndroidInitializationSettings initializationSettingsAndroid =
-  AndroidInitializationSettings('mipmap/ic_launcher');
+      AndroidInitializationSettings('mipmap/ic_launcher');
   const InitializationSettings initializationSettings =
-  InitializationSettings(android: initializationSettingsAndroid);
+      InitializationSettings(android: initializationSettingsAndroid);
 
   // 알림 초기화 및 대응 함수 설정
   await flutterLocalNotificationsPlugin.initialize(
@@ -216,7 +212,7 @@ Future<void> main() async {
   // high_importance_channel 생성
   await flutterLocalNotificationsPlugin
       .resolvePlatformSpecificImplementation<
-      AndroidFlutterLocalNotificationsPlugin>()
+          AndroidFlutterLocalNotificationsPlugin>()
       ?.createNotificationChannel(highImportanceChannel);
 
   // 알림 권한 요청
@@ -254,12 +250,14 @@ Future<void> requestLocationPermission() async {
   }
 }
 
-void startLocationService(BuildContext context, LocationService locationService, RabbitMQService rabbitMQService) async {
+void startLocationService(BuildContext context, LocationService locationService,
+    RabbitMQService rabbitMQService) async {
   var userProvider = Provider.of<UserProvider>(context, listen: false);
   if (userProvider.userId != 0) {
     var timeSetService = TimeSetService();
     try {
-      List<TimeSet> timeSets = await timeSetService.fetchTimeSets(userProvider.userId.toString());
+      List<TimeSet> timeSets =
+          await timeSetService.fetchTimeSets(userProvider.userId.toString());
       DateTime now = DateTime.now();
       String currentDay = DateFormat('EEEE', 'ko_KR').format(now).toLowerCase();
       String currentTime = DateFormat('HH:mm').format(now);
@@ -272,7 +270,8 @@ void startLocationService(BuildContext context, LocationService locationService,
       debugPrint('Current time: $currentTime');
 
       for (var timeSet in timeSets) {
-        debugPrint('Checking TimeSet: ${timeSet.startTime} - ${timeSet.endTime} on days: ${timeSet.day}');
+        debugPrint(
+            'Checking TimeSet: ${timeSet.startTime} - ${timeSet.endTime} on days: ${timeSet.day}');
         debugPrint('Day bit: ${timeSet.day[dayIndex]}');
         if (timeSet.day[dayIndex] == '1' &&
             timeSet.startTime.compareTo(currentTime) <= 0 &&
@@ -288,7 +287,8 @@ void startLocationService(BuildContext context, LocationService locationService,
       }
 
       // 위치 스트림 리스너 설정
-      var locationSubscription = locationService.getLocationStream().listen((position) {
+      var locationSubscription =
+          locationService.getLocationStream().listen((position) {
         if (rabbitMQService.isInitialized) {
           // debugPrint('Sending location: (${position.latitude}, ${position.longitude}) with destinationId: $destinationId');
           rabbitMQService.sendLocation(position.latitude, position.longitude, userProvider.userId, destinationId);
@@ -296,7 +296,6 @@ void startLocationService(BuildContext context, LocationService locationService,
           debugPrint('RabbitMQ not initialized. Location not sent.');
         }
       });
-
     } catch (e) {
       print("TimeSet data fetch failed: $e");
     }
@@ -332,18 +331,19 @@ void handleNotificationResponse(NotificationResponse response) async {
     debugPrint('Notification action received: ${response.payload}');
     switch (response.payload) {
       case 'overspeed-1':
+        GoRouter.of(navigatorKey.currentContext!).push('/overspeed1');
+        break;
       case 'overspeed-2':
+        GoRouter.of(navigatorKey.currentContext!).push('/overspeed2');
+        break;
       case 'overspeed-3':
-      // Handle overspeed notification
+        GoRouter.of(navigatorKey.currentContext!).push('/overspeed3');
         break;
       case 'created':
-      // runApp(MyApp(initialRoute: '/c_home'));
         break;
       case 'arrival':
-      // runApp(MyApp(initialRoute: '/noti'));
         break;
       case 'goal':
-      // runApp(MyApp(initialRoute: '/goal'));
         break;
     }
   }
@@ -376,8 +376,8 @@ class _MyAppState extends State<MyApp> {
       _isSplashScreenVisible = false; // 상태를 업데이트하여 스플래시 화면을 숨김
     });
   }
-  bool _isSplashScreenVisible = true;
 
+  bool _isSplashScreenVisible = true;
 
   // 초기 서비스 설정
   Future<void> initServices() async {
@@ -405,11 +405,9 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
-    return
-      FutureBuilder<void>(
+    return FutureBuilder<void>(
       future: _autoLoginFuture,
       builder: (context, snapshot) {
         if (_isSplashScreenVisible) {
@@ -430,8 +428,7 @@ class _MyAppState extends State<MyApp> {
           );
         } else {
           // 자동 로그인 성공 여부에 따라 GoRouter 사용
-          return
-            MaterialApp.router(
+          return MaterialApp.router(
             routerConfig: router,
             debugShowCheckedModeBanner: false,
           );

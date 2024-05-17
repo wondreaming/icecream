@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icecream/auth/service/user_service.dart';
 import 'package:icecream/com/widget/default_layout.dart';
@@ -33,42 +34,42 @@ class _ForkPageState extends State<ForkPage> {
 
   @override
   Widget build(BuildContext context) {
-          return DefaultLayout(
-            title: '',
-            child: Center(
-              child: Column(
-                children: [
-                  CustomElevatedButton(
-                      onPressed: () {
-                        context.goNamed('signup');
-                      },
-                      child: '부모'),
-                  SizedBox(
-                    height: 10.0,
-                  ),
-                  CustomElevatedButton(
-                      onPressed: () {
-                        context.goNamed('c_qrcode');
-                      },
-                      child: '자녀'),
-                  SizedBox(
-                    height: 10.0,
-                  ),
-                  Text('로그인할꺼야?'),
-                  SizedBox(
-                    height: 10.0,
-                  ),
-                  CustomElevatedButton(
-                      onPressed: () {
-                        context.goNamed('p_login');
-                      },
-                      child: '로그인 버튼'),
-                ],
-              ),
+    return DefaultLayout(
+      title: '',
+      child: Center(
+        child: Column(
+          children: [
+            CustomElevatedButton(
+                onPressed: () {
+                  context.goNamed('signup');
+                },
+                child: '부모'),
+            SizedBox(
+              height: 10.0,
             ),
-          );
-        }
-      }
+            CustomElevatedButton(
+                onPressed: () {
+                  context.goNamed('c_qrcode');
+                },
+                child: '자녀'),
+            SizedBox(
+              height: 10.0,
+            ),
+            Text('로그인할꺼야?'),
+            SizedBox(
+              height: 10.0,
+            ),
+            CustomElevatedButton(
+                onPressed: () {
+                  context.goNamed('p_login');
+                },
+                child: '로그인 버튼'),
+          ],
+        ),
+      ),
+    );
+  }
+}
 //     );
 //   }
 // }
