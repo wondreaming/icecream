@@ -4,6 +4,9 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:kakao_map_plugin/kakao_map_plugin.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:icecream/main/widget/childrenList.dart';
+import 'package:icecream/main/service/child_gps.dart';
+import 'package:icecream/main/models/child_marker_model.dart';
+import 'package:intl/intl.dart';
 
 class StartFloatFabLocation extends FloatingActionButtonLocation {
   const StartFloatFabLocation();
@@ -27,14 +30,22 @@ class _PMainState extends State<PMain> {
   KakaoMapController? _mapController;
   Position? _initialPosition;
   Set<Marker> markers = {};
-
+  Map<String, ChildMarkerData> markerData = {};
   bool _isExpanded = false;
+
 
   @override
   void initState() {
     super.initState();
     _initKakaoMapFuture = initKakaoMap();
   }
+
+  void _setExpandedState(bool isExpanded) {
+    setState(() {
+      _isExpanded = isExpanded;
+    });
+  }
+
 
   Future<void> initKakaoMap() async {
     await dotenv.load();
@@ -44,11 +55,21 @@ class _PMainState extends State<PMain> {
         desiredAccuracy: LocationAccuracy.high);
   }
 
+  DateTime parseServerTimestamp(String timestamp) {
+    DateFormat format = DateFormat("EEE MMM dd HH:mm:ss 'KST' yyyy", 'en_US');
+    try {
+      return format.parse(timestamp);
+    } catch (e) {
+      print("Timestamp parsing error: $e");
+      return DateTime.now(); // 파싱 실패 시 현재 시간 반환
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultLayout(
       automaticallyImplyLeading: false,
-      title: '보호자 메인',
+      title: '아이스크림',
       padding: EdgeInsets.zero,
       child: Scaffold(
         body: Column(
@@ -68,6 +89,7 @@ class _PMainState extends State<PMain> {
                     return KakaoMap(
                       onMapCreated: _onMapCreated,
                       markers: markers.toList(),
+                      onMarkerTap: _onMarkerTap,
                     );
                   } else {
                     return const Center(child: CircularProgressIndicator());
@@ -114,7 +136,7 @@ class _PMainState extends State<PMain> {
               title: Text('자녀 목록', style: TextStyle(fontSize: 16)),
             );
           },
-          body: const ChildList(),
+          body: ChildList(onChildTap: _onChildTap),
           isExpanded: _isExpanded,
         ),
       ],
@@ -146,4 +168,84 @@ class _PMainState extends State<PMain> {
       markers.add(marker);
     });
   }
+
+  void _onChildTap(int childId, String childName, String? profileImage) async {
+    // 패널을 자동으로 닫기
+    _setExpandedState(false);
+
+    final childGPSService = ChildGPSService();
+    final gpsData = await childGPSService.fetchChildGPS(childId);
+
+    if (gpsData != null) {
+      final latitude = gpsData['latitude'];
+      final longitude = gpsData['longitude'];
+      final timestamp = parseServerTimestamp(gpsData['timestamp']); // 서버로부터 받은 타임스탬프 파싱
+
+      final position = Position(
+        latitude: latitude,
+        longitude: longitude,
+        timestamp: timestamp,
+        accuracy: 1,
+        altitude: 0,
+        heading: 0,
+        speed: 0,
+        speedAccuracy: 1,
+        altitudeAccuracy: 1,
+        headingAccuracy: 1,
+      );
+
+      _mapController?.panTo(LatLng(position.latitude, position.longitude));
+      _addMarkerWithChildInfo(position, childName, profileImage, timestamp);
+    }
+  }
+
+  void _addMarkerWithChildInfo(Position position, String childName, String? profileImage, DateTime timestamp) {
+    final markerId = UniqueKey().toString();
+    final marker = Marker(
+      markerId: markerId,
+      latLng: LatLng(position.latitude, position.longitude),
+
+    );
+
+    // 자녀 정보와 마커 ID 연결
+    markerData[markerId] = ChildMarkerData(name: childName, profileImage: profileImage, timestamp: timestamp);
+
+    setState(() {
+      markers.add(marker);
+    });
+  }
+
+  void _onMarkerTap(String markerId, LatLng position, int zoomLevel) {
+    final data = markerData[markerId];
+    if (data != null) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(data.name, style: TextStyle(fontFamily: 'GmarketSans')), // 자녀 이름 표시
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (data.profileImage != null)
+                  SizedBox(
+                    width: 200, // 이미지 너비 고정
+                    height: 200, // 이미지 높이 고정
+                    child: Image.network(data.profileImage ?? '', fit: BoxFit.cover),
+                  )
+                else
+                  SizedBox(
+                    width: 250, // 이미지 너비 고정
+                    height: 250, // 이미지 높이 고정
+                    child: Image.asset('asset/img/picture.JPEG', fit: BoxFit.cover), // null 체크 추가
+                  ),
+                SizedBox(height: 10),
+                Text('마지막 시간: ${DateFormat('MM월 dd일 HH시 mm분').format(data.timestamp)}', style: TextStyle(fontSize: 14, fontFamily: 'GmarketSans')), // 타임스탬프 형식으로 표시
+              ],
+            ),
+          );
+        },
+      );
+    }
+  }
+
 }

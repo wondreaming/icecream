@@ -4,7 +4,6 @@ import 'package:icecream/com/const/dio_interceptor.dart';
 class GoalService {
   final Dio _dio = CustomDio().createDio();
 
-  // 자녀 ID를 사용하여 목표 데이터 가져오기
   Future<Map<String, dynamic>> fetchGoals(String userId) async {
     try {
       final response =
