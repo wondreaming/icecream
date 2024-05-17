@@ -80,4 +80,5 @@ dependencies {
     implementation 'com.rabbitmq:amqp-client:5.9.0'
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'
+    implementation 'com.google.firebase:firebase-messaging:23.0.0'
 }
