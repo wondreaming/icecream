@@ -64,30 +64,6 @@ class _ForkPageState extends State<ForkPage> {
                   context.goNamed('p_login');
                 },
                 child: '로그인 버튼'),
-            SizedBox(
-              height: 10.0,
-            ),
-            CustomElevatedButton(
-                onPressed: () {
-                  context.goNamed('overspeed1');
-                },
-                child: 'overspeed1'),
-            SizedBox(
-              height: 10.0,
-            ),
-            CustomElevatedButton(
-                onPressed: () {
-                  context.goNamed('overspeed2');
-                },
-                child: 'overspeed2'),
-            SizedBox(
-              height: 10.0,
-            ),
-            CustomElevatedButton(
-                onPressed: () {
-                  context.goNamed('overspeed3');
-                },
-                child: 'overspeed3'),
           ],
         ),
       ),
