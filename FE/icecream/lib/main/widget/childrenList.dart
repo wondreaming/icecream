@@ -3,8 +3,11 @@ import 'package:provider/provider.dart';
 import 'package:icecream/provider/user_provider.dart';
 import 'package:go_router/go_router.dart';
 
+// ChildList 위젯 정의 내부
 class ChildList extends StatelessWidget {
-  const ChildList({super.key});
+  final Function(int childId, String childName, String? profileImage) onChildTap;
+
+  const ChildList({super.key, required this.onChildTap});
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +42,6 @@ class ChildList extends StatelessWidget {
                   IconButton(
                     icon: const Icon(Icons.add, size: 24, color: Colors.black),
                     onPressed: () {
-                      // GoRouter를 사용하여 QRScanPage로 이동합니다.
                       context.goNamed('qrscan_page');
                     },
                   ),
@@ -48,28 +50,30 @@ class ChildList extends StatelessWidget {
             );
           } else {
             var child = children[index];
-            // 자녀 프로필 이미지가 null인 경우 기본 이미지 사용
             ImageProvider childImage = child.profileImage != null && child.profileImage!.isNotEmpty
                 ? AssetImage(child.profileImage!)
-                : const AssetImage('asset/img/picture.JPEG'); // 기본 이미지 경로를 확인하세요.
+                : const AssetImage('asset/img/picture.JPEG');
 
-            return SizedBox(
-              width: 80,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const SizedBox(height: 7),
-                  CircleAvatar(
-                    radius: 25,
-                    backgroundImage: childImage,
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    child.username,
-                    style: const TextStyle(fontSize: 12),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+            return InkWell(
+              onTap: () => onChildTap(child.userId, child.username, child.profileImage), // DateTime.now()는 예시입니다.
+              child: SizedBox(
+                width: 80,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(height: 7),
+                    CircleAvatar(
+                      radius: 25,
+                      backgroundImage: childImage,
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      child.username,
+                      style: const TextStyle(fontSize: 12),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
             );
           }
