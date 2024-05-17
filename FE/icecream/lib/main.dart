@@ -290,7 +290,7 @@ void startLocationService(BuildContext context, LocationService locationService,
       // 위치 스트림 리스너 설정
       var locationSubscription = locationService.getLocationStream().listen((position) {
         if (rabbitMQService.isInitialized) {
-          debugPrint('Sending location: (${position.latitude}, ${position.longitude}) with destinationId: $destinationId');
+          // debugPrint('Sending location: (${position.latitude}, ${position.longitude}) with destinationId: $destinationId');
           rabbitMQService.sendLocation(position.latitude, position.longitude, userProvider.userId, destinationId);
         } else {
           debugPrint('RabbitMQ not initialized. Location not sent.');
