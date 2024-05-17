@@ -51,11 +51,11 @@ class RabbitMQService {
         'timestamp': DateTime.now().toIso8601String()
       };
       // 메시지를 RabbitMQ로 전송하기 전에 로그를 찍습니다.
-      print('Sending location to RabbitMQ:');
-      print('Latitude: $latitude');
-      print('Longitude: $longitude');
-      print('User ID: $userId');
-      print('Destination ID: $destinationId');
+      // print('Sending location to RabbitMQ:');
+      // print('Latitude: $latitude');
+      // print('Longitude: $longitude');
+      // print('User ID: $userId');
+      // print('Destination ID: $destinationId');
 
       _exchange!.publish(jsonEncode(locationData), "Busan.ocean");
     } catch (e) {

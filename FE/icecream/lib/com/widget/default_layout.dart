@@ -27,8 +27,12 @@ class DefaultLayout extends StatelessWidget {
       backgroundColor: AppColors.background_color,
       appBar: AppBar(
         automaticallyImplyLeading: automaticallyImplyLeading!,
-        title: Text(title),
+        scrolledUnderElevation: 0,
+        title: Text(title, style: TextStyle(fontSize : 32, fontWeight:FontWeight.w500, fontFamily:'GmarketSans',),),
         actions: action,
+        centerTitle: false,  // 제목을 왼쪽으로 정렬
+        toolbarHeight: 80.0, // 앱바의 높이를 조정
+        titleSpacing: 20.0,  // 제목의 시작 부분에 공간
       ),
       body: Padding(
         // 패딩값 사용
