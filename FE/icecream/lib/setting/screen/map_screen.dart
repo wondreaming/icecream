@@ -98,6 +98,7 @@ class _MapScreenState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
     return DefaultLayout(
+      isSetting: true,
       isMap: true,
       title: '지도에서 위치 확인',
       child: Stack(

@@ -53,7 +53,7 @@ class UserProvider extends ChangeNotifier {
   int get userId => _userId; // userId getter 추가
 
 
-  // profileImage에 대한 setter 추가
+  // 부모 profileImage에 대한 setter 추가
   set setProfileImage(String newImage) {
     if (_profileImage != newImage) {
       _profileImage = newImage;

@@ -9,6 +9,7 @@ class DefaultLayout extends StatelessWidget {
   final bool isMap;
   final Widget? floatingActionButton;
   final bool? automaticallyImplyLeading;
+  final bool isSetting;
   const DefaultLayout({
     super.key,
     required this.child,
@@ -18,6 +19,7 @@ class DefaultLayout extends StatelessWidget {
     this.isMap = false,
     this.floatingActionButton,
     this.automaticallyImplyLeading = true,
+    this.isSetting = false,
   });
 
   @override
@@ -26,13 +28,21 @@ class DefaultLayout extends StatelessWidget {
       resizeToAvoidBottomInset: false, // 키보드 올라왔을 때, 영역 보존
       backgroundColor: AppColors.background_color,
       appBar: AppBar(
+        // centerTitle: true,
         automaticallyImplyLeading: automaticallyImplyLeading!,
         scrolledUnderElevation: 0,
-        title: Text(title, style: TextStyle(fontSize : 32, fontWeight:FontWeight.w500, fontFamily:'GmarketSans',),),
+        title: Text(
+          title,
+          style: TextStyle(
+            fontSize: 30,
+            fontWeight: FontWeight.w500,
+            fontFamily: 'GmarketSans',
+          ),
+        ),
         actions: action,
-        centerTitle: false,  // 제목을 왼쪽으로 정렬
+        centerTitle: false, // 제목을 왼쪽으로 정렬
         toolbarHeight: 80.0, // 앱바의 높이를 조정
-        titleSpacing: 20.0,  // 제목의 시작 부분에 공간
+        titleSpacing: isSetting? 3.0 : 28.0, // 제목의 시작 부분에 공간
       ),
       body: Padding(
         // 패딩값 사용

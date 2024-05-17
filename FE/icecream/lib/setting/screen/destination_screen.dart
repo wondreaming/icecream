@@ -290,6 +290,7 @@ class _DestinationScreenState extends State<DestinationScreen> {
   @override
   Widget build(BuildContext context) {
     return DefaultLayout(
+      isSetting: true,
       title: '안심 보행 설정',
       child: Container(
         height: MediaQuery.of(context).size.height,

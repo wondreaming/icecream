@@ -28,6 +28,7 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return DefaultLayout(
+      isSetting: true,
       title: '주소 검색',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

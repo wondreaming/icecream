@@ -23,13 +23,14 @@ class ProfileImage extends StatefulWidget {
   final double height;
   final String? imgUrl;
   final bool detail;
+  final bool isParent;
   const ProfileImage(
       {super.key,
       required this.width,
       required this.height,
       this.imgUrl,
       this.detail = false,
-      required this.user_id});
+      required this.user_id, required this.isParent});
 
   @override
   State<ProfileImage> createState() => _ProfileImageState();
@@ -74,8 +75,14 @@ class _ProfileImageState extends State<ProfileImage> {
     response = await postImgUrl();
     try {
       if (response.status == 200 && response.data != null) {
+        if (widget.isParent) {
         Provider.of<UserProvider>(context, listen: false).setProfileImage =
-            response.data!;
+            response.data!; } else {
+        // 자녀 프로필 이미지 업데이트
+        Provider.of<UserProvider>(context, listen: false).updateChildProfileImage(
+          widget.user_id,
+          response.data!,
+        );}
         final String message = response.message!;
         showCustomDialog(context, message, isNo: false, onPressed: () {
           context.pop();
