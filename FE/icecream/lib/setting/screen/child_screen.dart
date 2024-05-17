@@ -15,6 +15,7 @@ class ChildScreen extends StatelessWidget {
     final List<Child> children = userProvider.children;
 
     return DefaultLayout(
+      isSetting: true,
       title: '자녀 관리',
       child: Container(
         padding: const EdgeInsets.symmetric(
@@ -37,6 +38,7 @@ class ChildScreen extends StatelessWidget {
                           },
                         );
                       },
+                      isParent: false,
                       user_id: child.userId,
                       name: child.username,
                       number: child.phoneNumber,

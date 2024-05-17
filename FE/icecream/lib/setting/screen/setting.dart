@@ -26,6 +26,7 @@ class Setting extends StatelessWidget {
             Consumer<UserProvider>(
               builder: (context, userProvider, child) {
                 return Profile(
+                  isParent: true,
                   user_id: userProvider.userId,
                   imgUrl: userProvider.profileImage,
                   number: userProvider.phoneNumber,

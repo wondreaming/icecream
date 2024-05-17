@@ -22,6 +22,7 @@ class DetailProfile extends StatelessWidget {
     return Column(
       children: [
         ProfileImage(
+          isParent: is_parents,
           user_id: user_id,
           imgUrl: imgUrl,
           width: 200,
