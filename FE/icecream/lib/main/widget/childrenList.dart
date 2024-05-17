@@ -42,7 +42,8 @@ class ChildList extends StatelessWidget {
                   IconButton(
                     icon: const Icon(Icons.add, size: 24, color: Colors.black),
                     onPressed: () {
-                      context.goNamed('qrscan_page');
+                      // GoRouter를 사용하여 QRScanPage로 이동합니다.
+                      context.pushNamed('qrscan_page');
                     },
                   ),
                 ],
