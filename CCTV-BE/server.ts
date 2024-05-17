@@ -91,6 +91,10 @@ io.on("connect", socket => {
       io.to(roomName).emit("getCCTVImage", data);
     });
 
+    socket.on("sendCCTVImage2", data => {
+      io.to(roomName).emit("getCCTVImage2", data);
+    });
+
     // 방 퇴장
     socket.on("disconnect", data => {
       roomCapacity[roomName]--;
