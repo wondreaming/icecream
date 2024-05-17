@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:icecream/goal/model/goal_model.dart';
+import 'package:icecream/child/service/daily_goal_service.dart';
+import 'package:dio/dio.dart';
+import 'package:icecream/com/const/dio_interceptor.dart';
 
 class ChildDailyGoal extends StatelessWidget {
-  final DailyGoal dailyGoal;
+  final int userId;
 
-  const ChildDailyGoal({super.key, required this.dailyGoal});
+  const ChildDailyGoal({Key? key, required this.userId}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +24,7 @@ class ChildDailyGoal extends StatelessWidget {
             ),
           ),
           Positioned.fill(
-            child: ChildDailyGoalWidget(dailyGoal: dailyGoal),
+            child: ChildDailyGoalWidget(userId: userId),
           ),
         ],
       ),
@@ -30,9 +33,9 @@ class ChildDailyGoal extends StatelessWidget {
 }
 
 class ChildDailyGoalWidget extends StatefulWidget {
-  final DailyGoal dailyGoal;
+  final int userId;
 
-  const ChildDailyGoalWidget({super.key, required this.dailyGoal});
+  const ChildDailyGoalWidget({Key? key, required this.userId}) : super(key: key);
 
   @override
   _ChildDailyGoalWidgetState createState() => _ChildDailyGoalWidgetState();
@@ -47,29 +50,30 @@ class _ChildDailyGoalWidgetState extends State<ChildDailyGoalWidget> {
   @override
   void initState() {
     super.initState();
-    _today = DateTime.now();
+    _today = DateTime.now().toLocal(); // 한국 시간대로 변환
     _currentMonth = DateTime(_today.year, _today.month);
     _populateDates(_currentMonth);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(Duration(milliseconds: 500), _scrollToTodayDate); // 지연 호출
+    });
     _scrollController.addListener(_scrollListener);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToCurrentDate());
   }
 
   void _scrollListener() {
-    if (_scrollController.position.atEdge) {
-      if (_scrollController.position.pixels == 0) {
-        DateTime newMonth =
-            DateTime(_currentMonth.year, _currentMonth.month - 1);
-        _populateDates(newMonth, append: false);
-        // Adjust scroll to the end of the newly loaded previous month after setState
-        Future.delayed(Duration.zero, () {
-          _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-        });
-      } else if (_scrollController.position.pixels ==
-          _scrollController.position.maxScrollExtent) {
-        DateTime newMonth =
-            DateTime(_currentMonth.year, _currentMonth.month + 1);
-        _populateDates(newMonth, append: true);
-      }
+    // 이 함수가 필요하지 않다면 삭제할 수 있습니다.
+  }
+
+  void _scrollToTodayDate() {
+    if (!mounted) return; // 상태가 마운트된 상태에서만 동작
+
+    DateTime todayDate = DateTime(_today.year, _today.month, _today.day);
+    int index = _visibleDates.indexWhere((date) => date.isAtSameMomentAs(todayDate));
+    if (index != -1) {
+      double position = index * 106.7;
+      double screenHeight = MediaQuery.of(context).size.height;
+      double maxHeight = screenHeight * 0.1;
+      position -= maxHeight / 2; // Center the date more accurately
+      _scrollController.animateTo(position > 0 ? position : 0, duration: Duration(milliseconds: 500), curve: Curves.easeInOut);
     }
   }
 
@@ -78,8 +82,8 @@ class _ChildDailyGoalWidgetState extends State<ChildDailyGoalWidget> {
     DateTime startDate = DateTime(month.year, month.month, 1);
     DateTime endDate = DateTime(month.year, month.month + 1, 0);
     for (DateTime date = startDate;
-        date.isBefore(endDate.add(const Duration(days: 1)));
-        date = date.add(const Duration(days: 1))) {
+    date.isBefore(endDate.add(const Duration(days: 1)));
+    date = date.add(const Duration(days: 1))) {
       newDates.add(date);
     }
 
@@ -90,71 +94,97 @@ class _ChildDailyGoalWidgetState extends State<ChildDailyGoalWidget> {
         _visibleDates.insertAll(0, newDates);
         _currentMonth = month; // Update the current month
       }
+      _today = DateTime.now().toLocal(); // 한국 시간대로 변환
     });
   }
 
-  void _scrollToCurrentDate() {
-    int index = _visibleDates.indexOf(_today);
-    if (index != -1) {
-      double position = index * 60.0; // assuming each item height as 60.0
-      position -= MediaQuery.of(context).size.height / 2; // Center the date
-      _scrollController.jumpTo(position > 0 ? position : 0);
+  Map<String, int?> extendDateRange(Map<DateTime, int> originalResults) {
+    Map<String, int?> extendedResults = {};
+    for (DateTime date in _visibleDates) {
+      String key = DateFormat('yyyy-MM-dd').format(date);
+      extendedResults[key] = originalResults[date];
     }
+    return extendedResults;
   }
 
   @override
   Widget build(BuildContext context) {
-    Map<String, bool?> fullResult = extendDateRange(widget.dailyGoal.result);
+    final CustomDio customDio = CustomDio();
+    final DailyGoalService _dailyGoalService = DailyGoalService(customDio.createDio());
 
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () {
-                _changeMonth(isNext: false);
-              },
-            ),
-            Text(
-              DateFormat('MMMM yyyy').format(_currentMonth),
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            IconButton(
-              icon: const Icon(Icons.arrow_forward),
-              onPressed: () {
-                _changeMonth(isNext: true);
-              },
-            ),
-          ],
-        ),
-        Expanded(
-          child: ListView.builder(
-            controller: _scrollController,
-            itemCount: _visibleDates.length,
-            itemBuilder: (context, index) {
-              DateTime date = _visibleDates[index];
-              String dateStr = DateFormat('yyyy-MM-dd').format(date);
-              bool? isSuccess = fullResult[dateStr];
+    return FutureBuilder<Map<DateTime, int>>(
+      future: _dailyGoalService.fetchGoalStatus(widget.userId),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else if (!snapshot.hasData) {
+          return const Center(child: Text('No data'));
+        } else {
+          final goalData = snapshot.data!;
+          Map<String, int?> fullResult = extendDateRange(goalData);
 
-              return DailyDateCircle(
-                date: date,
-                isSuccess: isSuccess,
-                isToday: date.isAtSameMomentAs(DateTime.now()),
-              );
-            },
-          ),
-        ),
-      ],
+          double maxHeight = MediaQuery.of(context).size.height * 0.55;
+
+          return Container(
+            height: maxHeight,
+            child: Stack(
+              children: [
+                ListView.builder(
+                  padding: EdgeInsets.only(bottom: 25.0),
+                  controller: _scrollController,
+                  itemCount: _visibleDates.length,
+                  itemBuilder: (context, index) {
+                    DateTime date = _visibleDates[index];
+                    String dateStr = DateFormat('yyyy-MM-dd').format(date);
+                    int? status = fullResult[dateStr];
+
+                    return DailyDateCircle(
+                      date: date,
+                      status: status,
+                      isToday: date.isAtSameMomentAs(DateTime.now().toLocal()),
+                    );
+                  },
+                ),
+                Positioned(
+                  left: 10,
+                  top: maxHeight / 2 - 24,
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () {
+                      _changeMonth(isNext: false);
+                    },
+                  ),
+                ),
+                Positioned(
+                  right: 10,
+                  top: maxHeight / 2 - 24,
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_forward),
+                    onPressed: () {
+                      _changeMonth(isNext: true);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+      },
     );
   }
 
   void _changeMonth({required bool isNext}) {
-    DateTime newMonth = isNext
-        ? DateTime(_currentMonth.year, _currentMonth.month + 1)
-        : DateTime(_currentMonth.year, _currentMonth.month - 1);
-    _populateDates(newMonth);
+    setState(() {
+      if (isNext) {
+        _currentMonth = DateTime(_currentMonth.year, _currentMonth.month + 1);
+      } else {
+        _currentMonth = DateTime(_currentMonth.year, _currentMonth.month - 1);
+      }
+      _visibleDates.clear();
+      _populateDates(_currentMonth);
+    });
   }
 
   @override
@@ -162,55 +192,84 @@ class _ChildDailyGoalWidgetState extends State<ChildDailyGoalWidget> {
     _scrollController.dispose();
     super.dispose();
   }
-
-  Map<String, bool?> extendDateRange(Map<String, bool> originalResults) {
-    Map<String, bool?> extendedResults = {};
-    for (DateTime date in _visibleDates) {
-      String key = DateFormat('yyyy-MM-dd').format(date);
-      extendedResults[key] = originalResults[key];
-    }
-    return extendedResults;
-  }
 }
 
 class DailyDateCircle extends StatelessWidget {
   final DateTime date;
-  final bool? isSuccess;
+  final int? status;
   final bool isToday;
 
   const DailyDateCircle({
-    super.key,
+    Key? key,
     required this.date,
-    this.isSuccess,
+    this.status,
     required this.isToday,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    bool successStatus = isSuccess ?? false;
+    Color backgroundColor;
+    Color textColor;
+    BoxDecoration boxDecoration;
+
+    switch (status) {
+      case 1:
+        backgroundColor = Colors.green;
+        textColor = Colors.white;
+        boxDecoration = BoxDecoration(
+          color: backgroundColor,
+          shape: BoxShape.circle,
+        );
+        break;
+      case 0:
+        backgroundColor = Colors.white;
+        textColor = Colors.grey;
+        boxDecoration = BoxDecoration(
+          color: backgroundColor,
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.green, width: 4.0), // 진하고 굵은 테두리
+        );
+        break;
+      case -1:
+        backgroundColor = Colors.red;
+        textColor = Colors.white;
+        boxDecoration = BoxDecoration(
+          color: backgroundColor,
+          shape: BoxShape.circle,
+        );
+        break;
+      default:
+        backgroundColor = Colors.white;
+        textColor = Colors.grey;
+        boxDecoration = BoxDecoration(
+          color: backgroundColor,
+          shape: BoxShape.circle,
+        );
+        break;
+    }
 
     return Center(
       child: CustomPaint(
         painter: CircleLinePainter(
           isToday: isToday,
-          isSuccess: successStatus,
-          isUndefined: isSuccess == null,
+          isSuccess: status == 1,
+          isUndefined: status == null,
           circleRadius: 45.0,
-          lineHeight: 48.0,
-          drawBottomLine: true,
+          lineHeight: 48.0, // 모든 요소 밑에 선 추가
         ),
         child: Padding(
           padding: const EdgeInsets.only(top: 24.0),
-          child: CircleAvatar(
-            radius: 45.0,
-            backgroundColor: isSuccess == null
-                ? Colors.white
-                : (successStatus ? Colors.green : Colors.red),
-            child: Text(
-              DateFormat('MM월 dd일').format(date),
-              style: TextStyle(
-                color: isSuccess == null ? Colors.grey : Colors.white,
-                fontWeight: FontWeight.bold,
+          child: Container(
+            decoration: boxDecoration,
+            child: CircleAvatar(
+              radius: 45.0,
+              backgroundColor: Colors.transparent,
+              child: Text(
+                DateFormat('MM월 dd일').format(date),
+                style: TextStyle(
+                  color: textColor,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
@@ -226,7 +285,6 @@ class CircleLinePainter extends CustomPainter {
   final bool isUndefined;
   final double circleRadius;
   final double lineHeight;
-  final bool drawBottomLine;
 
   CircleLinePainter({
     required this.isToday,
@@ -234,32 +292,40 @@ class CircleLinePainter extends CustomPainter {
     this.isUndefined = false,
     required this.circleRadius,
     required this.lineHeight,
-    this.drawBottomLine = false,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    // 이전 구문에서 올바르지 않았던 부분들을 수정했습니다.
     final paint = Paint()
-      ..color = Colors.grey
-      ..strokeWidth = 2.0; // strokeWidth를 올바르게 설정
+      ..strokeWidth = 2.0;
 
-    canvas.drawLine(Offset(size.width / 2, 0),
-        Offset(size.width / 2, lineHeight / 2), paint);
+    // 위쪽 수직선
+    paint.color = Colors.grey;
+    canvas.drawLine(
+      Offset(size.width / 2, 0),
+      Offset(size.width / 2, lineHeight / 2),
+      paint,
+    );
 
-    if (drawBottomLine) {
-      canvas.drawLine(Offset(size.width / 2, circleRadius * 2 + lineHeight / 2),
-          Offset(size.width / 2, size.height), paint);
-    }
+    // 아래쪽 수직선
+    paint.color = Colors.grey;
+    canvas.drawLine(
+      Offset(size.width / 2, size.height - lineHeight / 2),
+      Offset(size.width / 2, size.height * 2),
+      paint,
+    );
 
     if (isUndefined) {
       final outlinePaint = Paint()
         ..color = isToday ? Colors.black : Colors.grey
         ..strokeWidth = 2.0
-        ..style = PaintingStyle.stroke; // style을 올바르게 설정
+        ..style = PaintingStyle.stroke;
 
-      canvas.drawCircle(Offset(size.width / 2, lineHeight / 2 + circleRadius),
-          circleRadius, outlinePaint);
+      canvas.drawCircle(
+        Offset(size.width / 2, lineHeight / 2 + circleRadius),
+        circleRadius,
+        outlinePaint,
+      );
     }
   }
 
@@ -269,7 +335,6 @@ class CircleLinePainter extends CustomPainter {
         oldDelegate.isSuccess != isSuccess ||
         oldDelegate.isUndefined != isUndefined ||
         oldDelegate.circleRadius != circleRadius ||
-        oldDelegate.lineHeight != lineHeight ||
-        oldDelegate.drawBottomLine != drawBottomLine;
+        oldDelegate.lineHeight != lineHeight;
   }
 }

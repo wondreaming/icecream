@@ -4,13 +4,16 @@ import 'package:icecream/child/widget/reward_modal.dart';
 import 'package:icecream/child/widget/child_daily_goal.dart';
 import 'package:icecream/goal/model/goal_model.dart';
 import 'package:icecream/child/service/goal_service.dart';
+import 'package:icecream/child/service/daily_goal_service.dart';
 import 'package:icecream/provider/user_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:dio/dio.dart';
+import 'package:icecream/com/const/dio_interceptor.dart';
 
 class ChildReward extends StatelessWidget {
   ChildReward({super.key});
 
-  final GoalService _goalService = GoalService(); // 수정된 부분: 매개변수 없이 인스턴스 생성
+  final GoalService _goalService = GoalService(); // GoalService 인스턴스 생성
 
   void showHistoryModal(BuildContext context) {
     showDialog(
@@ -41,36 +44,17 @@ class ChildReward extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double maxHeight = MediaQuery.of(context).size.height * 0.55;
-    final dailyGoal = DailyGoal(
-      period: 7,
-      record: 5,
-      content: '예시 내용',
-      result: {
-        '2024-04-01': true,
-        '2024-04-02': false,
-        '2024-04-03': true,
-        '2024-04-04': true,
-        '2024-04-05': false,
-        '2024-04-06': true,
-        '2024-04-07': true,
-        '2024-04-08': false,
-        '2024-04-09': true,
-        '2024-04-10': true,
-        '2024-04-11': false,
-        '2024-04-12': true,
-      },
-    );
 
     return FutureBuilder<Map<String, dynamic>>(
       future: _goalService.fetchGoal(
           Provider.of<UserProvider>(context, listen: false).userId.toString()),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (!snapshot.hasData) {
-          return Center(child: Text('No data'));
+          return const Center(child: Text('등록된 목표가 없습니다!!!'));
         } else {
           final goalData = snapshot.data!;
           final currentStreak = goalData['record'];
@@ -99,7 +83,7 @@ class ChildReward extends StatelessWidget {
                 const Divider(thickness: 1, height: 1, color: Colors.grey),
                 SizedBox(
                     height: maxHeight,
-                    child: ChildDailyGoal(dailyGoal: dailyGoal)),
+                    child: ChildDailyGoal(userId: Provider.of<UserProvider>(context, listen: false).userId)), // userId 전달
                 const Divider(thickness: 1, height: 1, color: Colors.grey),
                 const SizedBox(height: 20),
                 Padding(
