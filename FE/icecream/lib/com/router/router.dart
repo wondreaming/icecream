@@ -5,6 +5,9 @@ import 'package:icecream/auth/screen/fork_page.dart';
 import 'package:icecream/auth/screen/p_login_page.dart';
 import 'package:icecream/auth/screen/p_signup.dart';
 import 'package:icecream/auth/screen/qrscan_page.dart';
+import 'package:icecream/child/screen/child_overspeed1.dart';
+import 'package:icecream/child/screen/child_overspeed2.dart';
+import 'package:icecream/child/screen/child_overspeed3.dart'; // 빨간색 버블
 import 'package:icecream/com/widget/temp.dart';
 import 'package:icecream/home/screen/c_home.dart';
 import 'package:icecream/home/screen/p_home.dart';
@@ -54,6 +57,21 @@ final router = GoRouter(
         return const ForkPage();
       },
       routes: [
+        GoRoute(
+          name: 'overspeed1',
+          path: 'overspeed1',
+          builder: (context, state) => const Overspeed1(),
+        ),
+        GoRoute(
+          name: 'overspeed2',
+          path: 'overspeed2',
+          builder: (context, state) => const Overspeed2(),
+        ),
+        GoRoute(
+          name: 'overspeed3',
+          path: 'overspeed3',
+          builder: (context, state) => const Overspeed3(),
+        ),
         GoRoute(
           name: 'signup',
           path: 'signup',
