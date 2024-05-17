@@ -60,7 +60,7 @@ class _UpdateRewardModalState extends State<UpdateRewardModal> {
                                 borderRadius: BorderRadius.circular(15)),
                           ),
                           hint: const Text('Days',
-                              style: TextStyle(fontSize: 14)),
+                              style: TextStyle(fontSize: 14, fontFamily: 'GmarketSans')),
                           value: selectedDays,
                           items: daysItems
                               .map((int item) => DropdownMenuItem<int>(
@@ -68,7 +68,7 @@ class _UpdateRewardModalState extends State<UpdateRewardModal> {
                             child: Center(
                                 child: Text('$item',
                                     style:
-                                    const TextStyle(fontSize: 14))),
+                                    const TextStyle(fontFamily: 'GmarketSans', fontSize: 12))),
                           ))
                               .toList(),
                           onChanged: (int? value) {
@@ -93,14 +93,14 @@ class _UpdateRewardModalState extends State<UpdateRewardModal> {
                             return daysItems.map((int item) {
                               return Center(
                                   child: Text('$item',
-                                      style: const TextStyle(fontSize: 14)));
+                                      style: const TextStyle(fontFamily: 'GmarketSans', fontSize: 14)));
                             }).toList();
                           },
                         ),
                       ),
                     )),
                 const SizedBox(width: 10),
-                const Text('일 달성 시', style: TextStyle(fontSize: 22)),
+                const Text('일 달성 시', style: TextStyle(fontFamily: 'GmarketSans', fontSize: 22)),
               ],
             ),
             const SizedBox(height: 20),
@@ -110,7 +110,7 @@ class _UpdateRewardModalState extends State<UpdateRewardModal> {
                 decoration: InputDecoration(
                   hintText: '보상 내용을 입력하세요',
                   hintStyle: TextStyle(
-                      fontSize: 14, color: Colors.black.withOpacity(0.5)),
+                      fontFamily: 'GmarketSans', fontSize: 14, color: Colors.black.withOpacity(0.5)),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15)),
                   contentPadding:
@@ -120,6 +120,11 @@ class _UpdateRewardModalState extends State<UpdateRewardModal> {
                 maxLines: null,
                 expands: true,
                 textAlignVertical: TextAlignVertical.top,
+                style: TextStyle(
+                    fontFamily: 'GmarketSans',
+                    fontSize: 16,
+                    color: Colors.black
+                ),
               ),
             ),
             const SizedBox(height: 20),
@@ -133,13 +138,13 @@ class _UpdateRewardModalState extends State<UpdateRewardModal> {
                         horizontal: 35, vertical: 12),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15)),
-                    textStyle: const TextStyle(fontSize: 20),
+                    textStyle: const TextStyle(fontFamily: 'GmarketSans', fontSize: 20),
                     backgroundColor: AppColors.input_text_color,
                     elevation: 1,
                   ),
                   child: const Text('닫기',
                       style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.w600)),
+                          fontFamily: 'GmarketSans', color: Colors.white, fontWeight: FontWeight.w500)),
                 ),
                 ElevatedButton(
                   onPressed: () async {
@@ -168,12 +173,12 @@ class _UpdateRewardModalState extends State<UpdateRewardModal> {
                     backgroundColor: AppColors.custom_green,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15)),
-                    textStyle: const TextStyle(fontSize: 20),
+                    textStyle: const TextStyle(fontFamily: 'GmarketSans', fontSize: 20),
                     elevation: 1,
                   ),
                   child: const Text('저장',
                       style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.w600)),
+                          fontFamily: 'GmarketSans', color: Colors.white, fontWeight: FontWeight.w500)),
                 ),
               ],
             ),

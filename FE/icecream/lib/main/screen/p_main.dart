@@ -31,14 +31,21 @@ class _PMainState extends State<PMain> {
   Position? _initialPosition;
   Set<Marker> markers = {};
   Map<String, ChildMarkerData> markerData = {};
-
   bool _isExpanded = false;
+
 
   @override
   void initState() {
     super.initState();
     _initKakaoMapFuture = initKakaoMap();
   }
+
+  void _setExpandedState(bool isExpanded) {
+    setState(() {
+      _isExpanded = isExpanded;
+    });
+  }
+
 
   Future<void> initKakaoMap() async {
     await dotenv.load();
@@ -62,7 +69,7 @@ class _PMainState extends State<PMain> {
   Widget build(BuildContext context) {
     return DefaultLayout(
       automaticallyImplyLeading: false,
-      title: '보호자 메인',
+      title: '아이스크림',
       padding: EdgeInsets.zero,
       child: Scaffold(
         body: Column(
@@ -163,6 +170,9 @@ class _PMainState extends State<PMain> {
   }
 
   void _onChildTap(int childId, String childName, String? profileImage) async {
+    // 패널을 자동으로 닫기
+    _setExpandedState(false);
+
     final childGPSService = ChildGPSService();
     final gpsData = await childGPSService.fetchChildGPS(childId);
 
@@ -212,15 +222,24 @@ class _PMainState extends State<PMain> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text(data.name), // 자녀 이름 표시
+            title: Text(data.name, style: TextStyle(fontFamily: 'GmarketSans')), // 자녀 이름 표시
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (data.profileImage != null)
-                  Image.network(data.profileImage ?? '')
+                  SizedBox(
+                    width: 200, // 이미지 너비 고정
+                    height: 200, // 이미지 높이 고정
+                    child: Image.network(data.profileImage ?? '', fit: BoxFit.cover),
+                  )
                 else
-                  Image.asset('asset/img/picture.JPEG'), // null 체크 추가
-                Text('마지막 위치: ${DateFormat('MM월 dd일 HH시 mm분').format(data.timestamp)}'), // 타임스탬프 형식으로 표시
+                  SizedBox(
+                    width: 250, // 이미지 너비 고정
+                    height: 250, // 이미지 높이 고정
+                    child: Image.asset('asset/img/picture.JPEG', fit: BoxFit.cover), // null 체크 추가
+                  ),
+                SizedBox(height: 10),
+                Text('마지막 시간: ${DateFormat('MM월 dd일 HH시 mm분').format(data.timestamp)}', style: TextStyle(fontSize: 14, fontFamily: 'GmarketSans')), // 타임스탬프 형식으로 표시
               ],
             ),
           );
@@ -228,4 +247,5 @@ class _PMainState extends State<PMain> {
       );
     }
   }
+
 }

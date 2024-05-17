@@ -83,7 +83,7 @@ class _PDailyGoalWidgetState extends State<PDailyGoalWidget> {
     DateTime todayDate = DateTime(_today.year, _today.month, _today.day);
     int index = _visibleDates.indexWhere((date) => date.isAtSameMomentAs(todayDate));
     if (index != -1) {
-      double position = index * 106.7;
+      double position = index * 127.0;
       double screenHeight = MediaQuery.of(context).size.height;
       double maxHeight = screenHeight * 0.1;
       position -= maxHeight / 2; // Center the date more accurately
@@ -166,6 +166,7 @@ class _PDailyGoalWidgetState extends State<PDailyGoalWidget> {
                     onPressed: () {
                       _changeMonth(isNext: false);
                     },
+                    iconSize: 32,
                   ),
                 ),
                 Positioned(
@@ -176,6 +177,7 @@ class _PDailyGoalWidgetState extends State<PDailyGoalWidget> {
                     onPressed: () {
                       _changeMonth(isNext: true);
                     },
+                    iconSize: 32,
                   ),
                 ),
               ],
@@ -314,7 +316,7 @@ class DailyDateCircle extends StatelessWidget {
           isToday: isToday,
           isSuccess: status == 1,
           isUndefined: status == null,
-          circleRadius: 45.0,
+          circleRadius: 55.0,
           lineHeight: 48.0, // 모든 요소 밑에 선 추가
         ),
         child: Padding(
@@ -322,13 +324,14 @@ class DailyDateCircle extends StatelessWidget {
           child: Container(
             decoration: boxDecoration,
             child: CircleAvatar(
-              radius: 45.0,
+              radius: 55.0,
               backgroundColor: Colors.transparent,
               child: Text(
                 DateFormat('MM월 dd일').format(date),
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.bold,
+                  fontSize: 20,
                 ),
               ),
             ),
@@ -357,7 +360,7 @@ class CircleLinePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..strokeWidth = 2.0;
+      ..strokeWidth = 4.0;
 
     // 위쪽 수직선
     paint.color = Colors.grey;
@@ -378,7 +381,7 @@ class CircleLinePainter extends CustomPainter {
     if (isUndefined) {
       final outlinePaint = Paint()
         ..color = isToday ? Colors.black : Colors.grey
-        ..strokeWidth = 2.0
+        ..strokeWidth = 4.0
         ..style = PaintingStyle.stroke;
 
       canvas.drawCircle(
