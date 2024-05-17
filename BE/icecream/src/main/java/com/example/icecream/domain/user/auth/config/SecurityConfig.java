@@ -56,7 +56,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.POST, "/users").permitAll()
                         .requestMatchers("/users/check", "/auth/login", "/auth/device/login","/auth/reissue", "/error").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/destination", "/api/goal", "/api/goal/status").hasRole("CHILD")
+                        .requestMatchers(HttpMethod.GET, "/destination", "/goal", "/goal/status").hasAnyRole("CHILD", "PARENT")
                         .anyRequest().hasRole("PARENT"))
                 .exceptionHandling((exceptionConfig) ->
                         exceptionConfig
