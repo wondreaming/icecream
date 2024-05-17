@@ -84,8 +84,7 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
   // 하위 위젯에서 안심 보행 업데이트를 위한 콜백 함수
   Future<void> refresh() async {
     await getDestination();
-    setState(() {
-    });
+    setState(() {});
   }
 
   // 자녀 연결 해제
@@ -113,7 +112,8 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
 
     if (response.status == 200) {
       usernameController.clear();
-      Provider.of<UserProvider>(context, listen: false).updateChildName(widget.user_id, username);
+      Provider.of<UserProvider>(context, listen: false)
+          .updateChildName(widget.user_id, username);
       context.pop();
     } else {
       final String message = response.message!;
@@ -128,10 +128,10 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
     final dio = CustomDio().createDio();
     final userRepository = UserRespository(dio);
 
-    UserPhoneNumberModel newPhoneNumber =
-    UserPhoneNumberModel(user_id: widget.user_id, phone_number: phoneNumber);
+    UserPhoneNumberModel newPhoneNumber = UserPhoneNumberModel(
+        user_id: widget.user_id, phone_number: phoneNumber);
     ResponseModel response =
-    await userRepository.patchPhoneNumber(userPhoneNumber: newPhoneNumber);
+        await userRepository.patchPhoneNumber(userPhoneNumber: newPhoneNumber);
     return response;
   }
 
@@ -142,7 +142,8 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
     if (response.status == 200) {
       phoneNumberController.clear();
       final String message = response.message!;
-      Provider.of<UserProvider>(context, listen: false).updateChildPhoneNumber(widget.user_id, phoneNumber);
+      Provider.of<UserProvider>(context, listen: false)
+          .updateChildPhoneNumber(widget.user_id, phoneNumber);
       showCustomDialog(context, message, isNo: false, onPressed: () {
         context.pop();
       });
@@ -153,7 +154,6 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
@@ -163,6 +163,7 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
         children.firstWhere((child) => child.userId == widget.user_id);
 
     return DefaultLayout(
+      isSetting: true,
       title: '자녀 관리',
       action: [
         CustomPopupButton(
@@ -244,11 +245,18 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
           padding: EdgeInsets.symmetric(vertical: 20.0),
           child: Column(
             children: [
-              DetailProfile(
-                user_id: child.userId,
-                is_parents: false,
-                id: child.username,
-                number: child.phoneNumber,
+              Consumer<UserProvider>(
+                builder: (context, userProvider, _) {
+                  final child = userProvider.children
+                      .firstWhere((child) => child.userId == widget.user_id);
+                  return DetailProfile(
+                    user_id: child.userId,
+                    is_parents: false,
+                    id: child.username,
+                    number: child.phoneNumber,
+                    imgUrl: child.profileImage,
+                  );
+                },
               ),
               Container(
                 margin: EdgeInsets.only(bottom: 8.0, top: 16.0),
