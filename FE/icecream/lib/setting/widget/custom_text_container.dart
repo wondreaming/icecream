@@ -109,6 +109,8 @@ class CustomTextContainer extends StatelessWidget {
                   onTap: onTap,
                   child: Text(
                     explainText!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: isDone! ? 16.0 : 14.0,
                       fontWeight: FontWeight.w400,

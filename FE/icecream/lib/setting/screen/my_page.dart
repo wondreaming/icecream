@@ -193,6 +193,7 @@ class _MyPageState extends State<MyPage> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
 
     return DefaultLayout(
+      isSetting: true,
       title: '마이 페이지',
       action: [
         CustomPopupButton(
