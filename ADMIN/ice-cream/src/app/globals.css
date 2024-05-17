@@ -34,3 +34,33 @@ body {
     background: #f6f5fa;
   }
 }
+
+@font-face {
+  font-family: "gmarketsans";
+  src: url("../fonts/GmarketSansBold.otf") format("otf");
+  font-weight: bold;
+}
+
+@font-face {
+  font-family: "gmarketsans";
+  src: url("../fonts/GmarketSansLight.otf") format("otf");
+  font-weight: light;
+}
+
+@font-face {
+  font-family: "gmarketsans";
+  src: url("../fonts/GmarketSansMedium.otf") format("otf");
+  font-weight: medium;
+}
+
+/* 사용자 정의 글꼴 스타일 정의 */
+@layer base {
+  .font-gmarketsans {
+    font-family: "GmarketSans", ui-sans-serif, system-ui;
+  }
+}
+
+/* 전역 글꼴 설정 */
+body {
+  @apply font-gmarketsans;
+}

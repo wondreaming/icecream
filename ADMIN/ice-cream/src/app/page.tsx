@@ -1,10 +1,9 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import io from "socket.io-client";
-import { set } from "mongoose";
 
 const SOCKET_SERVER_URL = `${process.env.NEXT_PUBLIC_SOCKET_SERVER_URL}`;
 
@@ -13,6 +12,13 @@ const Home = () => {
   const pathname = usePathname();
   const { data: session, status: sessionStatus } = useSession();
   const [cctvImage, setCctvImage] = useState<string | null>(null);
+  const [cctvName, setCctvName] = useState<string>("오션초등학교 CCTV"); // cctv 이름
+  const [speedDataList, setSpeedDataList] = useState<
+    {
+      time: string;
+      speed: number;
+    }[]
+  >([]); // 시간과 속도 받을 리스트
 
   useEffect(() => {
     if (sessionStatus === "unauthenticated" && pathname !== "/login") {
@@ -37,6 +43,13 @@ const Home = () => {
         setCctvImage(base64Image);
       });
 
+      socket.on("getSpeedData", (data: { time: string; speed: number }) => {
+        setSpeedDataList(prevList => [
+          ...prevList,
+          { time: data.time, speed: data.speed },
+        ]);
+      });
+
       return () => {
         socket.disconnect();
       };
@@ -46,24 +59,55 @@ const Home = () => {
   return (
     sessionStatus === "authenticated" && (
       <>
-        <main className="flex mx-auto max-w-[1290px] min-h-screen flex-col items-center p-24">
-          <button
-            className="absolute top-2 right-2 p-2 btn-delete"
-            onClick={() => {
-              signOut();
-            }}
-          >
-            로그아웃
-          </button>
-          <h1>관리자 페이지</h1>
-          <div>
-            <h1>WebSocket CCTV Image Viewer</h1>
-            {cctvImage ? (
-              <img src={`data:image/jpeg;base64,${cctvImage}`} alt="CCTV" />
-            ) : (
-              // <img src={cctvImage} alt="CCTV" />
-              <p>No image received yet.</p>
-            )}
+        <main className="h-screen overflow-hidden">
+          <div className="grid grid-cols-8 h-full">
+            <div className="col-span-6 flex items-center justify-center">
+              <div className="w-full h-full flex flex-col items-center justify-center">
+                <h1 className="absolute top-3 left-3 p-2 text-3xl">
+                  {/* WebSocket CCTV Image Viewer */}
+                  {cctvName}
+                </h1>
+                {cctvImage ? (
+                  <img
+                    src={`data:image/jpeg;base64,${cctvImage}`}
+                    alt="CCTV"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  // <img src={cctvImage} alt="CCTV" />
+                  <p className="text-xl">No image received yet.</p>
+                )}
+              </div>
+            </div>
+            {/* <div className="col-span-2">지도</div> */}
+            <div className="col-span-2 bg-black flex flex-col justify-end items-center h-full">
+              <h1 className="text-white text-2xl mt-10 hidden sm:block">
+                관리자 페이지
+              </h1>
+              <h3 className="text-white mt-10 mb-5 text-4xl hidden sm:block">
+                과속 발생 현황
+              </h3>
+              <div className="text-white flex-grow w-full overflow-y-auto px-5 flex flex-col justify-center items-center">
+                {speedDataList.length > 0 ? (
+                  speedDataList.map((data, index) => (
+                    <div key={index} className="text-white">
+                      <div>시간 : {data.time}</div>
+                      <div>속도 : {data.speed} km/h</div>
+                    </div>
+                  ))
+                ) : (
+                  <p> 과속 차량이 없습니다</p>
+                )}
+              </div>
+              <button
+                className="p-2 px-10 btn-delete mt-auto mb-8"
+                onClick={() => {
+                  signOut();
+                }}
+              >
+                로그아웃
+              </button>
+            </div>
           </div>
         </main>
       </>
