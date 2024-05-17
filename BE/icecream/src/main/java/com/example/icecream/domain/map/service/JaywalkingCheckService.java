@@ -7,7 +7,6 @@ import com.example.icecream.domain.goal.repository.postgres.GoalRepository;
 import com.example.icecream.domain.map.entity.Road;
 import com.example.icecream.domain.map.repository.RoadRepository;
 import com.example.icecream.domain.notification.dto.FcmRequestDto2;
-import com.example.icecream.domain.notification.repository.FcmTokenRepository;
 import com.example.icecream.domain.notification.service.NotificationService;
 import com.example.icecream.domain.user.entity.User;
 import com.example.icecream.domain.user.repository.ParentChildMappingRepository;
@@ -20,7 +19,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
@@ -36,10 +34,9 @@ public class JaywalkingCheckService {
     private final GoalRepository goalRepository;
     private final ParentChildMappingRepository parentChildMappingRepository;
     private final UserRepository userRepository;
-    private final FcmTokenRepository fcmTokenRepository;
     private final NotificationService notificationService;
 
-    public void checkJaywalking(int userId, double latitude, double longitude) throws IOException {
+    public void checkJaywalking(int userId, double latitude, double longitude) {
         ValueOperations<String, Integer> ops = redisTemplate.opsForValue();
         Integer dailyGoal = ops.get("user_goal:" + userId);
         Point point = geometryFactory.createPoint(new Coordinate(longitude, latitude));
