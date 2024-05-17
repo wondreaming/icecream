@@ -36,7 +36,6 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException {
-
         User user = userRepository.findByLoginIdAndIsDeletedFalse(authentication.getName()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저 입니다."));
         List<User> children = parentChildMappingRepository.findChildrenByParentId(user.getId());
 
