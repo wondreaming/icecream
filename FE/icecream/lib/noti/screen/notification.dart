@@ -52,7 +52,18 @@ class _NotiState extends State<Noti> {
 
   Widget _buildNotificationList() {
     if (_notificationModel == null || _notificationModel!.data!.isEmpty) {
-      return const Text('알람이 없습니다.');
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              '알림이 없습니다.',
+              style: TextStyle(fontFamily: 'GmarketSans', fontSize: 28),
+            ),
+            SizedBox(height: 100),
+          ],
+        ),
+      );
     }
 
     Map<String, List<NotificationData>> groupedData =
@@ -60,6 +71,8 @@ class _NotiState extends State<Noti> {
 
     return Column(
       children: [
+        SizedBox(height: 15,),
+        Divider(),
         Expanded(
           child: ListView(
             children: groupedData.entries.map((entry) {
@@ -67,6 +80,7 @@ class _NotiState extends State<Noti> {
             }).toList(),
           ),
         ),
+        Divider(),
         const SizedBox(height: 90),
       ],
     );
@@ -88,10 +102,10 @@ class _NotiState extends State<Noti> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 14.0),
+          padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 10.0),
           child: Text(
             date,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
+            style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 25, fontFamily: 'GmarketSans'),
           ),
         ),
         ...notifications.map((data) {
@@ -100,13 +114,14 @@ class _NotiState extends State<Noti> {
           return Column(
             children: [
               ListTile(
+                dense: true,
                 title: Text(
                   time,
                   style: TextStyle(color: Colors.grey[600], fontSize: 12),
                 ),
                 subtitle: Text(
                   data.content!,
-                  style: const TextStyle(fontSize: 18),
+                  style: const TextStyle(fontSize: 18, fontFamily: 'GmarketSans'),
                 ),
               ),
               const Padding(
@@ -116,9 +131,11 @@ class _NotiState extends State<Noti> {
             ],
           );
         }),
+        SizedBox(height: 45), // 내용과 다음 날짜 사이 간격 추가
       ],
     );
   }
+
 
   String _formatDateString(DateTime dateTime) {
     DateTime now = DateTime.now();
