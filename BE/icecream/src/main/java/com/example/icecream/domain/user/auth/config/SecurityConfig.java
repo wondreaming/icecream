@@ -4,6 +4,7 @@ import com.example.icecream.common.logging.CorrelationIdFilter;
 import com.example.icecream.common.logging.LoggingFilter;
 import com.example.icecream.domain.user.auth.filter.JwtAuthenticationFilter;
 import com.example.icecream.domain.user.auth.filter.LoginIdAuthenticationFilter;
+import com.example.icecream.domain.user.auth.handler.CustomAccessDeniedHandler;
 import com.example.icecream.domain.user.auth.handler.CustomAuthenticationEntryPoint;
 import com.example.icecream.domain.user.auth.handler.CustomAuthenticationSuccessHandler;
 import com.example.icecream.domain.user.auth.service.CustomUserDetailsService;
@@ -37,6 +38,7 @@ public class SecurityConfig {
     private final CustomUserDetailsService customUserDetailService;
     private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final LoggingFilter loggingFilter;
     private final CorrelationIdFilter correlationIdFilter;
 
@@ -52,13 +54,14 @@ public class SecurityConfig {
                 .sessionManagement(management ->
                         management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(HttpMethod.POST, "/users")
-                        .permitAll()
-                        .requestMatchers("/users/check", "/auth/login", "/auth/device/login","/auth/reissue", "/error")
-                        .permitAll()
-                        .anyRequest().authenticated())
+                        .requestMatchers(HttpMethod.POST, "/users").permitAll()
+                        .requestMatchers("/users/check", "/auth/login", "/auth/device/login","/auth/reissue", "/error").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/destination", "/api/goal", "/api/goal/status").hasRole("CHILD")
+                        .anyRequest().hasRole("PARENT"))
                 .exceptionHandling((exceptionConfig) ->
-                        exceptionConfig.authenticationEntryPoint(customAuthenticationEntryPoint))
+                        exceptionConfig
+                                .authenticationEntryPoint(customAuthenticationEntryPoint)
+                                .accessDeniedHandler(customAccessDeniedHandler))
                 .addFilterBefore(correlationIdFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(loggingFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
