@@ -38,8 +38,7 @@ class _GoalState extends State<Goal> {
   }
 
   void loadChildData() {
-    UserProvider userProvider =
-    Provider.of<UserProvider>(context, listen: false);
+    UserProvider userProvider = Provider.of<UserProvider>(context, listen: false);
     if (userProvider.children.isNotEmpty) {
       childrenData = userProvider.children;
       updateChildSelection(childrenData.first);
@@ -120,7 +119,7 @@ class _GoalState extends State<Goal> {
                 ),
                 Expanded(
                   flex: 6, // 길이를 줄이기 위해 flex 비율 조정
-                  child: DailyGoalPage(dailyGoal: dailyGoal!),
+                  child: DailyGoalPage(selectedChildId: int.parse(selectedChildId)), // String을 int로 변환
                 ),
                 Expanded(
                   flex: 1, // RewardModal 버튼을 추가
@@ -128,8 +127,7 @@ class _GoalState extends State<Goal> {
                     child: ElevatedButton(
                       onPressed: _openUpdateRewardModal,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                        const Color.fromARGB(255, 25, 243, 116),
+                        backgroundColor: const Color.fromARGB(255, 25, 243, 116),
                       ),
                       child: const Text('보상 수정하기'),
                     ),
