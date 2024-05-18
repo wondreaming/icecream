@@ -57,7 +57,7 @@ pipeline {
                 sh 'docker stop icecream || true'
                 sh 'docker rm icecream || true'
                 // 백엔드 이미지 실행
-                sh 'docker run -d -p 8080:8080 --name icecream icecream'
+                sh 'docker run -d -p 8070:8080 --name icecream icecream'
             }
         }
 
