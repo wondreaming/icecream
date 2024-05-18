@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../service/user_service.dart';
 import 'package:icecream/setting/widget/custom_text_field.dart';
 import 'package:icecream/setting/widget/custom_elevated_button.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class ChildRegisterPage extends StatefulWidget {
   final String deviceId;
@@ -36,16 +37,12 @@ class PhoneNumberFormatter extends TextInputFormatter {
     value = _cleanPhoneNumber(value);
 
     if (value.length <= 3) {
-      // 010 입력 중
       return value;
     } else if (value.length <= 7) {
-      // 010-xxxx 포맷
       return '${value.substring(0, 3)}-${value.substring(3)}';
     } else if (value.length <= 11) {
-      // 010-xxxx-xxxx 포맷
       return '${value.substring(0, 3)}-${value.substring(3, 7)}-${value.substring(7)}';
     } else {
-      // 길이가 11자를 넘지 않도록 제한
       return '${value.substring(0, 3)}-${value.substring(3, 7)}-${value.substring(7, 11)}';
     }
   }
@@ -69,14 +66,24 @@ class _ChildRegisterPageState extends State<ChildRegisterPage> {
     final String name = _nameController.text.trim();
     final String phonenum = _phoneController.text.trim();
     if (name.isEmpty) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('이름을 입력하세요')));
+      Fluttertoast.showToast(
+        msg: '이름을 입력해주세요',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
       return;
     }
 
     if (phonenum.isEmpty) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('전화번호를 입력하세요')));
+      Fluttertoast.showToast(
+        msg: '전화번호를 입력해주세요',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
       return;
     }
 
@@ -91,8 +98,13 @@ class _ChildRegisterPageState extends State<ChildRegisterPage> {
     try {
       final response = await _userService.registerChild(data);
 
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('등록 성공: ${response.data}')));
+      Fluttertoast.showToast(
+        msg: '자녀 등록에 성공했어요',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+      );
 
       // 자녀 정보 갱신
       await _userService.fetchChildren(context.read<UserProvider>());
@@ -101,8 +113,13 @@ class _ChildRegisterPageState extends State<ChildRegisterPage> {
       context.goNamed('parents');
     } catch (e) {
       debugPrint("$e");
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('등록 실패: $e')));
+      Fluttertoast.showToast(
+        msg: '자녀 등록에 실패했어요',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
     }
   }
 
@@ -116,7 +133,7 @@ class _ChildRegisterPageState extends State<ChildRegisterPage> {
           children: [
             CustomTextField(
               controller: _nameController,
-              hintText: '자녀의 이름',
+              hintText: '자녀 이름',
               contentPadding:
                   const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
             ),
