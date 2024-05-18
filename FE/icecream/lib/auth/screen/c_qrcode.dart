@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:icecream/noti/models/notification_model.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:encrypt/encrypt.dart' as en;
 import 'dart:convert';
@@ -47,19 +46,6 @@ class _QRCodePageState extends State<QRCodePage> {
     });
   }
 
-  // String _encryptData(String data) {
-  //   final key = en.Key.fromUtf8('1996100219961002');
-  //   final iv = en.IV.fromLength(16);
-  //   final encrypter = en.Encrypter(en.AES(key, mode: en.AESMode.cbc));
-
-  //   final encrypted = encrypter.encrypt(data, iv: iv);
-  //   final decrypted = encrypter.decrypt64(encrypted.base64, iv: iv);
-  //   debugPrint("key 정보: ${key.base64}");
-  //   debugPrint("복호화된 정보: $decrypted");
-  //   debugPrint('IV for Decryption: ${iv.base64}'); // IV 출력
-  //   return encrypted.base64;
-  // }
-
   String _encryptData(String data) {
     final key = en.Key.fromUtf8('1996100219961002');
     final iv = en.IV.fromLength(16); // IV 생성
@@ -87,30 +73,46 @@ class _QRCodePageState extends State<QRCodePage> {
     List<Color> gradientColors = getRandomColors();
     return Scaffold(
       appBar: AppBar(
-        title: const Text('QRCode Page'),
+        title: const Text('QRCode Page', style: TextStyle(fontFamily: 'GmarketSans', fontWeight: FontWeight.w500)),
+        centerTitle: true,
       ),
       body: Center(
-        child: SizedBox(
-          width: 300,
-          height: 300,
-          child: PrettyQrView.data(
-            data: _qrData,
-            errorCorrectLevel: QrErrorCorrectLevel.H,
-            decoration: PrettyQrDecoration(
-              shape: PrettyQrRoundedSymbol(
-                color: PrettyQrBrush.gradient(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: gradientColors,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 300,
+              height: 300,
+              child: PrettyQrView.data(
+                data: _qrData,
+                errorCorrectLevel: QrErrorCorrectLevel.H,
+                decoration: PrettyQrDecoration(
+                  shape: PrettyQrRoundedSymbol(
+                    color: PrettyQrBrush.gradient(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: gradientColors,
+                      ),
+                    ),
+                  ),
+                  image: const PrettyQrDecorationImage(
+                    image: AssetImage('asset/img/icelogo.png'),
                   ),
                 ),
               ),
-              image: const PrettyQrDecorationImage(
-                image: AssetImage('asset/img/icelogo.png'),
+            ),
+            const SizedBox(height: 30.0), // QR 코드와 텍스트 사이의 여백 추가
+            const Text(
+              '부모님이 스캔해주세요!',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'GmarketSans',
+                fontWeight: FontWeight.w400,
+                fontSize: 16.0,
               ),
             ),
-          ),
+          ],
         ),
       ),
     );

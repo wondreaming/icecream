@@ -7,7 +7,10 @@ class CustomElevatedButton extends StatelessWidget {
   final Color backgroundColor;
   final Color foregroundColor;
   final double width;
+  final double height;
   final bool isSearch;
+  final String? image; // 이미지 경로를 받을 매개변수 추가
+
   const CustomElevatedButton({
     super.key,
     required this.onPressed,
@@ -15,7 +18,9 @@ class CustomElevatedButton extends StatelessWidget {
     this.backgroundColor = AppColors.custom_yellow,
     this.foregroundColor = AppColors.text_color,
     this.width = double.infinity,
+    this.height = 40,
     this.isSearch = false,
+    this.image, // 초기화
   });
 
   @override
@@ -23,21 +28,30 @@ class CustomElevatedButton extends StatelessWidget {
     return SizedBox(
       // 사이즈 설정
       width: width,
-      height: 40,
+      height: height,
       child: ElevatedButton(
         onPressed: onPressed,
-        child: isSearch
-            ? Row(
+        child: image != null
+            ? Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.location_searching),
-                  SizedBox(
-                    width: 5.0,
-                  ),
-                  Text(child)
+                  Image.asset(image!, height: 80.0),
+                  const SizedBox(width: 10.0),
+                  Text(child),
                 ],
               )
-            : Text(child),
+            : isSearch
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.location_searching),
+                      const SizedBox(
+                        width: 5.0,
+                      ),
+                      Text(child)
+                    ],
+                  )
+                : Text(child),
         style: ElevatedButton.styleFrom(
           side: isSearch
               ? BorderSide(
@@ -58,12 +72,12 @@ class CustomElevatedButton extends StatelessWidget {
           foregroundColor: foregroundColor,
           // 글꼴
           textStyle: isSearch
-              ? TextStyle(
+              ? const TextStyle(
                   fontFamily: 'GmarketSans',
                   fontSize: 16.0,
                   fontWeight: FontWeight.w400,
                 )
-              : TextStyle(
+              : const TextStyle(
                   fontFamily: 'GmarketSans',
                   fontSize: 20,
                   fontWeight: FontWeight.w400,

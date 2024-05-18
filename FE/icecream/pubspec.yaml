@@ -99,6 +99,8 @@ flutter:
     - .env
     - asset/img/overspeed.png
     - asset/img/crosswalk.png
+    - asset/img/parents.png
+    - asset/img/children.png
     - asset/img/icecream.riv
     - asset/img/icecreamloop.riv
   # To add assets to your application, add an assets section, like this:

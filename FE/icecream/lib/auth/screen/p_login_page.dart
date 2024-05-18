@@ -59,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       appBar: AppBar(
           automaticallyImplyLeading: false,
-          title: const Text('로그인')),
+          title: const Text('로그인', style: TextStyle(fontFamily: 'GmarketSans', fontWeight: FontWeight.w500))),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -80,6 +80,7 @@ class _LoginPageState extends State<LoginPage> {
             CustomElevatedButton(
               onPressed: _login,
               child: '로그인',
+              height: 55,
             ),
           ],
         ),
