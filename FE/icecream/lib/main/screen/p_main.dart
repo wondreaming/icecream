@@ -7,6 +7,7 @@ import 'package:icecream/main/widget/childrenList.dart';
 import 'package:icecream/main/service/child_gps.dart';
 import 'package:icecream/main/models/child_marker_model.dart';
 import 'package:intl/intl.dart';
+import 'package:rive/rive.dart';
 
 class StartFloatFabLocation extends FloatingActionButtonLocation {
   const StartFloatFabLocation();
@@ -42,7 +43,8 @@ class _PMainState extends State<PMain> {
     await dotenv.load();
     final mapApiKey = dotenv.env['KAKAO_API_KEY'];
     AuthRepository.initialize(appKey: '$mapApiKey');
-    _initialPosition = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    _initialPosition = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
   }
 
   @override
@@ -61,14 +63,29 @@ class _PMainState extends State<PMain> {
                   child: FutureBuilder(
                     future: _initKakaoMapFuture,
                     builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.done && _initialPosition != null) {
+                      if (snapshot.connectionState == ConnectionState.done &&
+                          _initialPosition != null) {
                         return KakaoMap(
                           onMapCreated: _onMapCreated,
                           markers: markers.toList(),
                           onMarkerTap: _onMarkerTap,
                         );
                       } else {
-                        return const Center(child: CircularProgressIndicator());
+                        // 로딩 중일 때 로딩 화면 표시
+                        return const MaterialApp(
+                          home: Scaffold(
+                            body: Center(
+                              child: SizedBox(
+                                width: 150,
+                                height: 150,
+                                child: RiveAnimation.asset(
+                                  'asset/img/icecreamloop.riv',
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
                       }
                     },
                   ),
@@ -82,7 +99,6 @@ class _PMainState extends State<PMain> {
               child: Container(
                 color: Colors.white.withOpacity(0.9), // 배경을 약간 투명하게 설정
                 child: ChildList(onChildTap: _onChildTap),
-
               ),
             ),
           ],
@@ -94,7 +110,9 @@ class _PMainState extends State<PMain> {
             backgroundColor: Colors.white,
             elevation: 3,
             tooltip: '현재 위치로 이동',
-            shape: CircleBorder(side: BorderSide(color: Colors.grey.withOpacity(0.5), width: 1)),
+            shape: CircleBorder(
+                side:
+                    BorderSide(color: Colors.grey.withOpacity(0.5), width: 1)),
             child: const Icon(Icons.my_location, color: Colors.black),
           ),
         ),
@@ -116,21 +134,21 @@ class _PMainState extends State<PMain> {
   void _onMapCreated(KakaoMapController controller) {
     _mapController = controller;
     if (_initialPosition != null) {
-      controller.panTo(LatLng(_initialPosition!.latitude, _initialPosition!.longitude));
+      controller.panTo(
+          LatLng(_initialPosition!.latitude, _initialPosition!.longitude));
       _addMarkerAtPosition(_initialPosition!);
     }
   }
 
   void _moveToCurrentLocation() async {
-    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
     _mapController?.panTo(LatLng(position.latitude, position.longitude));
     setState(() {
       markers.clear(); // 모든 마커 제거하고
       _addMarkerAtPosition(position); // 현재 위치에 새로운 마커 추가
     });
   }
-
-
 
   void _addCustomMarkerAtPosition(Position position) {
     final marker = Marker(
@@ -143,8 +161,11 @@ class _PMainState extends State<PMain> {
       markers.add(marker);
     });
   }
+
   void _addMarkerAtPosition(Position position) {
-    final marker = Marker(markerId: UniqueKey().toString(), latLng: LatLng(position.latitude, position.longitude));
+    final marker = Marker(
+        markerId: UniqueKey().toString(),
+        latLng: LatLng(position.latitude, position.longitude));
     setState(() {
       markers.add(marker);
     });
@@ -157,16 +178,30 @@ class _PMainState extends State<PMain> {
       final latitude = gpsData['latitude'];
       final longitude = gpsData['longitude'];
       final timestamp = parseServerTimestamp(gpsData['timestamp']);
-      final position = Position(latitude: latitude, longitude: longitude, timestamp: timestamp, accuracy: 1, altitude: 0, heading: 0, speed: 0, speedAccuracy: 1, altitudeAccuracy: 1, headingAccuracy: 1);
+      final position = Position(
+          latitude: latitude,
+          longitude: longitude,
+          timestamp: timestamp,
+          accuracy: 1,
+          altitude: 0,
+          heading: 0,
+          speed: 0,
+          speedAccuracy: 1,
+          altitudeAccuracy: 1,
+          headingAccuracy: 1);
       _mapController?.panTo(LatLng(position.latitude, position.longitude));
       _addMarkerWithChildInfo(position, childName, profileImage, timestamp);
     }
   }
 
-  void _addMarkerWithChildInfo(Position position, String childName, String? profileImage, DateTime timestamp) {
+  void _addMarkerWithChildInfo(Position position, String childName,
+      String? profileImage, DateTime timestamp) {
     final markerId = UniqueKey().toString();
-    final marker = Marker(markerId: markerId, latLng: LatLng(position.latitude, position.longitude));
-    markerData[markerId] = ChildMarkerData(name: childName, profileImage: profileImage, timestamp: timestamp);
+    final marker = Marker(
+        markerId: markerId,
+        latLng: LatLng(position.latitude, position.longitude));
+    markerData[markerId] = ChildMarkerData(
+        name: childName, profileImage: profileImage, timestamp: timestamp);
     setState(() {
       markers.clear(); // 모든 기존 마커 제거
       markers.add(marker);
@@ -185,11 +220,21 @@ class _PMainState extends State<PMain> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (data.profileImage != null)
-                  SizedBox(width: 200, height: 200, child: Image.network(data.profileImage ?? '', fit: BoxFit.cover))
+                  SizedBox(
+                      width: 200,
+                      height: 200,
+                      child: Image.network(data.profileImage ?? '',
+                          fit: BoxFit.cover))
                 else
-                  SizedBox(width: 250, height: 250, child: Image.asset('asset/img/picture.JPEG', fit: BoxFit.cover)),
+                  SizedBox(
+                      width: 250,
+                      height: 250,
+                      child: Image.asset('asset/img/picture.JPEG',
+                          fit: BoxFit.cover)),
                 SizedBox(height: 10),
-                Text('마지막 시간: ${DateFormat('MM월 dd일 HH시 mm분').format(data.timestamp)}', style: TextStyle(fontSize: 14, fontFamily: 'GmarketSans')),
+                Text(
+                    '마지막 시간: ${DateFormat('MM월 dd일 HH시 mm분').format(data.timestamp)}',
+                    style: TextStyle(fontSize: 14, fontFamily: 'GmarketSans')),
               ],
             ),
           );

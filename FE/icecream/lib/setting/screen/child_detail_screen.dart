@@ -20,6 +20,7 @@ import 'package:icecream/setting/widget/custom_show_dialog.dart';
 import 'package:icecream/setting/widget/custom_text_field.dart';
 import 'package:icecream/setting/widget/detail_profile.dart';
 import 'package:provider/provider.dart';
+import 'package:rive/rive.dart';
 
 class ChildDetailScreen extends StatefulWidget {
   final int user_id;
@@ -300,7 +301,14 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
                   }
                   // snapshot.hasData가 없으면,
                   if (!snapshot.hasData) {
-                    return CircularProgressIndicator();
+                    return SizedBox(
+                      width: 150,
+                      height: 150,
+                      child: RiveAnimation.asset(
+                        'asset/img/icecreamloop.riv',
+                        fit: BoxFit.cover,
+                      ),
+                    );
                   }
                   // snapshot.hasData가 있으면,
                   return ListView.separated(
