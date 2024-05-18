@@ -5,8 +5,7 @@ import 'package:icecream/com/widget/default_layout.dart';
 import '../service/user_service.dart';
 import 'package:icecream/setting/widget/custom_text_field.dart';
 import 'package:icecream/setting/widget/custom_elevated_button.dart';
-
-import 'p_login_page.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class PhoneNumberFormatter extends TextInputFormatter {
   @override
@@ -23,16 +22,12 @@ class PhoneNumberFormatter extends TextInputFormatter {
     value = _cleanPhoneNumber(value);
 
     if (value.length <= 3) {
-      // 010 입력 중
       return value;
     } else if (value.length <= 7) {
-      // 010-xxxx 포맷
       return '${value.substring(0, 3)}-${value.substring(3)}';
     } else if (value.length <= 11) {
-      // 010-xxxx-xxxx 포맷
       return '${value.substring(0, 3)}-${value.substring(3, 7)}-${value.substring(7)}';
     } else {
-      // 길이가 11자를 넘지 않도록 제한
       return '${value.substring(0, 3)}-${value.substring(3, 7)}-${value.substring(7, 11)}';
     }
   }
@@ -41,7 +36,6 @@ class PhoneNumberFormatter extends TextInputFormatter {
     return value.replaceAll(RegExp(r'[^0-9]'), '');
   }
 }
-
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -62,15 +56,14 @@ class _SignUpPageState extends State<SignUpPage> {
   bool _isLoading = false;
   final UserService _userService = UserService();
   final FocusNode _loginIdFocusNode = FocusNode();
+  final FocusNode _passwordCheckFocusNode = FocusNode(); // 비밀번호 확인 포커스 노드 추가
   String? _usernameError;
   String? _phoneNumberError;
   String? _loginIdError;
   String? _passwordError;
   String? _passwordCheckError;
 
-  Color? _loginIdBorderColor;
-
-  bool _passwordVisible = false; // 비밀번호 가리기/보이기 상태 변수 추가
+  bool _passwordVisible = false;
   bool _passwordCheckVisible = false;
 
   @override
@@ -78,6 +71,7 @@ class _SignUpPageState extends State<SignUpPage> {
     super.initState();
     _loadDeviceId();
     _loginIdFocusNode.addListener(_onLoginIdFocusChange);
+    _passwordCheckFocusNode.addListener(_onPasswordCheckFocusChange); // 리스너 추가
   }
 
   Future<void> _loadDeviceId() async {
@@ -92,13 +86,22 @@ class _SignUpPageState extends State<SignUpPage> {
     }
   }
 
+  void _onPasswordCheckFocusChange() {
+    if (!_passwordCheckFocusNode.hasFocus) {
+      _validatePasswordCheckField(); // 포커스가 빠졌을 때 비밀번호 확인 유효성 검사
+    }
+  }
+
   Future<void> _checkLoginIdAvailability() async {
     String loginId = _loginIdController.text;
     if (loginId.isEmpty) {
-      setState(() {
-        _loginIdError = '로그인 ID를 입력하세요';
-        _loginIdBorderColor = Colors.red;
-      });
+      Fluttertoast.showToast(
+        msg: '아이디를 입력해 주세요',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
       return;
     }
 
@@ -107,24 +110,30 @@ class _SignUpPageState extends State<SignUpPage> {
       if (result['isAvailable']) {
         setState(() {
           _loginIdError = null;
-          _loginIdBorderColor = Colors.green;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result['message'])),
+        Fluttertoast.showToast(
+          msg: '사용 가능한 아이디예요',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.green,
+          textColor: Colors.white,
         );
       } else {
-        setState(() {
-          _loginIdError = result['message'];
-          _loginIdBorderColor = Colors.red;
-        });
+        Fluttertoast.showToast(
+          msg: '이미 사용 중인 아이디예요',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+        );
       }
     } catch (e) {
-      setState(() {
-        _loginIdError = '아이디 중복 검사에 실패했습니다';
-        _loginIdBorderColor = Colors.red;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('아이디 중복 검사에 실패했습니다: $e')),
+      Fluttertoast.showToast(
+        msg: '아이디 중복 검사에 실패했어요',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
       );
     }
   }
@@ -132,8 +141,13 @@ class _SignUpPageState extends State<SignUpPage> {
   Future<void> registerUser() async {
     bool isValid = _validateFormFields();
     if (!isValid || _isLoading) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('입력 정보를 확인하세요.')));
+      Fluttertoast.showToast(
+        msg: '입력 정보를 확인해주세요',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
       return;
     }
 
@@ -148,15 +162,22 @@ class _SignUpPageState extends State<SignUpPage> {
     debugPrint("Registering with data: $data");
     try {
       final response = await _userService.registerUser(data);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('회원가입 성공: ${response.data}')),
+      Fluttertoast.showToast(
+        msg: '회원가입에 성공했어요',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
       );
-      // 회원가입 성공 시 로그인 페이지로 이동
       GoRouter.of(context).pushReplacementNamed('p_login');
     } catch (e) {
       debugPrint("$e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('회원가입 실패: $e')),
+      Fluttertoast.showToast(
+        msg: '회원가입에 실패했어요',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
       );
     }
   }
@@ -171,11 +192,11 @@ class _SignUpPageState extends State<SignUpPage> {
     String? passwordCheckError = _validatePasswordCheck(_passwordCheckController.text);
 
     setState(() {
-      _usernameError = usernameError;
-      _phoneNumberError = phoneNumberError;
-      _loginIdError = loginIdError;
-      _passwordError = passwordError;
-      _passwordCheckError = passwordCheckError;
+      // _usernameError = usernameError;
+      // _phoneNumberError = phoneNumberError;
+      // _loginIdError = loginIdError;
+      // _passwordError = passwordError;
+      // _passwordCheckError = passwordCheckError;
     });
 
     if (usernameError != null ||
@@ -187,6 +208,22 @@ class _SignUpPageState extends State<SignUpPage> {
     }
 
     return isValid;
+  }
+
+  void _validatePasswordCheckField() {
+    String? passwordCheckError = _validatePasswordCheck(_passwordCheckController.text);
+    if (passwordCheckError != null) {
+      Fluttertoast.showToast(
+        msg: '비밀번호가 일치하지 않아요',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
+    }
+    // setState(() {
+    //   _passwordCheckError = passwordCheckError;
+    // });
   }
 
   String? _validateUsername(String? value) {
@@ -253,7 +290,7 @@ class _SignUpPageState extends State<SignUpPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(height: 10),
-              CustomTextField(                
+              CustomTextField(
                 controller: _usernameController,
                 hintText: '이름',
                 errorText: _usernameError,
@@ -265,22 +302,21 @@ class _SignUpPageState extends State<SignUpPage> {
                 hintText: '전화번호',
                 errorText: _phoneNumberError,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
-                inputFormatters: [PhoneNumberFormatter()], // 전화번호 포맷터 추가
+                inputFormatters: [PhoneNumberFormatter()],
               ),
               SizedBox(height: 10),
               CustomTextField(
                 controller: _loginIdController,
-                hintText: '로그인 ID',
+                hintText: '아이디 (영문, 숫자 6 ~ 20자)',
                 focusNode: _loginIdFocusNode,
                 errorText: _loginIdError,
-                borderColor: _loginIdBorderColor,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
               ),
               SizedBox(height: 10),
               CustomTextField(
                 controller: _passwordController,
-                obscureText: !_passwordVisible, // 비밀번호 가리기/보이기 상태 연결
-                hintText: '비밀번호',
+                obscureText: !_passwordVisible,
+                hintText: '비밀번호 (영문, 숫자 8 ~ 20)',
                 errorText: _passwordError,
                 maxLines: 1,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
@@ -299,6 +335,7 @@ class _SignUpPageState extends State<SignUpPage> {
               CustomTextField(
                 controller: _passwordCheckController,
                 obscureText: !_passwordVisible,
+                focusNode: _passwordCheckFocusNode, // 포커스 노드 추가
                 hintText: '비밀번호 확인',
                 errorText: _passwordCheckError,
                 maxLines: 1,
@@ -322,6 +359,8 @@ class _SignUpPageState extends State<SignUpPage> {
   void dispose() {
     _loginIdFocusNode.removeListener(_onLoginIdFocusChange);
     _loginIdFocusNode.dispose();
+    _passwordCheckFocusNode.removeListener(_onPasswordCheckFocusChange); // 리스너 제거
+    _passwordCheckFocusNode.dispose(); // 포커스 노드 제거
     super.dispose();
   }
 }

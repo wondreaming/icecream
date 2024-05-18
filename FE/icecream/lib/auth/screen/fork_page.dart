@@ -20,6 +20,7 @@ class _ForkPageState extends State<ForkPage> {
   @override
   Widget build(BuildContext context) {
     return DefaultLayout(
+      isAppbar: false,
       title: '',
       child: Center(
         child: Padding(
