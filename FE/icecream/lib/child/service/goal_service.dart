@@ -12,9 +12,14 @@ class GoalService {
       if (response.statusCode == 200) {
         return response.data['data'][0];
       } else {
-        throw Exception('Failed to load goal');
+        throw Exception('Failed to load goal: ${response.statusCode}');
       }
+    } on DioError catch (dioError) {
+      // DioError를 구체적으로 처리
+      print('DioError fetching goal: ${dioError.response?.statusCode} - ${dioError.message}');
+      rethrow;
     } catch (e) {
+      // 다른 예외 처리
       print('Error fetching goal: $e');
       rethrow;
     }
