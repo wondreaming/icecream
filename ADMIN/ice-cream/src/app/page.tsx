@@ -71,7 +71,7 @@ const Home = () => {
                   <img
                     src={`data:image/jpeg;base64,${cctvImage}`}
                     alt="CCTV"
-                    className="w-full h-full object-cover"
+                    // className="w-full h-full object-cover"
                   />
                 ) : (
                   // <img src={cctvImage} alt="CCTV" />
