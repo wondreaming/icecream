@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:icecream/goal/model/goal_model.dart';
 import 'package:icecream/child/service/daily_goal_service.dart';
 import 'package:dio/dio.dart';
 import 'package:icecream/com/const/dio_interceptor.dart';
@@ -50,29 +49,27 @@ class _ChildDailyGoalWidgetState extends State<ChildDailyGoalWidget> {
   @override
   void initState() {
     super.initState();
-    _today = DateTime.now().toLocal(); // 한국 시간대로 변환
+    _today = DateTime.now().toLocal();
     _currentMonth = DateTime(_today.year, _today.month);
     _populateDates(_currentMonth);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(Duration(milliseconds: 500), _scrollToTodayDate); // 지연 호출
+      Future.delayed(Duration(milliseconds: 300), _scrollToTodayDate);
     });
     _scrollController.addListener(_scrollListener);
   }
 
-  void _scrollListener() {
-    // 이 함수가 필요하지 않다면 삭제할 수 있습니다.
-  }
+  void _scrollListener() {}
 
   void _scrollToTodayDate() {
-    if (!mounted) return; // 상태가 마운트된 상태에서만 동작
+    if (!mounted || _visibleDates.isEmpty) return;
 
     DateTime todayDate = DateTime(_today.year, _today.month, _today.day);
     int index = _visibleDates.indexWhere((date) => date.isAtSameMomentAs(todayDate));
     if (index != -1) {
-      double position = index * 106.7;
+      double position = index * 128.0;
       double screenHeight = MediaQuery.of(context).size.height;
       double maxHeight = screenHeight * 0.1;
-      position -= maxHeight / 2; // Center the date more accurately
+      position -= maxHeight / 2;
       _scrollController.animateTo(position > 0 ? position : 0, duration: Duration(milliseconds: 500), curve: Curves.easeInOut);
     }
   }
@@ -81,9 +78,7 @@ class _ChildDailyGoalWidgetState extends State<ChildDailyGoalWidget> {
     List<DateTime> newDates = [];
     DateTime startDate = DateTime(month.year, month.month, 1);
     DateTime endDate = DateTime(month.year, month.month + 1, 0);
-    for (DateTime date = startDate;
-    date.isBefore(endDate.add(const Duration(days: 1)));
-    date = date.add(const Duration(days: 1))) {
+    for (DateTime date = startDate; date.isBefore(endDate.add(const Duration(days: 1))); date = date.add(const Duration(days: 1))) {
       newDates.add(date);
     }
 
@@ -92,9 +87,9 @@ class _ChildDailyGoalWidgetState extends State<ChildDailyGoalWidget> {
         _visibleDates.addAll(newDates);
       } else {
         _visibleDates.insertAll(0, newDates);
-        _currentMonth = month; // Update the current month
+        _currentMonth = month;
       }
-      _today = DateTime.now().toLocal(); // 한국 시간대로 변환
+      _today = DateTime.now().toLocal();
     });
   }
 
@@ -119,8 +114,8 @@ class _ChildDailyGoalWidgetState extends State<ChildDailyGoalWidget> {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
-        } else if (!snapshot.hasData) {
-          return const Center(child: Text('No data'));
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(child: Text('No data available'));
         } else {
           final goalData = snapshot.data!;
           Map<String, int?> fullResult = extendDateRange(goalData);
@@ -186,6 +181,7 @@ class _ChildDailyGoalWidgetState extends State<ChildDailyGoalWidget> {
       _populateDates(_currentMonth);
     });
   }
+
 
   @override
   void dispose() {
@@ -254,7 +250,7 @@ class DailyDateCircle extends StatelessWidget {
           isToday: isToday,
           isSuccess: status == 1,
           isUndefined: status == null,
-          circleRadius: 45.0,
+          circleRadius: 55.0,
           lineHeight: 48.0, // 모든 요소 밑에 선 추가
         ),
         child: Padding(
@@ -262,13 +258,14 @@ class DailyDateCircle extends StatelessWidget {
           child: Container(
             decoration: boxDecoration,
             child: CircleAvatar(
-              radius: 45.0,
+              radius: 55.0,
               backgroundColor: Colors.transparent,
               child: Text(
                 DateFormat('MM월 dd일').format(date),
                 style: TextStyle(
                   color: textColor,
                   fontWeight: FontWeight.bold,
+                  fontSize: 20,
                 ),
               ),
             ),
@@ -297,9 +294,8 @@ class CircleLinePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..strokeWidth = 2.0;
+      ..strokeWidth = 4.0;
 
-    // 위쪽 수직선
     paint.color = Colors.grey;
     canvas.drawLine(
       Offset(size.width / 2, 0),
@@ -307,7 +303,6 @@ class CircleLinePainter extends CustomPainter {
       paint,
     );
 
-    // 아래쪽 수직선
     paint.color = Colors.grey;
     canvas.drawLine(
       Offset(size.width / 2, size.height - lineHeight / 2),
