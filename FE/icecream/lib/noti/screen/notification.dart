@@ -4,6 +4,7 @@ import 'package:dotted_line/dotted_line.dart';
 import 'package:icecream/com/widget/default_layout.dart';
 import 'package:icecream/noti/service/notification_service.dart';
 import 'package:icecream/noti/models/notification_model.dart';
+import 'package:rive/rive.dart';
 
 class Noti extends StatefulWidget {
   const Noti({super.key});
@@ -45,7 +46,17 @@ class _NotiState extends State<Noti> {
       automaticallyImplyLeading: false,
       title: '알림',
       child: _isLoading
-          ? const CircularProgressIndicator()
+          ? // 로딩 중일 때 로딩 화면 표시
+          const Center(
+              child: SizedBox(
+                width: 150,
+                height: 150,
+                child: RiveAnimation.asset(
+                  'asset/img/icecreamloop.riv',
+                  fit: BoxFit.cover,
+                ),
+              ),
+            )
           : _buildNotificationList(),
     );
   }
@@ -71,7 +82,9 @@ class _NotiState extends State<Noti> {
 
     return Column(
       children: [
-        SizedBox(height: 15,),
+        SizedBox(
+          height: 15,
+        ),
         Divider(),
         Expanded(
           child: ListView(
@@ -105,7 +118,10 @@ class _NotiState extends State<Noti> {
           padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 10.0),
           child: Text(
             date,
-            style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 25, fontFamily: 'GmarketSans'),
+            style: const TextStyle(
+                fontWeight: FontWeight.w500,
+                fontSize: 25,
+                fontFamily: 'GmarketSans'),
           ),
         ),
         ...notifications.map((data) {
@@ -121,7 +137,8 @@ class _NotiState extends State<Noti> {
                 ),
                 subtitle: Text(
                   data.content!,
-                  style: const TextStyle(fontSize: 18, fontFamily: 'GmarketSans'),
+                  style:
+                      const TextStyle(fontSize: 18, fontFamily: 'GmarketSans'),
                 ),
               ),
               const Padding(
@@ -135,7 +152,6 @@ class _NotiState extends State<Noti> {
       ],
     );
   }
-
 
   String _formatDateString(DateTime dateTime) {
     DateTime now = DateTime.now();
