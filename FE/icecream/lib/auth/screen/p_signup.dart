@@ -243,7 +243,7 @@ class _SignUpPageState extends State<SignUpPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('회원가입', style: TextStyle(fontFamily: 'GmarketSans', fontSize: 24)),
+        title: Text('회원가입', style: TextStyle(fontFamily: 'GmarketSans', fontWeight: FontWeight.w500)),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -253,14 +253,6 @@ class _SignUpPageState extends State<SignUpPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                '회원가입',
-                style: TextStyle(
-                  fontFamily: 'GmarketSans',
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
               SizedBox(height: 10),
               CustomTextField(                
                 controller: _usernameController,
@@ -318,6 +310,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 onPressed: registerUser,
                 child: '회원가입',
                 width: double.infinity,
+                height: 70,
               ),
             ],
           ),
