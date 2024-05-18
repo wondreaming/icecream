@@ -373,7 +373,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> _navigateAfterDelay() async {
-    await Future.delayed(Duration(seconds: 5)); // 5초 동안 지연
+    await Future.delayed(Duration(milliseconds: 2500)); // 5초 동안 지연
     setState(() {
       _isSplashScreenVisible = false; // 상태를 업데이트하여 스플래시 화면을 숨김
     });

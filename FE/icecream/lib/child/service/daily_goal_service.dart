@@ -11,7 +11,7 @@ class DailyGoalService {
     try {
       String token = await _secureStorage.read(key: 'accessToken') ?? '';
       final response = await dio.get(
-        'http://k10e202.p.ssafy.io:8080/api/goal/status?user_id=$userId',
+        'https://k10e202.p.ssafy.io/api/goal/status?user_id=$userId',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       if (response.statusCode == 200) {
