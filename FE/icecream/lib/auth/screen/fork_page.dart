@@ -29,7 +29,7 @@ class _ForkPageState extends State<ForkPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch, // 너비 최대화
             children: [
               const Text(
-                '저희 서비스는 처음이신가요?',
+                '서비스가 처음인가요?',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontFamily: 'GmarketSans',
@@ -42,7 +42,7 @@ class _ForkPageState extends State<ForkPage> {
                 onPressed: () {
                   context.goNamed('signup');
                 },
-                child: '부모이신가요?',
+                child: '부모',
                 height: 150, // 높이 조정
                 image: 'asset/img/parents.png', // 부모 아이콘 이미지 경로 추가
               ),
@@ -51,7 +51,7 @@ class _ForkPageState extends State<ForkPage> {
                 onPressed: () {
                   context.goNamed('c_qrcode');
                 },
-                child: '자녀이신가요?',
+                child: '자녀',
                 height: 150, // 높이 조정
                 image: 'asset/img/children.png', // 자녀 아이콘 이미지 경로 추가
               ),
