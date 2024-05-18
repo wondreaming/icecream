@@ -11,7 +11,7 @@ class TimeSetService {
       print('여기Fetching time sets for user ID: $userId');
       String token = await _secureStorage.read(key: 'accessToken') ?? '';
       final response = await _dio.get(
-        'http://k10e202.p.ssafy.io:8080/api/destination?user_id=$userId',
+        'https://k10e202.p.ssafy.io/api/destination?user_id=$userId',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       if (response.statusCode == 200) {

@@ -4,7 +4,7 @@ import 'package:icecream/noti/models/notification_model.dart';
 
 class NotificationService {
   final Dio _dio = Dio();
-  final String _baseUrl = "http://k10e202.p.ssafy.io:8080";
+  final String _baseUrl = "https://k10e202.p.ssafy.io";
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
   Future<String> _getAccessToken() async {

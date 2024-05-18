@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:icecream/com/const/dio_interceptor.dart';
 
 class ChildGPSService {
-  static const String baseUrl = "http://k10e202.p.ssafy.io:8080/api";
+  static const String baseUrl = "https://k10e202.p.ssafy.io/api";
   final Dio _dio = CustomDio().createDio();
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
