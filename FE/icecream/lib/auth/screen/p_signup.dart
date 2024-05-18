@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:icecream/com/widget/default_layout.dart';
 import '../service/user_service.dart';
 import 'package:icecream/setting/widget/custom_text_field.dart';
 import 'package:icecream/setting/widget/custom_elevated_button.dart';
@@ -241,12 +242,10 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('회원가입', style: TextStyle(fontFamily: 'GmarketSans', fontWeight: FontWeight.w500)),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
+    return DefaultLayout(
+      isSetting: true,
+      title: '회원가입',
+      child: SingleChildScrollView(
         padding: EdgeInsets.all(20),
         child: Form(
           key: _formKey,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:icecream/com/widget/default_layout.dart';
 import 'package:provider/provider.dart';
 import '../service/user_service.dart';
 import 'package:icecream/provider/user_provider.dart';
@@ -56,11 +57,10 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-          automaticallyImplyLeading: false,
-          title: const Text('로그인', style: TextStyle(fontFamily: 'GmarketSans', fontWeight: FontWeight.w500))),
-      body: Padding(
+    return DefaultLayout(
+      isSetting: true,
+      title: '로그인',
+      child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: <Widget>[
