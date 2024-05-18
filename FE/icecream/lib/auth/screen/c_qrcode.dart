@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:icecream/com/widget/default_layout.dart';
 import 'package:icecream/noti/models/notification_model.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:encrypt/encrypt.dart' as en;
@@ -71,12 +72,10 @@ class _QRCodePageState extends State<QRCodePage> {
   @override
   Widget build(BuildContext context) {
     List<Color> gradientColors = getRandomColors();
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('QRCode Page', style: TextStyle(fontFamily: 'GmarketSans', fontWeight: FontWeight.w500)),
-        centerTitle: true,
-      ),
-      body: Center(
+    return DefaultLayout(
+      isSetting: true,
+      title: '자녀 등록',
+      child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
