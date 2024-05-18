@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icecream/auth/service/user_service.dart';
 import 'package:icecream/home/screen/c_home.dart';
@@ -398,6 +399,13 @@ class _MyAppState extends State<MyApp> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     try {
       await _userService.autoLogin(userProvider);
+      Fluttertoast.showToast(
+          msg: '자동 로그인 성공',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.green,
+          textColor: Colors.white,
+        );
       await initServices();
       if (userProvider.isLoggedIn) {
         startLocationService(context, _locationService, _rabbitMQService);

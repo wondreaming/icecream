@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icecream/com/widget/default_layout.dart';
 import 'package:provider/provider.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import '../service/user_service.dart';
 import 'package:icecream/provider/user_provider.dart';
 import 'package:icecream/setting/widget/custom_text_field.dart';
@@ -36,22 +37,39 @@ class _LoginPageState extends State<LoginPage> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
 
     if (loginId.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('로그인 ID와 비밀번호를 입력하세요')));
+      Fluttertoast.showToast(
+        msg: '올바른 아이디와 비밀번호를 입력해주세요',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
       return;
     }
+
     debugPrint('loginId: $loginId');
     debugPrint('password: $password');
     debugPrint('fcmToken: $_fcmToken');
+
     try {
       await _userService.loginUser(loginId, password, _fcmToken, userProvider);
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('로그인 성공')));
+      Fluttertoast.showToast(
+        msg: '로그인 성공했어요',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+      );
       context.goNamed('parents'); // 부모 유저 로그인 성공시 PHome으로 이동
     } catch (e) {
       debugPrint("$e");
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('로그인 실패: $e')));
+      Fluttertoast.showToast(
+        msg: '로그인 실패했어요',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
     }
   }
 
@@ -66,7 +84,7 @@ class _LoginPageState extends State<LoginPage> {
           children: <Widget>[
             CustomTextField(
               controller: _loginIdController,
-              hintText: '로그인 ID',
+              hintText: '아이디',
               contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
             ),
             const SizedBox(height: 20),
