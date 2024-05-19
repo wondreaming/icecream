@@ -51,29 +51,29 @@ class _PDailyGoalWidgetState extends State<PDailyGoalWidget> {
   @override
   void initState() {
     super.initState();
-    _today = DateTime.now().toLocal(); // 한국 시간대로 변환
+    _today = DateTime.now().toLocal();
     _currentMonth = DateTime(_today.year, _today.month);
     _populateDates(_currentMonth);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(Duration(milliseconds: 300), _scrollToTodayDate); // 지연 호출
+      Future.delayed(Duration(milliseconds: 300), _scrollToTodayDate);
     });
     _scrollController.addListener(_scrollListener);
   }
 
   void _scrollListener() {
-    // 이 함수가 필요하지 않다면 삭제할 수 있습니다.
+    // 필요 없다면 이 함수를 삭제하세요.
   }
 
   @override
-  void didUpdateWidget(PDailyGoalWidget oldWidget) {
+  void didUpdateWidget(covariant PDailyGoalWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.selectedChildId != oldWidget.selectedChildId) {
-      _today = DateTime.now().toLocal();  // 한국 시간대로 다시 설정
-      _currentMonth = DateTime(_today.year, _today.month); // 현재 달을 업데이트
-      _visibleDates.clear(); // 기존에 표시된 날짜들을 클리어
-      _populateDates(_currentMonth); // 날짜들을 다시 생성
+      _today = DateTime.now().toLocal();
+      _currentMonth = DateTime(_today.year, _today.month);
+      _visibleDates.clear();
+      _populateDates(_currentMonth);
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Future.delayed(Duration(milliseconds: 300), _scrollToTodayDate); // 지연된 호출로 오늘 날짜로 스크롤
+        Future.delayed(Duration(milliseconds: 300), _scrollToTodayDate);
       });
     }
   }
@@ -105,9 +105,9 @@ class _PDailyGoalWidgetState extends State<PDailyGoalWidget> {
         _visibleDates.addAll(newDates);
       } else {
         _visibleDates.insertAll(0, newDates);
-        _currentMonth = month; // Update the current month
+        _currentMonth = month; // 현재 월 업데이트
       }
-      _today = DateTime.now().toLocal(); // 한국 시간대로 변환
+      _today = DateTime.now().toLocal(); // 한국 시간대로 업데이트
     });
   }
 
@@ -130,13 +130,13 @@ class _PDailyGoalWidgetState extends State<PDailyGoalWidget> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: SizedBox(
-                  width: 150,
-                  height: 150,
-                  child: RiveAnimation.asset(
-                    'asset/img/icecreamloop.riv',
-                    fit: BoxFit.cover,
-                  ),
-                ),);
+            width: 150,
+            height: 150,
+            child: RiveAnimation.asset(
+              'asset/img/icecreamloop.riv',
+              fit: BoxFit.cover,
+            ),
+          ));
         } else if (snapshot.hasError || !snapshot.hasData) {
           final goalData = snapshot.data ?? {};
           Map<String, int?> fullResult = extendDateRange(goalData);
@@ -157,10 +157,13 @@ class _PDailyGoalWidgetState extends State<PDailyGoalWidget> {
                     int? status = fullResult[dateStr];
 
                     return DailyDateCircle(
-                      date: date,
-                      status: status,
-                      isToday: date.isAtSameMomentAs(DateTime.now().toLocal()),
-                      selectedChildId: widget.selectedChildId,
+                        date: date,
+                        status: status,
+                        isToday: date.isAtSameMomentAs(DateTime.now().toLocal()),
+                        selectedChildId: widget.selectedChildId,
+                        onUpdateSuccess: () {
+                          setState(() {});
+                        }
                     );
                   },
                 ),
@@ -209,10 +212,13 @@ class _PDailyGoalWidgetState extends State<PDailyGoalWidget> {
                     int? status = fullResult[dateStr];
 
                     return DailyDateCircle(
-                      date: date,
-                      status: status,
-                      isToday: date.isAtSameMomentAs(DateTime.now().toLocal()),
-                      selectedChildId: widget.selectedChildId,
+                        date: date,
+                        status: status,
+                        isToday: date.isAtSameMomentAs(DateTime.now().toLocal()),
+                        selectedChildId: widget.selectedChildId,
+                        onUpdateSuccess: () {
+                          setState(() {});
+                        }
                     );
                   },
                 ),
@@ -268,6 +274,7 @@ class DailyDateCircle extends StatelessWidget {
   final int? status;
   final bool isToday;
   final int selectedChildId;
+  final Function onUpdateSuccess;
 
   const DailyDateCircle({
     Key? key,
@@ -275,6 +282,7 @@ class DailyDateCircle extends StatelessWidget {
     this.status,
     required this.isToday,
     required this.selectedChildId,
+    required this.onUpdateSuccess,
   }) : super(key: key);
 
   @override
@@ -359,8 +367,8 @@ class DailyDateCircle extends StatelessWidget {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text("상태 변경"),
-            content: const Text("해당 날짜의 성공 여부를 변경합니다."),
+            title: const Text("성공 여부 변경하기"),
+            content: const Text("\n해당 날짜의 성공 여부를 변경합니다."),
             actions: <Widget>[
               TextButton(
                 child: const Text("취소"),
@@ -384,13 +392,10 @@ class DailyDateCircle extends StatelessWidget {
 
   void _updateStatus(BuildContext context) {
     final String formattedDate = DateFormat('yyyy-MM-dd').format(date);
-    final GoalService goalService = GoalService();  // GoalService 인스턴스 생성
+    final GoalService goalService = GoalService();
 
-    // API 호출
-    goalService.updateGoalStatus(selectedChildId, formattedDate, status!).then((response) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("성공적으로 업데이트되었습니다!"),
-      ));
+    goalService.updateGoalStatus(selectedChildId, formattedDate, status! * -1).then((response) {
+      onUpdateSuccess();
     }).catchError((error) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text("상태 업데이트 실패: $error"),
