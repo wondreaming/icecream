@@ -72,6 +72,7 @@ dependencies:
   flutter_image_compress: ^2.3.0
   floating_bubbles: ^2.6.2
   fluttertoast: ^8.2.5
+  flutter_wear_os_connectivity: ^1.0.0
 
 dev_dependencies:
   flutter_test:

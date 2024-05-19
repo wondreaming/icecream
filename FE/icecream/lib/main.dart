@@ -36,8 +36,16 @@ import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
+// bluetooth
+import 'package:flutter_wear_os_connectivity/flutter_wear_os_connectivity.dart';
+import 'dart:developer';
+
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
+
+final FlutterWearOsConnectivity _flutterWearOsConnectivity =
+    FlutterWearOsConnectivity();
+WearOsDevice? _selectedDevice;
 
 // 알림 채널 high_importance_channel
 const AndroidNotificationChannel highImportanceChannel =
@@ -73,6 +81,12 @@ Future<void> _handleNotification(RemoteMessage message) async {
     case 'overspeed-1':
     case 'overspeed-2':
     case 'overspeed-3':
+      List<int> list = content!.codeUnits;
+      Uint8List bytes = Uint8List.fromList(list);
+      _flutterWearOsConnectivity
+          .sendMessage(bytes,
+              deviceId: _selectedDevice!.id, path: "/sample-message")
+          .then(print);
       isOverspeed = true;
       break;
     case 'created':
@@ -294,7 +308,8 @@ void startLocationService(BuildContext context, LocationService locationService,
           locationService.getLocationStream().listen((position) {
         if (rabbitMQService.isInitialized) {
           // debugPrint('Sending location: (${position.latitude}, ${position.longitude}) with destinationId: $destinationId');
-          rabbitMQService.sendLocation(position.latitude, position.longitude, userProvider.userId, destinationId);
+          rabbitMQService.sendLocation(position.latitude, position.longitude,
+              userProvider.userId, destinationId);
         } else {
           debugPrint('RabbitMQ not initialized. Location not sent.');
         }
@@ -365,12 +380,36 @@ class _MyAppState extends State<MyApp> {
   final RabbitMQService _rabbitMQService = RabbitMQService();
   late StreamSubscription<Position> _locationSubscription;
   late Future<void> _autoLoginFuture;
+  List<WearOsDevice> _deviceList = [];
+  StreamSubscription<CapabilityInfo>? _connectedDeviceCapabilitySubscription;
 
   @override
   void initState() {
     super.initState();
     _autoLoginFuture = _autoLogin();
     _navigateAfterDelay();
+    _flutterWearOsConnectivity.configureWearableAPI().then((_) {
+      _flutterWearOsConnectivity.getConnectedDevices().then((value) {
+        _updateDeviceList(value.toList());
+      });
+      _flutterWearOsConnectivity.getAllDataItems().then(inspect);
+      _connectedDeviceCapabilitySubscription = _flutterWearOsConnectivity
+          .capabilityChanged(
+              capabilityPathURI: Uri(
+                  scheme: "wear", // Default scheme for WearOS app
+                  host: "*", // Accept all path
+                  path:
+                      "/flutter_smart_watch_connected_nodes" // Capability path
+                  ))
+          .listen((info) {
+        if (info.associatedDevices.isEmpty) {
+          setState(() {
+            _selectedDevice = null;
+          });
+        }
+        _updateDeviceList(info.associatedDevices.toList());
+      });
+    });
   }
 
   Future<void> _navigateAfterDelay() async {
@@ -392,6 +431,21 @@ class _MyAppState extends State<MyApp> {
   void dispose() {
     _locationSubscription?.cancel();
     super.dispose();
+    _flutterWearOsConnectivity.dispose();
+    _clearAllListeners();
+  }
+
+  _clearAllListeners() {
+    _connectedDeviceCapabilitySubscription?.cancel();
+  }
+
+  void _updateDeviceList(List<WearOsDevice> devices) {
+    setState(() {
+      _deviceList = devices;
+      if (_deviceList.isNotEmpty) {
+        _selectedDevice = _deviceList.first;
+      }
+    });
   }
 
   // 자동 로그인
@@ -400,12 +454,12 @@ class _MyAppState extends State<MyApp> {
     try {
       await _userService.autoLogin(userProvider);
       Fluttertoast.showToast(
-          msg: '자동 로그인 성공',
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          backgroundColor: Colors.green,
-          textColor: Colors.white,
-        );
+        msg: '자동 로그인 성공',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+      );
       await initServices();
       if (userProvider.isLoggedIn) {
         startLocationService(context, _locationService, _rabbitMQService);
