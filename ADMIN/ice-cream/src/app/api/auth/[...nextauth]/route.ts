@@ -22,7 +22,11 @@ const authOptions = {
               password: credentials?.password,
             }),
           });
+          if (!res.ok) {
+            throw new Error("Failed to login");
+          }
           const user = await res.json();
+
           if (user) {
             console.log(user);
             return user;
