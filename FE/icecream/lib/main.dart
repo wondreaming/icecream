@@ -259,7 +259,7 @@ void startLocationService(BuildContext context, LocationService locationService,
     var timeSetService = TimeSetService();
     try {
       List<TimeSet> timeSets =
-          await timeSetService.fetchTimeSets(userProvider.userId.toString());
+      await timeSetService.fetchTimeSets(userProvider.userId.toString());
       DateTime now = DateTime.now();
       String currentDay = DateFormat('EEEE', 'ko_KR').format(now).toLowerCase();
       String currentTime = DateFormat('HH:mm').format(now);
@@ -267,7 +267,6 @@ void startLocationService(BuildContext context, LocationService locationService,
       int destinationId = -1;
       int dayIndex = getDayIndex(currentDay);
 
-      // 디버깅 로그 추가
       debugPrint('Current day: $currentDay (index: $dayIndex)');
       debugPrint('Current time: $currentTime');
 
@@ -288,16 +287,8 @@ void startLocationService(BuildContext context, LocationService locationService,
         debugPrint('No matching TimeSet found.');
       }
 
-      // 위치 스트림 리스너 설정
-      var locationSubscription =
-          locationService.getLocationStream().listen((position) {
-        if (rabbitMQService.isInitialized) {
-          // debugPrint('Sending location: (${position.latitude}, ${position.longitude}) with destinationId: $destinationId');
-          rabbitMQService.sendLocation(position.latitude, position.longitude, userProvider.userId, destinationId);
-        } else {
-          debugPrint('RabbitMQ not initialized. Location not sent.');
-        }
-      });
+      locationService.startLocationUpdates(rabbitMQService, userProvider.userId, destinationId);
+
     } catch (e) {
       print("TimeSet data fetch failed: $e");
     }
@@ -399,7 +390,8 @@ class _MyAppState extends State<MyApp> {
     try {
       await _userService.autoLogin(userProvider);
       await initServices();
-      if (userProvider.isLoggedIn) {
+      // 사용자가 부모가 아닐 경우에만 위치 서비스를 시작\
+      if (userProvider.isLoggedIn && !userProvider.isParent) {
         startLocationService(context, _locationService, _rabbitMQService);
       }
     } catch (e) {

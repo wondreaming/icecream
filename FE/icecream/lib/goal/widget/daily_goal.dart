@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:icecream/goal/service/p_daily_goal_service.dart';
+import 'package:icecream/goal/service/goal_service.dart';
 import 'package:dio/dio.dart';
 import 'package:icecream/com/const/dio_interceptor.dart';
 
@@ -76,17 +77,16 @@ class _PDailyGoalWidgetState extends State<PDailyGoalWidget> {
     }
   }
 
-
   void _scrollToTodayDate() {
-    if (!mounted) return; // 상태가 마운트된 상태에서만 동작
+    if (!mounted) return;
 
     DateTime todayDate = DateTime(_today.year, _today.month, _today.day);
     int index = _visibleDates.indexWhere((date) => date.isAtSameMomentAs(todayDate));
     if (index != -1) {
-      double position = index * 127.0;
+      double position = index * 128.5;
       double screenHeight = MediaQuery.of(context).size.height;
       double maxHeight = screenHeight * 0.1;
-      position -= maxHeight / 2; // Center the date more accurately
+      position -= maxHeight / 2;
       _scrollController.animateTo(position > 0 ? position : 0, duration: Duration(milliseconds: 500), curve: Curves.easeInOut);
     }
   }
@@ -95,9 +95,7 @@ class _PDailyGoalWidgetState extends State<PDailyGoalWidget> {
     List<DateTime> newDates = [];
     DateTime startDate = DateTime(month.year, month.month, 1);
     DateTime endDate = DateTime(month.year, month.month + 1, 0);
-    for (DateTime date = startDate;
-    date.isBefore(endDate.add(const Duration(days: 1)));
-    date = date.add(const Duration(days: 1))) {
+    for (DateTime date = startDate; date.isBefore(endDate.add(const Duration(days: 1))); date = date.add(const Duration(days: 1))) {
       newDates.add(date);
     }
 
@@ -132,7 +130,6 @@ class _PDailyGoalWidgetState extends State<PDailyGoalWidget> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError || !snapshot.hasData) {
-          // 상태코드가 200이 아닐 경우에도 데이터를 출력하도록 수정
           final goalData = snapshot.data ?? {};
           Map<String, int?> fullResult = extendDateRange(goalData);
 
@@ -155,6 +152,7 @@ class _PDailyGoalWidgetState extends State<PDailyGoalWidget> {
                       date: date,
                       status: status,
                       isToday: date.isAtSameMomentAs(DateTime.now().toLocal()),
+                      selectedChildId: widget.selectedChildId,
                     );
                   },
                 ),
@@ -187,7 +185,7 @@ class _PDailyGoalWidgetState extends State<PDailyGoalWidget> {
           final goalData = snapshot.data!;
           Map<String, int?> fullResult = extendDateRange(goalData);
 
-          double maxHeight = MediaQuery.of(context).size.height * 0.55;
+          double maxHeight = MediaQuery.of(context).size.height * 0.53;
 
           return Container(
             height: maxHeight,
@@ -206,6 +204,7 @@ class _PDailyGoalWidgetState extends State<PDailyGoalWidget> {
                       date: date,
                       status: status,
                       isToday: date.isAtSameMomentAs(DateTime.now().toLocal()),
+                      selectedChildId: widget.selectedChildId,
                     );
                   },
                 ),
@@ -260,12 +259,14 @@ class DailyDateCircle extends StatelessWidget {
   final DateTime date;
   final int? status;
   final bool isToday;
+  final int selectedChildId;
 
   const DailyDateCircle({
     Key? key,
     required this.date,
     this.status,
     required this.isToday,
+    required this.selectedChildId,
   }) : super(key: key);
 
   @override
@@ -310,28 +311,31 @@ class DailyDateCircle extends StatelessWidget {
         break;
     }
 
-    return Center(
-      child: CustomPaint(
-        painter: CircleLinePainter(
-          isToday: isToday,
-          isSuccess: status == 1,
-          isUndefined: status == null,
-          circleRadius: 55.0,
-          lineHeight: 48.0, // 모든 요소 밑에 선 추가
-        ),
-        child: Padding(
-          padding: const EdgeInsets.only(top: 24.0),
-          child: Container(
-            decoration: boxDecoration,
-            child: CircleAvatar(
-              radius: 55.0,
-              backgroundColor: Colors.transparent,
-              child: Text(
-                DateFormat('MM월 dd일').format(date),
-                style: TextStyle(
-                  color: textColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
+    return GestureDetector(
+      onTap: () => _onTap(context),
+      child: Center(
+        child: CustomPaint(
+          painter: CircleLinePainter(
+            isToday: isToday,
+            isSuccess: status == 1,
+            isUndefined: status == null,
+            circleRadius: 55.0,
+            lineHeight: 48.0, // 모든 요소 밑에 선 추가
+          ),
+          child: Padding(
+            padding: const EdgeInsets.only(top: 24.0),
+            child: Container(
+              decoration: boxDecoration,
+              child: CircleAvatar(
+                radius: 55.0,
+                backgroundColor: Colors.transparent,
+                child: Text(
+                  DateFormat('MM월 dd일').format(date),
+                  style: TextStyle(
+                    color: textColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
                 ),
               ),
             ),
@@ -339,6 +343,51 @@ class DailyDateCircle extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _onTap(BuildContext context) {
+    if (status == -1 || status == 1) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text("상태 변경"),
+            content: const Text("해당 날짜의 성공 여부를 변경합니다."),
+            actions: <Widget>[
+              TextButton(
+                child: const Text("취소"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: const Text("확인"),
+                onPressed: () {
+                  _updateStatus(context);
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
+  void _updateStatus(BuildContext context) {
+    final String formattedDate = DateFormat('yyyy-MM-dd').format(date);
+    final GoalService goalService = GoalService();  // GoalService 인스턴스 생성
+
+    // API 호출
+    goalService.updateGoalStatus(selectedChildId, formattedDate, status!).then((response) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("성공적으로 업데이트되었습니다!"),
+      ));
+    }).catchError((error) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("상태 업데이트 실패: $error"),
+      ));
+    });
   }
 }
 
@@ -374,7 +423,7 @@ class CircleLinePainter extends CustomPainter {
     paint.color = Colors.grey;
     canvas.drawLine(
       Offset(size.width / 2, size.height - lineHeight / 2),
-      Offset(size.width / 2, size.height * 2),
+      Offset(size.width / 2, size.height),
       paint,
     );
 

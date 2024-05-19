@@ -1,10 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:icecream/noti/models/notification_model.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class NotificationService {
   final Dio _dio = Dio();
-  final String _baseUrl = "http://k10e202.p.ssafy.io:8080";
+  final String baseUrl = dotenv.env['BASE_URL']!;
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
   Future<String> _getAccessToken() async {
@@ -20,7 +21,7 @@ class NotificationService {
 
     try {
       final response = await _dio.get(
-        '$_baseUrl/api/notification',
+        '$baseUrl/notification',
         options: Options(headers: {
           'Authorization': 'Bearer $accessToken',
         }),
