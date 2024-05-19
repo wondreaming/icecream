@@ -50,7 +50,8 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _loginIdController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _passwordCheckController = TextEditingController();
+  final TextEditingController _passwordCheckController =
+      TextEditingController();
 
   String _deviceId = '';
   bool _isLoading = false;
@@ -162,14 +163,23 @@ class _SignUpPageState extends State<SignUpPage> {
     debugPrint("Registering with data: $data");
     try {
       final response = await _userService.registerUser(data);
-      Fluttertoast.showToast(
-        msg: '회원가입에 성공했어요',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.green,
-        textColor: Colors.white,
-      );
-      GoRouter.of(context).pushReplacementNamed('p_login');
+      if (response.statusCode == 200) {
+        Fluttertoast.showToast(
+          msg: '회원가입에 성공했어요',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.green,
+          textColor: Colors.white,
+        );
+        GoRouter.of(context).pushReplacementNamed('p_login');
+      } else {
+        Fluttertoast.showToast(
+          msg: '회원가입에 실패했어요',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+        );}
     } catch (e) {
       debugPrint("$e");
       Fluttertoast.showToast(
@@ -186,10 +196,12 @@ class _SignUpPageState extends State<SignUpPage> {
     bool isValid = true;
 
     String? usernameError = _validateUsername(_usernameController.text);
-    String? phoneNumberError = _validatePhoneNumber(_phoneNumberController.text);
+    String? phoneNumberError =
+        _validatePhoneNumber(_phoneNumberController.text);
     String? loginIdError = _validateLoginId(_loginIdController.text);
     String? passwordError = _validatePassword(_passwordController.text);
-    String? passwordCheckError = _validatePasswordCheck(_passwordCheckController.text);
+    String? passwordCheckError =
+        _validatePasswordCheck(_passwordCheckController.text);
 
     setState(() {
       // _usernameError = usernameError;
@@ -211,7 +223,8 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   void _validatePasswordCheckField() {
-    String? passwordCheckError = _validatePasswordCheck(_passwordCheckController.text);
+    String? passwordCheckError =
+        _validatePasswordCheck(_passwordCheckController.text);
     if (passwordCheckError != null) {
       Fluttertoast.showToast(
         msg: '비밀번호가 일치하지 않아요',
@@ -294,14 +307,16 @@ class _SignUpPageState extends State<SignUpPage> {
                 controller: _usernameController,
                 hintText: '이름',
                 errorText: _usernameError,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+                contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20.0, vertical: 16.0),
               ),
               SizedBox(height: 10),
               CustomTextField(
                 controller: _phoneNumberController,
                 hintText: '전화번호',
                 errorText: _phoneNumberError,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+                contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20.0, vertical: 16.0),
                 inputFormatters: [PhoneNumberFormatter()],
               ),
               SizedBox(height: 10),
@@ -310,7 +325,8 @@ class _SignUpPageState extends State<SignUpPage> {
                 hintText: '아이디 (영문, 숫자 6 ~ 20자)',
                 focusNode: _loginIdFocusNode,
                 errorText: _loginIdError,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+                contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20.0, vertical: 16.0),
               ),
               SizedBox(height: 10),
               CustomTextField(
@@ -319,7 +335,8 @@ class _SignUpPageState extends State<SignUpPage> {
                 hintText: '비밀번호 (영문, 숫자 8 ~ 20)',
                 errorText: _passwordError,
                 maxLines: 1,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+                contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20.0, vertical: 16.0),
                 suffixIcon: IconButton(
                   icon: Icon(
                     _passwordVisible ? Icons.visibility : Icons.visibility_off,
@@ -339,7 +356,8 @@ class _SignUpPageState extends State<SignUpPage> {
                 hintText: '비밀번호 확인',
                 errorText: _passwordCheckError,
                 maxLines: 1,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+                contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20.0, vertical: 16.0),
               ),
               SizedBox(height: 20),
               CustomElevatedButton(
@@ -359,7 +377,8 @@ class _SignUpPageState extends State<SignUpPage> {
   void dispose() {
     _loginIdFocusNode.removeListener(_onLoginIdFocusChange);
     _loginIdFocusNode.dispose();
-    _passwordCheckFocusNode.removeListener(_onPasswordCheckFocusChange); // 리스너 제거
+    _passwordCheckFocusNode
+        .removeListener(_onPasswordCheckFocusChange); // 리스너 제거
     _passwordCheckFocusNode.dispose(); // 포커스 노드 제거
     super.dispose();
   }
