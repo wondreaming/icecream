@@ -107,11 +107,8 @@ class _SignUpPageState extends State<SignUpPage> {
     }
 
     try {
-      var result = await _userService.checkLoginIdAvailability(loginId);
-      if (result['isAvailable']) {
-        setState(() {
-          _loginIdError = null;
-        });
+      var response = await _userService.checkLoginIdAvailability(loginId);
+      if (response['status'] == 200) {        
         Fluttertoast.showToast(
           msg: '사용 가능한 아이디예요',
           toastLength: Toast.LENGTH_SHORT,
@@ -163,7 +160,7 @@ class _SignUpPageState extends State<SignUpPage> {
     debugPrint("Registering with data: $data");
     try {
       final response = await _userService.registerUser(data);
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
         Fluttertoast.showToast(
           msg: '회원가입에 성공했어요',
           toastLength: Toast.LENGTH_SHORT,
