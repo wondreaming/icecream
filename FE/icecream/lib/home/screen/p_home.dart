@@ -10,10 +10,10 @@ class PHome extends StatefulWidget {
   const PHome({super.key});
 
   @override
-  State<PHome> createState() => _PHomeState();
+  State<PHome> createState() => PHomeState();
 }
 
-class _PHomeState extends State<PHome> with SingleTickerProviderStateMixin {
+class PHomeState extends State<PHome> with SingleTickerProviderStateMixin {
   late int currentPage;
   late TabController tabController;
   final List<Color> colors = [
@@ -42,6 +42,12 @@ class _PHomeState extends State<PHome> with SingleTickerProviderStateMixin {
     setState(() {
       currentPage = newPage;
     });
+  }
+
+  void reloadCurrentTab() {
+    final int currentIndex = tabController.index;
+    tabController.index = 0;  // 다른 탭으로 잠시 이동
+    tabController.index = currentIndex;  // 원래 탭으로 복귀
   }
 
   @override

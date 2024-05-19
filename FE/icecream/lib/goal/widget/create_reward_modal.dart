@@ -138,6 +138,7 @@ class _AddRewardModalState extends State<AddRewardModal> {
                       };
                       var response = await goalService.addGoal(goalData);
                       if (response.statusCode == 200) {
+                        widget.onSaved();  // 콜백 호출
                         Navigator.of(context).pop();
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(

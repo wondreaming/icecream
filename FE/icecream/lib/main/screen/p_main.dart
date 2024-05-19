@@ -9,6 +9,8 @@ import 'package:icecream/main/models/child_marker_model.dart';
 import 'package:intl/intl.dart';
 import 'package:rive/rive.dart';
 
+import '../widget/expansion_tile_card.dart';
+
 class StartFloatFabLocation extends FloatingActionButtonLocation {
   const StartFloatFabLocation();
 
@@ -32,6 +34,7 @@ class _PMainState extends State<PMain> {
   Position? _initialPosition;
   Set<Marker> markers = {};
   Map<String, ChildMarkerData> markerData = {};
+  GlobalKey<ExpansionTileCardState> expansionTileKey = GlobalKey<ExpansionTileCardState>();
 
   @override
   void initState() {
@@ -47,6 +50,7 @@ class _PMainState extends State<PMain> {
         desiredAccuracy: LocationAccuracy.high);
   }
 
+
   @override
   Widget build(BuildContext context) {
     return DefaultLayout(
@@ -55,53 +59,46 @@ class _PMainState extends State<PMain> {
       title: '아이스크림',
       padding: EdgeInsets.zero,
       child: Scaffold(
-        body: Stack(
-          children: [
-            Column(
-              children: [
-                Expanded(
-                  child: FutureBuilder(
-                    future: _initKakaoMapFuture,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.done &&
-                          _initialPosition != null) {
-                        return KakaoMap(
-                          onMapCreated: _onMapCreated,
-                          markers: markers.toList(),
-                          onMarkerTap: _onMarkerTap,
-                        );
-                      } else {
-                        // 로딩 중일 때 로딩 화면 표시
-                        return const MaterialApp(
-                          home: Scaffold(
-                            body: Center(
-                              child: SizedBox(
-                                width: 150,
-                                height: 150,
-                                child: RiveAnimation.asset(
-                                  'asset/img/icecreamloop.riv',
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      }
-                    },
+        body: GestureDetector(
+          onTap: () {
+            expansionTileKey.currentState?.collapse();
+          },
+          child: Stack(
+            children: [
+              Column(
+                children: [
+                  Expanded(
+                    child: FutureBuilder(
+                      future: _initKakaoMapFuture,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.done && _initialPosition != null) {
+                          return KakaoMap(
+                            onMapCreated: _onMapCreated,
+                            markers: markers.toList(),
+                            onMarkerTap: _onMarkerTap,
+                          );
+                        } else {
+                          return const Center(child: CircularProgressIndicator());
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              Positioned(
+                top: 20,
+                left: 25,
+                right: 25,
+                child: Container(
+                  color: Colors.white.withOpacity(0.0),
+                  child: ChildList(
+                    key: expansionTileKey,
+                    onChildTap: _onChildTap,
                   ),
                 ),
-              ],
-            ),
-            Positioned(
-              top: 20, // 상단 위치 설정
-              left: 25,
-              right: 25,
-              child: Container(
-                color: Colors.white.withOpacity(0.9), // 배경을 약간 투명하게 설정
-                child: ChildList(onChildTap: _onChildTap),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         floatingActionButton: Padding(
           padding: const EdgeInsets.fromLTRB(20, 5, 10, 10),
