@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
+import 'package:icecream/auth/screen/child_regist.dart';
 import 'package:icecream/auth/service/user_service.dart';
+import 'package:icecream/com/const/color.dart';
 import 'package:icecream/com/const/dio_interceptor.dart';
-import 'package:icecream/com/router/router.dart';
 import 'package:icecream/com/widget/default_layout.dart';
 import 'package:icecream/provider/user_provider.dart';
 import 'package:icecream/setting/model/password_model.dart';
@@ -61,18 +63,25 @@ class _MyPageState extends State<MyPage> {
     ResponseModel response;
     response = await postPassword();
 
-    print('배부름 ${response.status}');
     if (response.status == 200) {
+      final String? message = response.message;
       passwordController.clear();
       context.pop();
+      await Fluttertoast.showToast(
+          msg: message!,
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: AppColors.custom_black,
+          textColor: AppColors.background_color);
       changePasswordModal(context);
     } else {
       final String message = response.message!;
-      showCustomDialog(
-        context,
-        message,
-        isNo: false,
-      );
+      Fluttertoast.showToast(
+          msg: message,
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: AppColors.custom_black,
+          textColor: AppColors.background_color);
     }
   }
 
@@ -107,27 +116,31 @@ class _MyPageState extends State<MyPage> {
     final dio = CustomDio().createDio();
     final userRepository = UserRespository(dio);
     final refreshTokenModel = await UserService().getRefreashToken();
-    print('222222222222222222 ${refreshTokenModel.refreashToken}');
-    final refreashToken = refreshTokenModel.refreashToken;
     ResponseModel response =
-        await userRepository.postLogout(refreashToken: refreashToken);
-    print('111111111111111111 $response');
+        await userRepository.postLogout(refreshToken: refreshTokenModel);
     return response;
   }
 
-  void logout() async {
+  Future<void> logout() async {
     ResponseModel response;
     response = await postLogout();
 
     if (response.status == 200) {
       final String message = response.message!;
-      showCustomDialog(context, message, isNo: false, onPressed: () {
-        context.pop();
-      });
+      await Fluttertoast.showToast(
+          msg: message!,
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: AppColors.custom_black,
+          textColor: AppColors.background_color);
     } else {
-      showCustomDialog(context, '로그아웃이 실패했습니다', isNo: false, onPressed: () {
-        context.pop();
-      });
+      final String message = response.message!;
+      await Fluttertoast.showToast(
+          msg: message!,
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: AppColors.custom_black,
+          textColor: AppColors.background_color);
     }
   }
 
@@ -177,13 +190,23 @@ class _MyPageState extends State<MyPage> {
       phoneNumberController.clear();
       final String message = response.message!;
       userProvider.setPhoneNumber = phone_number;
-      showCustomDialog(context, message, isNo: false, onPressed: () {
-        context.pop();
-      });
+      context.pop();
+      Fluttertoast.showToast(
+          msg: message,
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: AppColors.custom_black,
+          textColor: AppColors.background_color);
+
     } else {
-      showCustomDialog(context, '전화번호 수정이 실패했습니다', isNo: false, onPressed: () {
-        context.pop();
-      });
+      final String message = response.message!;
+      context.pop();
+      Fluttertoast.showToast(
+          msg: message,
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: AppColors.custom_black,
+          textColor: AppColors.background_color);
     }
   }
 
@@ -245,7 +268,7 @@ class _MyPageState extends State<MyPage> {
                   );
                 }),
               ),
-              180.0,
+              160.0,
             );
           },
           secoundOnTap: () {
@@ -267,14 +290,13 @@ class _MyPageState extends State<MyPage> {
                           onChanged: (String value) {
                             phone_number = value;
                           },
-                          hintText: '-를 포함해서 전화번호를 입력해주세요',
+                          hintText: '전화번호를 입력해주세요',
+                          inputFormatters: [PhoneNumberFormatter()],
                         ),
                         SizedBox(height: 16.0),
                         CustomElevatedButton(
                             onPressed: () {
-
                               patchPhoneNumber();
-
                             },
                             child: '저장'),
                       ],
@@ -286,13 +308,14 @@ class _MyPageState extends State<MyPage> {
             );
           },
           thirdOnTap: () {
-            showCustomDialog(context, '로그아웃하시겠습니까?', onPressed: () {
-              UserService().deleteAll();
+            showCustomDialog(context, '로그아웃하시겠습니까?', onPressed: () async {
+              await logout();
+              await UserService().deleteAllExceptedFcm();
               context.go('/');
             });
           },
           fourthOnTap: () {
-            showCustomDialog(context, '회원 탈퇴하시겠습니까?', onPressed: ()  async {
+            showCustomDialog(context, '회원 탈퇴하시겠습니까?', onPressed: () async {
               await UserService().deleteUser();
               await UserService().deleteAll();
               context.go('/');
@@ -367,16 +390,17 @@ void changePasswordModal(BuildContext context) {
           ),
           SizedBox(height: 16.0),
           CustomElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 if (password1 == password2) {
-                  changePassword(context, password1);
+                  await changePassword(context, password1);
                   context.pop();
                 } else {
-                  showCustomDialog(
-                    context,
-                    '비밀번호가 일치하지 않습니다',
-                    isNo: false,
-                  );
+                  Fluttertoast.showToast(
+                      msg:  '비밀번호가 일치하지 않습니다',
+                      toastLength: Toast.LENGTH_SHORT,
+                      gravity: ToastGravity.BOTTOM,
+                      backgroundColor: AppColors.custom_black,
+                      textColor: AppColors.background_color);
                 }
               },
               child: '저장'),
@@ -387,27 +411,29 @@ void changePasswordModal(BuildContext context) {
   );
 }
 
-void changePassword(BuildContext context, String password) async {
+Future<void> changePassword(BuildContext context, String password) async {
   ResponseModel response;
   response = await patchPassword(password);
-  print(response.message);
 
   if (response.status == 200) {
     final String message = response.message!;
     if (Navigator.of(context, rootNavigator: true).canPop()) {
-    showCustomDialog(
-      context,
-      message,
-      isNo: false,
-    );}
+      Fluttertoast.showToast(
+          msg: message!,
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: AppColors.custom_black,
+          textColor: AppColors.background_color);
+    }
   } else {
     final String message = response.message!;
     if (Navigator.of(context).canPop()) {
-      showCustomDialog(
-        context,
-        message,
-        isNo: false,
-      );
+      Fluttertoast.showToast(
+          msg: message,
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: AppColors.custom_black,
+          textColor: AppColors.background_color);
     }
   }
 }

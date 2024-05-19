@@ -18,6 +18,7 @@ class CustomTextContainer extends StatelessWidget {
   final bool? isUnTitle;
   final String? errorText;
   final bool? isDone;
+  final FocusNode? focusNode;
   const CustomTextContainer({
     super.key,
     required this.text,
@@ -35,6 +36,7 @@ class CustomTextContainer extends StatelessWidget {
     this.isUnTitle = true,
     this.errorText,
     this.isDone = false,
+    this.focusNode,
   });
 
   @override
@@ -93,6 +95,7 @@ class CustomTextContainer extends StatelessWidget {
           if (isDetail)
             Flexible(
               child: CustomTextFieldVersion2(
+                focusNode: focusNode,
                 errorText: errorText,
                 controller: controller,
                 onChanged: onChanged,
@@ -115,7 +118,9 @@ class CustomTextContainer extends StatelessWidget {
                       fontSize: isDone! ? 16.0 : 14.0,
                       fontWeight: FontWeight.w400,
                       fontFamily: 'GmarketSans',
-                      color: isDone! ? AppColors.text_color : AppColors.input_text_color,
+                      color: isDone!
+                          ? AppColors.text_color
+                          : AppColors.input_text_color,
                     ),
                   ),
                 ),

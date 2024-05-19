@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icecream/com/const/color.dart';
 import 'package:icecream/com/const/dio_interceptor.dart';
@@ -30,7 +31,8 @@ class ProfileImage extends StatefulWidget {
       required this.height,
       this.imgUrl,
       this.detail = false,
-      required this.user_id, required this.isParent});
+      required this.user_id,
+      required this.isParent});
 
   @override
   State<ProfileImage> createState() => _ProfileImageState();
@@ -76,22 +78,83 @@ class _ProfileImageState extends State<ProfileImage> {
     try {
       if (response.status == 200 && response.data != null) {
         if (widget.isParent) {
-        Provider.of<UserProvider>(context, listen: false).setProfileImage =
-            response.data!; } else {
-        // 자녀 프로필 이미지 업데이트
-        Provider.of<UserProvider>(context, listen: false).updateChildProfileImage(
-          widget.user_id,
-          response.data!,
-        );}
+          Provider.of<UserProvider>(context, listen: false).setProfileImage =
+              response.data!;
+        } else {
+          // 자녀 프로필 이미지 업데이트
+          Provider.of<UserProvider>(context, listen: false)
+              .updateChildProfileImage(
+            widget.user_id,
+            response.data!,
+          );
+        }
         final String message = response.message!;
-        showCustomDialog(context, message, isNo: false, onPressed: () {
-          context.pop();
-        });
+        context.pop();
+        Fluttertoast.showToast(
+            msg: message,
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: AppColors.custom_black,
+            textColor: AppColors.background_color);
       } else {
         final String message = response.message!;
-        showCustomDialog(context, message, isNo: false, onPressed: () {
-          context.pop();
-        });
+        context.pop();
+        Fluttertoast.showToast(
+            msg: message,
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: AppColors.custom_black,
+            textColor: AppColors.background_color);
+      }
+    } catch (e) {
+      // 예외 발생시 에러 메시지 표시
+    }
+  }
+
+  // 프로필 이미지 삭제 api
+  Future<ResponseModel> deleteImg() async {
+    final dio = CustomDio().createDio();
+    final userRepository = UserRespository(dio);
+
+    ResponseModel response =
+        await userRepository.deleteImage(user_id: widget.user_id);
+    return response;
+  }
+
+  // 프로필 이미지 삭제 함수
+  void deleteImgUrl() async {
+    ResponseModel response;
+    response = await deleteImg();
+    try {
+      if (response.status == 200) {
+        if (widget.isParent) {
+          Provider.of<UserProvider>(context, listen: false).setProfileImage =
+              '';
+        } else {
+          // 자녀 프로필 이미지 업데이트
+          Provider.of<UserProvider>(context, listen: false)
+              .updateChildProfileImage(
+            widget.user_id,
+            '',
+          );
+        }
+        final String message = response.message!;
+        context.pop();
+        Fluttertoast.showToast(
+            msg: message,
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: AppColors.custom_black,
+            textColor: AppColors.background_color);
+      } else {
+        final String message = response.message!;
+        context.pop();
+        Fluttertoast.showToast(
+            msg: message,
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: AppColors.custom_black,
+            textColor: AppColors.background_color);
       }
     } catch (e) {
       // 예외 발생시 에러 메시지 표시
@@ -157,17 +220,14 @@ class _ProfileImageState extends State<ProfileImage> {
                               backgroundColor: AppColors.input_border_color,
                               child: '삭제',
                               onPressed: () {
-                                Provider.of<UserProvider>(context,
-                                        listen: false)
-                                    .setProfileImage = '';
-                                context.pop();
+                                deleteImgUrl();
                               },
                             ),
                           ],
                         );
                       },
                     ),
-                    500.0,
+                    480.0,
                   );
                 },
               ),
@@ -190,11 +250,18 @@ class _ProfileImageState extends State<ProfileImage> {
           )
         : ClipRRect(
             borderRadius: BorderRadius.circular(100),
-            child: Container(
-              height: 200,
-              width: 200,
-              color: AppColors.profile_black.withOpacity(0.5),
-            ),
+            child: widget.imgUrl == '' || widget.imgUrl == null
+                ? Container(
+                    height: 200,
+                    width: 200,
+                    color: AppColors.profile_black.withOpacity(0.5),
+                  )
+                : Image(
+                    image: NetworkImage(widget.imgUrl!),
+                    fit: BoxFit.cover,
+                    width: 200,
+                    height: 200,
+                  ),
           );
   }
 

@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:icecream/com/const/color.dart';
 import 'package:icecream/provider/user_provider.dart';
 import 'package:icecream/setting/model/refresh_token_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -35,12 +37,18 @@ class UserService {
   // refreshToken 가져가기
   Future<RefreashTokenModel> getRefreashToken() async {
     final token = await _readFromSecureStorage('refreshToken');
-    return RefreashTokenModel(refreashToken: token);
+    return RefreashTokenModel(refresh_token: token);
   }
 
   // 모든 데이터 삭제
   Future<void> deleteAll() async {
     await _secureStorage.deleteAll();
+  }
+
+  // fcm 빼고 모든 데이터 삭제
+  Future<void> deleteAllExceptedFcm() async {
+    await _secureStorage.delete(key: 'accessToken');
+    await _secureStorage.delete(key: 'refreshToken');
   }
 
   // 토큰 저장
@@ -210,8 +218,21 @@ class UserService {
     try {
       final response = await _dio.delete('/users');
       if (response.statusCode == 200) {
-        print('회원 탈퇴 성공적');
+        final String message = response.data['message'];
+        Fluttertoast.showToast(
+            msg: message,
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: AppColors.custom_black,
+            textColor: AppColors.background_color);
       } else {
+        final String message = response.data['message'];
+        Fluttertoast.showToast(
+            msg: message,
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: AppColors.custom_black,
+            textColor: AppColors.background_color);
         throw Exception('Failed to delete user: ${response.data['message']}');
       }
     } catch (e) {
