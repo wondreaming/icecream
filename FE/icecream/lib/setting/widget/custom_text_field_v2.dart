@@ -10,6 +10,7 @@ class CustomTextFieldVersion2 extends StatelessWidget {
   final String? errorText;
   final Widget? suffixIcon;
   final TextEditingController? controller;
+  final FocusNode? focusNode;
   const CustomTextFieldVersion2({
     super.key,
     this.maxLines,
@@ -20,6 +21,7 @@ class CustomTextFieldVersion2 extends StatelessWidget {
     this.errorText,
     this.suffixIcon,
     this.controller,
+    this.focusNode,
   });
 
   @override
@@ -31,6 +33,7 @@ class CustomTextFieldVersion2 extends StatelessWidget {
       ),
     );
     return TextField(
+      focusNode: focusNode,
       maxLength: 10,
       onSubmitted: (value) {},
       textInputAction: TextInputAction.done, // enter 무시
@@ -42,7 +45,7 @@ class CustomTextFieldVersion2 extends StatelessWidget {
       cursorColor: AppColors.input_text_color, // cursor 컬러
       textAlign: TextAlign.right,
       decoration: InputDecoration(
-        counterText: '', // counter text 비움으로 설정
+          counterText: '', // counter text 비움으로 설정
           contentPadding: EdgeInsets.all(0.0),
           filled: false,
           suffixIcon: suffixIcon, // 주소 찾기 할 때, 사용

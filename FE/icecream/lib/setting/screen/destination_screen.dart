@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icecream/com/const/color.dart';
 import 'package:icecream/com/const/dio_interceptor.dart';
@@ -145,8 +146,8 @@ class _DestinationScreenState extends State<DestinationScreen> {
   }
 
   // 시간 설정
-  Time _startTime = Time(hour: 7, minute: 00);
-  Time _endTime = Time(hour: 14, minute: 00);
+  Time _startTime = Time(hour: 0, minute: 00);
+  Time _endTime = Time(hour: 23, minute: 00);
   late String tempStartTime =
       tempData.containsKey('start_time') ? tempData['start_time'] : "07:00";
   late String tempEndTime =
@@ -168,6 +169,12 @@ class _DestinationScreenState extends State<DestinationScreen> {
         startDateTime.isAtSameMomentAs(endDateTime)) {
       setState(() {
         timeError = '종료 시간이 시작 시간보다 앞섭니다';
+        Fluttertoast.showToast(
+            msg: timeError,
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: AppColors.custom_red,
+            textColor: AppColors.background_color);
       });
       // 모든 프레임이 그려지고 난 뒤에 그려지는 작업
       WidgetsBinding.instance.addPostFrameCallback(
@@ -203,7 +210,6 @@ class _DestinationScreenState extends State<DestinationScreen> {
     });
     checkStartTimeAndEndTime(_startTime, _endTime, 'start');
     String formatStartTime = formatTimeOfDay(_startTime);
-    print(formatStartTime);
     start_time = formatStartTime;
   }
 
@@ -215,7 +221,6 @@ class _DestinationScreenState extends State<DestinationScreen> {
     });
     checkStartTimeAndEndTime(_startTime, _endTime, 'end');
     String formatEndTime = formatTimeOfDay(_endTime);
-    print(formatEndTime);
     end_time = formatEndTime;
   }
 
@@ -237,7 +242,6 @@ class _DestinationScreenState extends State<DestinationScreen> {
 
     ResponseModel response =
         await destinationRepository.addDestination(destination: newDestination);
-    print('등록 전달 잘하고 있어요 주인님 $newDestination');
     return response;
   }
 
@@ -257,7 +261,6 @@ class _DestinationScreenState extends State<DestinationScreen> {
         start_time: start_time,
         end_time: end_time,
         day: day);
-    print('전달 잘하고 있어요 주인님 $newDestination');
     ResponseModel response = await destinationRepository.patchDestination(
         destination: newDestination);
     return response;
@@ -270,7 +273,6 @@ class _DestinationScreenState extends State<DestinationScreen> {
     } else {
       response = await addDestination();
     }
-    print('에라이 ${response.status}');
     if (response.status == 200 || response.status == 201) {
       Provider.of<Destination>(context, listen: false).reset();
       widget.onDataSaved?.call();
@@ -295,7 +297,7 @@ class _DestinationScreenState extends State<DestinationScreen> {
       child: Container(
         height: MediaQuery.of(context).size.height,
         padding: const EdgeInsets.only(
-          bottom: 20.0,
+          bottom: 15.0,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -457,20 +459,6 @@ class _DestinationScreenState extends State<DestinationScreen> {
                   CustomShowPicker(value: _endTime, onChange: onEndTimeChanged),
                 );
               },
-            ),
-            SizedBox(
-              child: Align(
-                alignment: Alignment.bottomRight,
-                child: Text(
-                  '${timeError}',
-                  style: TextStyle(
-                    fontSize: 12.0,
-                    fontWeight: FontWeight.w400,
-                    fontFamily: 'GmarketSans',
-                    color: AppColors.input_text_color,
-                  ),
-                ),
-              ),
             ),
             Spacer(),
             CustomElevatedButton(

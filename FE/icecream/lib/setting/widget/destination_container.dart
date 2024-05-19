@@ -1,7 +1,6 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icecream/com/const/color.dart';
 import 'package:icecream/com/const/dio_interceptor.dart';
@@ -217,6 +216,13 @@ class _DestinationContainerState extends State<DestinationContainer> {
                                     onPressed: () async {
                                       var response = await deleteDestination();
                                       if (response.status == 200) {
+                                        final message = response.message;
+                                        Fluttertoast.showToast(
+                                            msg: message!,
+                                            toastLength: Toast.LENGTH_SHORT,
+                                            gravity: ToastGravity.BOTTOM,
+                                            backgroundColor: AppColors.custom_black,
+                                            textColor: AppColors.background_color);
                                         // 성공적으로 삭제 처리되었을 때 UI를 업데이트하기 위해
                                         setState(() {});
                                       }
@@ -233,7 +239,6 @@ class _DestinationContainerState extends State<DestinationContainer> {
                                   final destinationMap = widget.toMap();
                                   context.pushNamed('destination',
                                       extra: destinationMap, pathParameters: {'user_id': widget.user_id.toString()});
-                                  print(destinationMap);
                                 },
                                 child: '수정하기',
                               ),

@@ -477,6 +477,7 @@ class _MyAppState extends State<MyApp> {
         if (_isSplashScreenVisible) {
           // 로딩 중일 때 로딩 화면 표시
           return const MaterialApp(
+            debugShowCheckedModeBanner: false,
             home: Scaffold(
               body: Center(
                 child: SizedBox(
@@ -492,9 +493,14 @@ class _MyAppState extends State<MyApp> {
           );
         } else {
           // 자동 로그인 성공 여부에 따라 GoRouter 사용
-          return MaterialApp.router(
-            routerConfig: router,
-            debugShowCheckedModeBanner: false,
+          return GestureDetector(
+            onTap: (){
+              FocusManager.instance.primaryFocus?.unfocus(); // 키보드 닫기 이벤트
+            },
+            child: MaterialApp.router(
+              routerConfig: router,
+              debugShowCheckedModeBanner: false,
+            ),
           );
         }
       },
