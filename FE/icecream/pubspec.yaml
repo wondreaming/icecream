@@ -2,7 +2,7 @@ name: icecream
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.3.3 <4.0.0'
+  sdk: ">=3.3.3 <4.0.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -31,10 +31,49 @@ dependencies:
   flutter:
     sdk: flutter
 
-
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.6
+  flutter_dotenv: ^5.1.0
+  go_router: ^13.2.4
+  flutter_secure_storage: ^9.1.1
+  dio: ^5.4.3+1
+  provider: ^6.1.2
+  firebase_core: ^2.30.1
+  firebase_messaging: ^14.9.0
+  flutter_local_notifications: ^17.1.0
+  flutter_floating_bottom_bar: ^1.2.0
+  android_id: ^0.3.6
+  kakao_map_plugin: ^0.3.0
+  permission_handler: ^11.3.1
+  geolocator: ^11.0.0
+  image_picker: ^1.1.0
+  shared_preferences: ^2.2.3
+  pretty_qr_code: ^3.3.0
+  encrypt: ^5.0.3
+  dart_amqp: ^0.2.5
+  path_provider: ^2.1.3
+  http: ^1.2.1
+  image: ^4.1.7
+  intl: ^0.19.0
+  dropdown_button2: ^2.3.9
+  dotted_line: ^3.2.2
+  day_night_time_picker: ^1.3.1
+  qr_code_scanner: ^1.0.1
+  kpostal: ^0.5.1
+  retrofit: '>=4.0.0 <5.0.0'
+  logger: any  #for logging purpose
+  json_annotation: ^4.8.0
+  rive: ^0.13.4
+  flutter_native_splash: ^2.4.0
+  mime: ^1.0.5
+  http_parser: ^4.0.2
+  path: ^1.9.0
+  flutter_image_compress: ^2.3.0
+  floating_bubbles: ^2.6.2
+  fluttertoast: ^8.2.5
+  flutter_wear_os_connectivity: ^1.0.0
+
 
 dev_dependencies:
   flutter_test:
@@ -46,18 +85,27 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^3.0.0
-
+  build_runner: ^2.3.3
+  json_serializable: ^6.8.0
+  retrofit_generator: '>=7.0.0 <8.0.0'
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
-
+  assets:
+    - asset/img/
+    - .env
+    - asset/img/overspeed.png
+    - asset/img/crosswalk.png
+    - asset/img/parents.png
+    - asset/img/children.png
+    - asset/img/icecream.riv
+    - asset/img/icecreamloop.riv
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
@@ -86,5 +134,40 @@ flutter:
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
   #
+  fonts:
+    - family: Freesentation
+      fonts:
+        - asset: asset/fonts/Freesentation-Black.ttf
+          weight: 900
+        - asset: asset/fonts/Freesentation-ExtraBold.ttf
+          weight: 800
+        - asset: asset/fonts/Freesentation-Bold.ttf
+          weight: 700
+        - asset: asset/fonts/Freesentation-SemiBold.ttf
+          weight: 600
+        - asset: asset/fonts/Freesentation-Medium.ttf
+          weight: 500
+        - asset: asset/fonts/Freesentation-Regular.ttf
+          weight: 400
+        - asset: asset/fonts/Freesentation-Light.ttf
+          weight: 300
+        - asset: asset/fonts/Freesentation-ExtraLight.ttf
+          weight: 200
+        - asset: asset/fonts/Freesentation-Thin.ttf
+          weight: 100
+    - family: GmarketSans
+      fonts:
+        - asset: asset/fonts/GmarketSansBold.otf
+          weight: 700
+        - asset: asset/fonts/GmarketSansMedium.otf
+          weight: 500
+        - asset: asset/fonts/GmarketSansLight.otf
+          weight: 300
+    - family: WAGURI
+      fonts:
+        - asset: asset/fonts/WAGURI.ttf
+    - family: omyuPretty
+      fonts:
+        - asset: asset/fonts/omyuPretty.ttf
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
