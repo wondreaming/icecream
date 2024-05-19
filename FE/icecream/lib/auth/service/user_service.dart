@@ -211,12 +211,7 @@ class UserService {
           queryParameters: {'login_id': loginId},
           options: Options(headers: {'no-token': true}) // 토큰을 포함하지 않음
           );
-      return {
-        'status': response.statusCode,
-        'message': response.data['message'],
-        'isAvailable': response.statusCode == 200 &&
-            response.data['message'] == "사용 가능한 ID 입니다."
-      };
+      return response.data;
     } catch (e) {
       return {'status': 500, 'message': '서버 에러가 발생했습니다.', 'isAvailable': false};
     }
