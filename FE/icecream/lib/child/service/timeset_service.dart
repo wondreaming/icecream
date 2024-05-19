@@ -1,17 +1,19 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class TimeSetService {
   final Dio _dio = Dio();
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+  final String baseUrl = dotenv.env['BASE_URL']!;
 
   Future<List<TimeSet>> fetchTimeSets(String userId) async {
     try {
       print('여기Fetching time sets for user ID: $userId');
       String token = await _secureStorage.read(key: 'accessToken') ?? '';
       final response = await _dio.get(
-        'https://k10e202.p.ssafy.io/api/destination?user_id=$userId',
+        '$baseUrl/destination?user_id=$userId',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       if (response.statusCode == 200) {

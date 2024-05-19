@@ -12,17 +12,27 @@ class RewardModal extends StatelessWidget {
     return Dialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 15.0),
       child: SizedBox(
-        height: MediaQuery.of(context).size.height * 0.3,
+        height: MediaQuery.of(context).size.height * 0.4,
         child: Column(
           children: [
-            const SizedBox(height: 30),
+            const SizedBox(height: 15),
             Text(
               '$period일 달성시',
               style: TextStyle(fontSize: 30, fontWeight: FontWeight.w500, fontFamily: 'GmarketSans'),
             ),
-            SizedBox(height: 30),
-            Text(content, style: TextStyle(fontSize : 16, fontFamily: 'GmarketSans'),),
-            Spacer(), // 나머지 공간을 채우는 위젯 추가
+            SizedBox(height: 15),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(25.0),
+                  child: Text(
+                    content,
+                    style: TextStyle(fontSize: 18, fontFamily: 'GmarketSans'),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 20,),
             Padding(
               padding: const EdgeInsets.only(bottom: 16.0),
               child: TextButton(

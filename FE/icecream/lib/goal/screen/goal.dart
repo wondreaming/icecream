@@ -9,6 +9,8 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:icecream/goal/service/goal_service.dart';
 import 'package:icecream/goal/widget/update_reward_modal.dart';
 
+import '../../home/screen/p_home.dart';
+
 class Goal extends StatefulWidget {
   const Goal({super.key});
 
@@ -235,10 +237,14 @@ class _GoalState extends State<Goal> {
             userId: selectedChildId,
             onSaved: () {
               fetchGoals();
+              setState(() {});
             });
       },
     );
   }
+
+
+
 
   void _openUpdateRewardModal() {
     showDialog(
