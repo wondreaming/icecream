@@ -4,6 +4,8 @@ import 'package:icecream/provider/user_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:icecream/main/widget/expansion_tile_card.dart';
 
+import '../../setting/widget/profile_image.dart';
+
 class ChildList extends StatelessWidget {
   final Function(int childId, String childName, String? profileImage) onChildTap;
   const ChildList({super.key, required this.onChildTap});
@@ -68,9 +70,7 @@ class ChildList extends StatelessWidget {
                 );
               } else {
                 var child = children[index];
-                var childImage = child.profileImage != null && child.profileImage!.isNotEmpty
-                    ? AssetImage(child.profileImage!)
-                    : const AssetImage('asset/img/picture.JPEG');
+                final childImage = ProfileImage(isParent : false, width: 50, height: 50, user_id: child.userId, imgUrl: child.profileImage,);
 
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 0.0),
@@ -85,21 +85,22 @@ class ChildList extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           const SizedBox(height: 7),
-                          Container(
-                            width: 50,
-                            height: 50,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.greenAccent,
-                                width: 2,
-                              ),
-                            ),
-                            child: CircleAvatar(
-                              radius: 25, // 아바타 반경
-                              backgroundImage: childImage,
-                            ),
-                          ),
+                          childImage,
+                          // Container(
+                          //   width: 50,
+                          //   height: 50,
+                          //   decoration: BoxDecoration(
+                          //     shape: BoxShape.circle,
+                          //     border: Border.all(
+                          //       color: Colors.greenAccent,
+                          //       width: 2,
+                          //     ),
+                          //   ),
+                          //   child: CircleAvatar(
+                          //     radius: 25, // 아바타 반경
+                          //     backgroundImage: profileimg,
+                          //   ),
+                          // ),
                           const SizedBox(height: 5),
                           Text(
                             child.username,
