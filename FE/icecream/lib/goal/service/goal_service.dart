@@ -42,4 +42,17 @@ class GoalService {
       throw Exception('Failed to patch goal');
     }
   }
+
+  Future<Response> updateGoalStatus(int userId, String date, int status) async {
+    try {
+      return await _dio.post('/api/goal/status', data: {
+        'user_id': userId,
+        'date': date,
+        'status': status,
+      });
+    } catch (e) {
+      print('Failed to update goal status: $e');
+      throw Exception('상태 업데이트 실패');
+    }
+  }
 }

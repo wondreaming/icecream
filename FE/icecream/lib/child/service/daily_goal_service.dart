@@ -1,9 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class DailyGoalService {
   final Dio dio;
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+  final String baseUrl = dotenv.env['BASE_URL']!;
 
   DailyGoalService(this.dio);
 
@@ -11,7 +13,7 @@ class DailyGoalService {
     try {
       String token = await _secureStorage.read(key: 'accessToken') ?? '';
       final response = await dio.get(
-        'http://k10e202.p.ssafy.io:8080/api/goal/status?user_id=$userId',
+        '$baseUrl/goal/status?user_id=$userId',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       if (response.statusCode == 200) {

@@ -29,7 +29,8 @@ import 'package:flutter/material.dart';
 class ExpansionTileCard extends StatefulWidget {
   /// Creates a single-line [ListTile] with a trailing button that expands or collapses
   /// the tile to reveal or hide the [children]. The [initiallyExpanded] property must
-  /// be non-null.
+  /// be non-null
+
   const ExpansionTileCard({
     super.key,
     this.leading,
@@ -39,7 +40,7 @@ class ExpansionTileCard extends StatefulWidget {
     this.children = const <Widget>[],
     this.trailing,
     this.borderRadius = const BorderRadius.all(Radius.circular(8.0)),
-    this.elevation = 2.0,
+    this.elevation = 30,
     this.initialElevation = 0.0,
     this.initiallyExpanded = false,
     this.initialPadding = EdgeInsets.zero,
@@ -206,7 +207,7 @@ class ExpansionTileCardState extends State<ExpansionTileCard>
   late Animation<Color?> _iconColor;
   late Animation<Color?> _materialColor;
   late Animation<EdgeInsets> _padding;
-
+  bool get isExpanded => _isExpanded;
   bool _isExpanded = false;
 
   @override
@@ -221,7 +222,6 @@ class ExpansionTileCardState extends State<ExpansionTileCard>
     _colorTween = CurveTween(curve: widget.colorCurve);
     _turnsTween = CurveTween(curve: widget.turnsCurve);
     _paddingTween = CurveTween(curve: widget.paddingCurve);
-
     _controller = AnimationController(duration: widget.duration, vsync: this);
     _heightFactor = _controller.drive(_heightFactorTween);
     _iconTurns = _controller.drive(_halfTween.chain(_turnsTween));
@@ -271,6 +271,7 @@ class ExpansionTileCardState extends State<ExpansionTileCard>
 
   void collapse() {
     _setExpansion(false);
+    print('닫힘');
   }
 
   void toggleExpansion() {
@@ -278,52 +279,38 @@ class ExpansionTileCardState extends State<ExpansionTileCard>
   }
 
   Widget _buildChildren(BuildContext context, Widget? child) {
-    return Padding(
-      padding: _padding.value,
-      child: Material(
-        type: MaterialType.card,
-        color: _materialColor.value,
-        borderRadius: widget.borderRadius,
-        elevation: _elevation.value,
-        shadowColor: widget.shadowColor,
-        child: Container(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              InkWell(
-                customBorder:
-                RoundedRectangleBorder(borderRadius: widget.borderRadius),
-                onTap: toggleExpansion,
-                child: ListTileTheme.merge(
-                  iconColor: _iconColor.value,
-                  textColor: _headerColor.value,
-                  child: Padding(
-                    padding: const EdgeInsets.all(2.0),
-                    child: ListTile(
-                      isThreeLine: widget.isThreeLine,
-                      contentPadding: widget.contentPadding,
-                      leading: widget.leading,
-                      title: widget.title,
-                      subtitle: widget.subtitle,
-                      trailing: RotationTransition(
-                        turns: widget.trailing == null || widget.animateTrailing
-                            ? _iconTurns
-                            : AlwaysStoppedAnimation(0),
-                        child: widget.trailing ?? Icon(Icons.expand_more),
-                      ),
-                    ),
-                  ),
+    // Calculate the horizontal translation for the icon when expanded
+    double translateValue = _isExpanded ? -10.0 : 0.0;
+    return InkWell(
+      onTap: toggleExpansion,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          ListTileTheme.merge(
+            iconColor: _iconColor.value,
+            textColor: _headerColor.value,
+            child: ListTile(
+              isThreeLine: widget.isThreeLine,
+              contentPadding: widget.contentPadding,
+              leading: widget.leading,
+              title: widget.title,
+              subtitle: widget.subtitle,
+              trailing: Transform.translate(
+                offset: Offset(translateValue, 0),
+                child: RotationTransition(
+                  turns: _iconTurns,
+                  child: widget.trailing ?? Icon(Icons.expand_more),
                 ),
               ),
-              ClipRect(
-                child: Align(
-                  heightFactor: _heightFactor.value,
-                  child: child,
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
+          ClipRect(
+            child: Align(
+              heightFactor: _heightFactor.value,
+              child: child,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -346,10 +333,32 @@ class ExpansionTileCardState extends State<ExpansionTileCard>
   @override
   Widget build(BuildContext context) {
     final bool closed = !_isExpanded && _controller.isDismissed;
-    return AnimatedBuilder(
-      animation: _controller.view,
-      builder: _buildChildren,
-      child: closed ? null : Column(children: widget.children),
+    return GestureDetector(
+      onTap: () {
+        if (_isExpanded) {
+          _setExpansion(false);
+        }
+      },
+      child: AnimatedBuilder(
+        animation: _controller.view,
+        builder: (BuildContext context, Widget? child) {
+          return Material(
+            type: MaterialType.card,
+            color: _materialColor.value ?? Theme.of(context).cardColor,
+            elevation: _isExpanded ? widget.elevation : widget.initialElevation,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+              side: BorderSide(
+                color: _isExpanded ? Colors.amber.shade200 : Colors.transparent,
+                width: 3.0,
+              ),
+            ),
+            child: _buildChildren(context, child),
+          );
+        },
+        child: closed ? null : Column(children: widget.children),
+      ),
     );
   }
+
 }
