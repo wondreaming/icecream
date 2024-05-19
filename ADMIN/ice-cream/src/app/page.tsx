@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import io from "socket.io-client";
+import Navbar from "./navbar";
 
 const SOCKET_SERVER_URL = `${process.env.NEXT_PUBLIC_SOCKET_SERVER_URL}`;
 
@@ -59,11 +60,12 @@ const Home = () => {
   return (
     sessionStatus === "authenticated" && (
       <>
-        <main className="h-screen overflow-hidden">
-          <div className="grid grid-cols-8 h-full">
-            <div className="col-span-6 flex items-center justify-center">
-              <div className="w-full h-full flex flex-col items-center justify-center">
-                <h1 className="absolute top-3 left-3 p-2 text-3xl">
+        <Navbar />
+        <main className="h-screen overflow-hidden pt-20 sm:pt-0">
+          <div className="grid grid-cols-1 sm:grid-cols-8 md:grid-cols-8 h-full">
+            <div className="col-span-1 md:col-span-6 sm:col-span-6 flex items-center justify-center">
+              <div className="w-full h-full-4 flex flex-col items-center justify-center">
+                <h1 className="absolute top-24 sm:top-20 sm:mt-0 left-3 p-2 text-xl sm:text-3xl">
                   {/* WebSocket CCTV Image Viewer */}
                   {cctvName}
                 </h1>
@@ -71,8 +73,8 @@ const Home = () => {
                   <img
                     src={`data:image/jpeg;base64,${cctvImage}`}
                     alt="CCTV"
-                    // className="w-full h-full object-cover"
-                  />
+                    className="w-full object-contain"
+                  /> // img 비율 유지
                 ) : (
                   // <img src={cctvImage} alt="CCTV" />
                   <p className="text-xl">No image received yet.</p>
@@ -80,11 +82,11 @@ const Home = () => {
               </div>
             </div>
             {/* <div className="col-span-2">지도</div> */}
-            <div className="col-span-2 bg-black flex flex-col justify-end items-center h-full">
-              <h1 className="text-white text-2xl mt-10 hidden sm:block">
+            <div className="col-span-1 md:col-span-2 sm:col-span-2 bg-black flex flex-col justify-end items-center h-full">
+              {/* <h1 className="text-white text-2xl mt-10 hidden sm:block">
                 관리자 페이지
-              </h1>
-              <h3 className="text-white mt-10 mb-5 text-4xl hidden sm:block">
+              </h1> */}
+              <h3 className="text-white mt-10 sm:mt-20 mb-5 text-2xl sm:text-4xl hidden sm:block whitespace-nowrap">
                 과속 발생 현황
               </h3>
               <div className="text-white flex-grow w-full overflow-y-auto px-5 flex flex-col justify-center items-center">
@@ -96,17 +98,17 @@ const Home = () => {
                     </div>
                   ))
                 ) : (
-                  <p> 과속 차량이 없습니다</p>
+                  <p className="whitespace-nowrap"> 과속 차량이 없습니다</p>
                 )}
               </div>
-              <button
+              {/* <button
                 className="p-2 px-10 btn-delete mt-auto mb-8"
                 onClick={() => {
                   signOut();
                 }}
               >
                 로그아웃
-              </button>
+              </button> */}
             </div>
           </div>
         </main>
