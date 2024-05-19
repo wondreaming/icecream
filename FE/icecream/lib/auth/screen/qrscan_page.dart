@@ -4,6 +4,7 @@ import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:icecream/com/const/color.dart';
 import 'package:encrypt/encrypt.dart' as en;
 import 'dart:convert';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class QRScanPage extends StatefulWidget {
   const QRScanPage({Key? key}) : super(key: key);
@@ -55,9 +56,14 @@ class _QRScanPageState extends State<QRScanPage> {
   }
 
   void _showErrorMessage() {
-    ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('잘못된 QR 코드입니다. 올바른 QR 코드를 스캔하세요.')));
-    controller?.resumeCamera(); // SnackBar가 사라진 후 카메라 재개
+    Fluttertoast.showToast(
+      msg: '다시 한 번 스캔해주세요',
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: Colors.red,
+      textColor: Colors.white,
+    );
+    controller?.resumeCamera(); // Toast 메시지가 사라진 후 카메라 재개
   }
 
   String _decryptData(String? encryptedData) {

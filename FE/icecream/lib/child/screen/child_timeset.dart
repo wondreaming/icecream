@@ -4,6 +4,7 @@ import 'package:icecream/child/service/timeset_service.dart';
 import 'package:icecream/provider/user_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:icecream/child/widget/child_location_icon.dart';
+import 'package:rive/rive.dart';
 
 class ChildTimeSet extends StatefulWidget {
   const ChildTimeSet({super.key});
@@ -41,7 +42,8 @@ class _ChildTimeSetState extends State<ChildTimeSet> {
                       children: [
                         const Text(
                           '저장된 장소와 시간입니다.',
-                          style: TextStyle(fontSize: 18, fontFamily: 'GmarketSans'),
+                          style: TextStyle(
+                              fontSize: 18, fontFamily: 'GmarketSans'),
                         ),
                         Expanded(
                           child: ListView.builder(
@@ -49,7 +51,8 @@ class _ChildTimeSetState extends State<ChildTimeSet> {
                             itemCount: snapshot.data!.length,
                             itemBuilder: (context, index) {
                               final data = snapshot.data![index];
-                              Widget iconWidget = data.icon >= 0 && data.icon < locationIcons.length
+                              Widget iconWidget = data.icon >= 0 &&
+                                      data.icon < locationIcons.length
                                   ? locationIcons[data.icon]
                                   : const Icon(Icons.error);
 
@@ -59,30 +62,43 @@ class _ChildTimeSetState extends State<ChildTimeSet> {
                                   margin: const EdgeInsets.all(8.0),
                                   child: Row(
                                     children: [
-                                      SizedBox(width: 10,),
+                                      SizedBox(
+                                        width: 10,
+                                      ),
                                       Container(
                                         width: 60,
                                         alignment: Alignment.center,
                                         child: iconWidget,
                                       ),
-                                      SizedBox(width: 10,),
+                                      SizedBox(
+                                        width: 10,
+                                      ),
                                       Expanded(
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
                                           children: [
                                             Row(
                                               children: [
                                                 Expanded(
                                                   child: Text(
                                                     data.name,
-                                                    style: const TextStyle(fontSize: 14, fontFamily: 'GmarketSans'),
+                                                    style: const TextStyle(
+                                                        fontSize: 14,
+                                                        fontFamily:
+                                                            'GmarketSans'),
                                                   ),
                                                 ),
                                                 RichText(
                                                   text: TextSpan(
-                                                    children: _daysOfWeek(data.day),
-                                                    style: const TextStyle(color: Colors.black, fontFamily: 'GmarketSans'),
+                                                    children:
+                                                        _daysOfWeek(data.day),
+                                                    style: const TextStyle(
+                                                        color: Colors.black,
+                                                        fontFamily:
+                                                            'GmarketSans'),
                                                   ),
                                                 ),
                                                 const SizedBox(width: 20),
@@ -94,7 +110,10 @@ class _ChildTimeSetState extends State<ChildTimeSet> {
                                                 const SizedBox(width: 9),
                                                 Text(
                                                   '${data.startTime} ~ ${data.endTime}',
-                                                  style: const TextStyle(fontSize: 32, fontFamily: 'GmarketSans'),
+                                                  style: const TextStyle(
+                                                      fontSize: 32,
+                                                      fontFamily:
+                                                          'GmarketSans'),
                                                 ),
                                               ],
                                             ),
@@ -114,22 +133,39 @@ class _ChildTimeSetState extends State<ChildTimeSet> {
                     // 데이터가 비어 있을 때 표시할 텍스트
                     return Center(
                       child: Column(
-                        mainAxisSize: MainAxisSize.min, // 이를 통해 Column은 자식의 크기에 맞게 최소화됩니다.
+                        mainAxisSize: MainAxisSize
+                            .min, // 이를 통해 Column은 자식의 크기에 맞게 최소화됩니다.
                         children: [
-                          const Text('저장된 목적지가 없습니다.', style: TextStyle(fontSize: 20, fontFamily: 'GmarketSans'), ),
+                          const Text(
+                            '저장된 목적지가 없습니다.',
+                            style: TextStyle(
+                                fontSize: 20, fontFamily: 'GmarketSans'),
+                          ),
                           const SizedBox(height: 30), // 위젯 사이의 간격을 추가합니다.
-                          const Text('보호자 계정에서 목적지를 설정해주세요.', style: TextStyle(fontSize: 20, fontFamily: 'GmarketSans')),
-                          const SizedBox(height: 100,),
+                          const Text('보호자 계정에서 목적지를 설정해주세요.',
+                              style: TextStyle(
+                                  fontSize: 20, fontFamily: 'GmarketSans')),
+                          const SizedBox(
+                            height: 100,
+                          ),
                         ],
                       ),
                     );
                   }
                 }
                 // 데이터를 불러오는 동안 표시할 위젯
-                return const CircularProgressIndicator();
+                return const Center(
+                  child: SizedBox(
+                    width: 150,
+                    height: 150,
+                    child: RiveAnimation.asset(
+                      'asset/img/icecreamloop.riv',
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                );
               },
             ),
-
           ),
         ],
       ),

@@ -4,6 +4,7 @@ import 'package:icecream/goal/service/p_daily_goal_service.dart';
 import 'package:icecream/goal/service/goal_service.dart';
 import 'package:dio/dio.dart';
 import 'package:icecream/com/const/dio_interceptor.dart';
+import 'package:rive/rive.dart';
 
 class DailyGoalPage extends StatelessWidget {
   final int selectedChildId;
@@ -128,7 +129,14 @@ class _PDailyGoalWidgetState extends State<PDailyGoalWidget> {
       future: _DailyGoalService.fetchGoalStatus(widget.selectedChildId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: SizedBox(
+                  width: 150,
+                  height: 150,
+                  child: RiveAnimation.asset(
+                    'asset/img/icecreamloop.riv',
+                    fit: BoxFit.cover,
+                  ),
+                ),);
         } else if (snapshot.hasError || !snapshot.hasData) {
           final goalData = snapshot.data ?? {};
           Map<String, int?> fullResult = extendDateRange(goalData);
