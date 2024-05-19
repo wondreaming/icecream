@@ -5,6 +5,7 @@ import 'package:icecream/child/widget/child_daily_goal.dart';
 import 'package:icecream/child/service/goal_service.dart';
 import 'package:icecream/provider/user_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:rive/rive.dart';
 
 class ChildReward extends StatelessWidget {
   ChildReward({super.key});
@@ -46,7 +47,14 @@ class ChildReward extends StatelessWidget {
           Provider.of<UserProvider>(context, listen: false).userId.toString()),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: SizedBox(
+                  width: 150,
+                  height: 150,
+                  child: RiveAnimation.asset(
+                    'asset/img/icecreamloop.riv',
+                    fit: BoxFit.cover,
+                  ),
+                ),);
         } else {
           final goalData = snapshot.data;
 

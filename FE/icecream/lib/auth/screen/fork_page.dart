@@ -20,10 +20,10 @@ class _ForkPageState extends State<ForkPage> {
   @override
   Widget build(BuildContext context) {
     return DefaultLayout(
-      title: '',
+      isAppbar: false,
       child: Center(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0), // 패딩 조정
+          padding: const EdgeInsets.symmetric(horizontal: 24.0), // 패딩 조정
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center, // 중앙 정렬
             crossAxisAlignment: CrossAxisAlignment.stretch, // 너비 최대화

@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:icecream/child/service/daily_goal_service.dart';
 import 'package:dio/dio.dart';
 import 'package:icecream/com/const/dio_interceptor.dart';
+import 'package:rive/rive.dart';
 
 class ChildDailyGoal extends StatelessWidget {
   final int userId;
@@ -111,7 +112,14 @@ class _ChildDailyGoalWidgetState extends State<ChildDailyGoalWidget> {
       future: _dailyGoalService.fetchGoalStatus(widget.userId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: SizedBox(
+                  width: 150,
+                  height: 150,
+                  child: RiveAnimation.asset(
+                    'asset/img/icecreamloop.riv',
+                    fit: BoxFit.cover,
+                  ),
+                ),);
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {

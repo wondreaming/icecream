@@ -6,14 +6,16 @@ import 'package:icecream/setting/widget/custom_text_container.dart';
 import 'package:icecream/setting/widget/profile.dart';
 import 'package:provider/provider.dart';
 
-class Setting extends StatelessWidget {
+class Setting extends StatefulWidget {
   const Setting({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // user 정보 가져오기
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
+  State<Setting> createState() => _SettingState();
+}
 
+class _SettingState extends State<Setting> {
+  @override
+  Widget build(BuildContext context) {
     return DefaultLayout(
       automaticallyImplyLeading: false,
       title: '설정',
