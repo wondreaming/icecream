@@ -45,7 +45,7 @@ const Home = () => {
       });
 
       socket.on("getSpeedData", (data: { time: string; speed: number }) => {
-        setSpeedDataList(prevList => [
+        setSpeedDataList((prevList) => [
           ...prevList,
           { time: data.time, speed: data.speed },
         ]);
@@ -73,7 +73,7 @@ const Home = () => {
                   <img
                     src={`data:image/jpeg;base64,${cctvImage}`}
                     alt="CCTV"
-                    className="w-full object-contain"
+                    // className="w-full object-contain"
                   /> // img 비율 유지
                 ) : (
                   // <img src={cctvImage} alt="CCTV" />
