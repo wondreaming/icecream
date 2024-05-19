@@ -1,7 +1,9 @@
-import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
+import 'package:icecream/auth/screen/p_signup.dart';
+import 'package:icecream/com/const/color.dart';
 import 'package:icecream/com/const/dio_interceptor.dart';
 import 'package:icecream/com/widget/default_layout.dart';
 import 'package:icecream/provider/user_provider.dart';
@@ -94,15 +96,24 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
     response = await deleteChild();
 
     if (response.status == 200) {
+      context.pop();
       final String message = response.message!;
-      showCustomDialog(context, message, isNo: false, onPressed: () {
-        context.pop();
-      });
+      await Fluttertoast.showToast(
+          msg: message!,
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: AppColors.custom_black,
+          textColor: AppColors.background_color);
+      await Provider.of<UserProvider>(context, listen: false)
+          .disconnectedChild(widget.user_id);
     } else {
       final String message = response.message!;
-      showCustomDialog(context, message, isNo: false, onPressed: () {
-        context.pop();
-      });
+      Fluttertoast.showToast(
+          msg: message!,
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: AppColors.custom_black,
+          textColor: AppColors.background_color);
     }
   }
 
@@ -115,12 +126,23 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
       usernameController.clear();
       Provider.of<UserProvider>(context, listen: false)
           .updateChildName(widget.user_id, username);
+      final message = response.message!;
+      Fluttertoast.showToast(
+          msg: message!,
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: AppColors.custom_black,
+          textColor: AppColors.background_color);
       context.pop();
     } else {
-      final String message = response.message!;
-      showCustomDialog(context, message, isNo: false, onPressed: () {
-        context.pop();
-      });
+      final message = response.message!;
+      Fluttertoast.showToast(
+          msg: message!,
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: AppColors.custom_black,
+          textColor: AppColors.background_color);
+      context.pop();
     }
   }
 
@@ -145,13 +167,21 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
       final String message = response.message!;
       Provider.of<UserProvider>(context, listen: false)
           .updateChildPhoneNumber(widget.user_id, phoneNumber);
-      showCustomDialog(context, message, isNo: false, onPressed: () {
-        context.pop();
-      });
+      context.pop();
+      Fluttertoast.showToast(
+          msg: message,
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: AppColors.custom_black,
+          textColor: AppColors.background_color);
     } else {
-      showCustomDialog(context, '전화번호 수정이 실패했습니다', isNo: false, onPressed: () {
-        context.pop();
-      });
+      final String message = response.message!;
+      Fluttertoast.showToast(
+          msg: message,
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: AppColors.custom_black,
+          textColor: AppColors.background_color);
     }
   }
 
@@ -189,7 +219,6 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
                       controller: usernameController,
                       onChanged: (String value) {
                         username = value;
-                        print(username);
                       },
                       hintText: '변경할 이름을 입력해주세요',
                     ),
@@ -209,23 +238,30 @@ class _ChildDetailScreenState extends State<ChildDetailScreen> {
             showCustomModal(
               context,
               '전화번호 변경',
-              Column(
-                children: [
-                  SizedBox(height: 16.0),
-                  CustomTextField(
-                    controller: phoneNumberController,
-                    onChanged: (String value) {
-                      phoneNumber = value;
-                    },
-                    hintText: '현재 전화번호를 입력해주세요',
-                  ),
-                  SizedBox(height: 16.0),
-                  CustomElevatedButton(
-                      onPressed: () {
-                        patchPhoneNumber();
+              PopScope(
+                canPop: true,
+                onPopInvoked: (bool didPop) async {
+                  phoneNumberController.clear();
+                },
+                child: Column(
+                  children: [
+                    SizedBox(height: 16.0),
+                    CustomTextField(
+                      controller: phoneNumberController,
+                      onChanged: (String value) {
+                        phoneNumber = value;
                       },
-                      child: '저장'),
-                ],
+                      hintText: '전화번호를 입력해주세요',
+                      inputFormatters: [PhoneNumberFormatter()],
+                    ),
+                    SizedBox(height: 16.0),
+                    CustomElevatedButton(
+                        onPressed: () {
+                          patchPhoneNumber();
+                        },
+                        child: '저장'),
+                  ],
+                ),
               ),
               160.0,
             );

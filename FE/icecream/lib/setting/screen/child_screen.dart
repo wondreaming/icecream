@@ -11,9 +11,6 @@ class ChildScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final List<Child> children = userProvider.children;
-
     return DefaultLayout(
       isSetting: true,
       title: '자녀 관리',
@@ -24,33 +21,38 @@ class ChildScreen extends StatelessWidget {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              ListView.builder(
-                itemCount: children.length,
-                itemBuilder: (context, index) {
-                  var child = children[index];
-                  return Column(children: [
-                    Profile(
-                      onPressed: () {
-                        context.pushNamed(
-                          'child',
-                          pathParameters: {
-                            "user_id": child.userId.toString(),
+              Consumer<UserProvider>(
+                builder: (context, userProvider, child) {
+                  final List<Child> children = userProvider.children;
+                  return ListView.builder(
+                    itemCount: children.length,
+                    itemBuilder: (context, index) {
+                      var child = children[index];
+                      return Column(children: [
+                        Profile(
+                          onPressed: () {
+                            context.pushNamed(
+                              'child',
+                              pathParameters: {
+                                "user_id": child.userId.toString(),
+                              },
+                            );
                           },
-                        );
-                      },
-                      isParent: false,
-                      user_id: child.userId,
-                      name: child.username,
-                      number: child.phoneNumber,
-                      imgUrl: child.profileImage,
-                    ),
-                    SizedBox(
-                      height: 10.0,
-                    ),
-                  ]);
+                          isParent: false,
+                          user_id: child.userId,
+                          name: child.username,
+                          number: child.phoneNumber,
+                          imgUrl: child.profileImage,
+                        ),
+                        SizedBox(
+                          height: 10.0,
+                        ),
+                      ]);
+                    },
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                  );
                 },
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
               ),
               AddContainer(
                 mention: '자녀를 추가해주세요',

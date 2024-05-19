@@ -19,11 +19,13 @@ class _UserRespository implements UserRespository {
   String? baseUrl;
 
   @override
-  Future<ResponseModel> postLogout({required String refreashToken}) async {
+  Future<ResponseModel> postLogout(
+      {required RefreashTokenModel refreshToken}) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = refreashToken;
+    final _data = <String, dynamic>{};
+    _data.addAll(refreshToken.toJson());
     final _result = await _dio
         .fetch<Map<String, dynamic>>(_setStreamType<ResponseModel>(Options(
       method: 'POST',
@@ -238,15 +240,33 @@ class _UserRespository implements UserRespository {
               _dio.options.baseUrl,
               baseUrl,
             ))));
+    final value = ResponseModel.fromJson(_result.data!);
+    return value;
+  }
 
-    if (_result.statusCode != 200) {
-      throw Exception('Failed to upload image. Server responded with status code: ${_result.statusCode}');
-    }
-
-    if (_result.data == null) {
-      throw Exception('No data received from the server');
-    }
-
+  @override
+  Future<ResponseModel> deleteImage({required int user_id}) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r'user_id': user_id};
+    final _headers = <String, dynamic>{};
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<ResponseModel>(Options(
+      method: 'DELETE',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              '/users/profile',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
     final value = ResponseModel.fromJson(_result.data!);
     return value;
   }

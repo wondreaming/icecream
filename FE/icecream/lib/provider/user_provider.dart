@@ -52,7 +52,6 @@ class UserProvider extends ChangeNotifier {
   List<Child> get children => _children;
   int get userId => _userId; // userId getter 추가
 
-
   // 부모 profileImage에 대한 setter 추가
   set setProfileImage(String newImage) {
     if (_profileImage != newImage) {
@@ -99,6 +98,7 @@ class UserProvider extends ChangeNotifier {
     _userId = 0; // userId 초기화
     notifyListeners();
   }
+
   // 자녀 정보 업데이트
   void updateChildren(List<Child> children) {
     _children = children;
@@ -114,8 +114,7 @@ class UserProvider extends ChangeNotifier {
           userId: oldChild.userId,
           profileImage: newProfileImage,
           username: oldChild.username,
-          phoneNumber: oldChild.phoneNumber
-      );
+          phoneNumber: oldChild.phoneNumber);
       notifyListeners();
     }
   }
@@ -129,8 +128,7 @@ class UserProvider extends ChangeNotifier {
           userId: oldChild.userId,
           profileImage: oldChild.profileImage,
           username: newName,
-          phoneNumber: oldChild.phoneNumber
-      );
+          phoneNumber: oldChild.phoneNumber);
       notifyListeners();
     }
   }
@@ -144,9 +142,14 @@ class UserProvider extends ChangeNotifier {
           userId: oldChild.userId,
           profileImage: oldChild.profileImage,
           username: oldChild.username,
-          phoneNumber: newPhoneNumber
-      );
+          phoneNumber: newPhoneNumber);
       notifyListeners();
     }
+  }
+
+  // 특정 자녀 연결 해제 업데이트
+  Future<void> disconnectedChild(int childId) async {
+    _children.removeWhere((child) => child.userId == childId);
+    notifyListeners();
   }
 }

@@ -20,7 +20,7 @@ class _ForkPageState extends State<ForkPage> {
   @override
   Widget build(BuildContext context) {
     return DefaultLayout(
-      title: '',
+      isAppbar: false,
       child: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0), // 패딩 조정
