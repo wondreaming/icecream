@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:icecream/com/const/color.dart';
@@ -174,6 +175,13 @@ class UserService {
             // 자녀 페이지로 이동 로직
             print("User is a Child");
           }
+          Fluttertoast.showToast(
+            msg: '자동 로그인 성공',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.green,
+            textColor: Colors.white,
+          );
         } else {
           userProvider.clearUserData();
           throw Exception('자동로그인에 실패했습니다');
@@ -202,11 +210,12 @@ class UserService {
       final response = await _dio.get('/users/check',
           queryParameters: {'login_id': loginId},
           options: Options(headers: {'no-token': true}) // 토큰을 포함하지 않음
-      );
+          );
       return {
         'status': response.statusCode,
         'message': response.data['message'],
-        'isAvailable': response.statusCode == 200 && response.data['message'] == "사용 가능한 ID 입니다."
+        'isAvailable': response.statusCode == 200 &&
+            response.data['message'] == "사용 가능한 ID 입니다."
       };
     } catch (e) {
       return {'status': 500, 'message': '서버 에러가 발생했습니다.', 'isAvailable': false};

@@ -81,12 +81,14 @@ Future<void> _handleNotification(RemoteMessage message) async {
     case 'overspeed-1':
     case 'overspeed-2':
     case 'overspeed-3':
+    if (_selectedDevice != null) {
       List<int> list = content!.codeUnits;
       Uint8List bytes = Uint8List.fromList(list);
       _flutterWearOsConnectivity
           .sendMessage(bytes,
               deviceId: _selectedDevice!.id, path: "/sample-message")
           .then(print);
+    }
       isOverspeed = true;
       break;
     case 'created':
@@ -442,14 +444,7 @@ class _MyAppState extends State<MyApp> {
   Future<void> _autoLogin() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     try {
-      await _userService.autoLogin(userProvider);
-      Fluttertoast.showToast(
-        msg: '자동 로그인 성공',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        backgroundColor: Colors.green,
-        textColor: Colors.white,
-      );
+      await _userService.autoLogin(userProvider);      
       await initServices();
       // 사용자가 부모가 아닐 경우에만 위치 서비스를 시작\
       if (userProvider.isLoggedIn && !userProvider.isParent) {
