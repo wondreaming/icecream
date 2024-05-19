@@ -19,7 +19,7 @@ abstract class UserRespository {
 
   // 로그아웃
   @POST('/auth/logout')
-  Future<ResponseModel> postLogout({@Body() required String refreashToken});
+  Future<ResponseModel> postLogout({@Body() required RefreashTokenModel refreshToken});
 
   // 자녀 이름 수정
   @PATCH('/users/child')
@@ -54,4 +54,9 @@ abstract class UserRespository {
   Future<ResponseModel> postImage(
       {@Query('user_id') required int user_id,
       @Body() required FormData formData});
+
+  // 프로필 이미지 삭제
+  @DELETE('/users/profile')
+  Future<ResponseModel> deleteImage(
+      {@Query('user_id') required int user_id,});
 }

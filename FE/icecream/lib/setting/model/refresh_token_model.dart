@@ -3,10 +3,10 @@ part 'refresh_token_model.g.dart';
 
 @JsonSerializable()
 class RefreashTokenModel {
-  final String refreashToken;
+  final String refresh_token;
   RefreashTokenModel(
       {
-        required this.refreashToken
+        required this.refresh_token
       });
 
   factory RefreashTokenModel.fromJson(Map<String, dynamic> json) =>
