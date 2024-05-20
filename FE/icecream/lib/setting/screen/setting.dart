@@ -51,7 +51,7 @@ class _SettingState extends State<Setting> {
                 text: '자녀관리',
                 isFrontIcon: false,
                 onPressed: () {
-                  context.goNamed('children');
+                  context.pushNamed('children');
                 },
               ),
             ),
