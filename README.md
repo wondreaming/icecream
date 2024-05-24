@@ -169,4 +169,4 @@
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 |**이재진**|**정종길**|**심상익**|**유영준**|**황채원**|**서준하**|**김민진**|
 | <img src="./docs/팀원/재진.png" style="height: 100px"> | <img src="./docs/팀원/종길.png" style="height: 100px"> | <img src="./docs/팀원/상익.png" style="height: 100px"> | <img src="./docs/팀원/영준.png" style="height: 100px"> | <img src="./docs/팀원/채원.png" style="height: 100px"> | <img src="./docs/팀원/준하.png" style="height: 100px"> | <img src="./docs/팀원/민진.png" style="height: 100px"> |
-| 팀장 <br/> BackEnd <br/> Infra <br/> GPU서버| BankEnd <br/> Security <br/> MQ 구축 <br/> | BackEnd <br/> ELK 스택 <br/> 관리자page <br/> GPU서버<br/>| FrontEnd <br/> FCM <br/> Design | Frontend <br/> WebSocket <br/> CCTV구축 | FrontEnd <br/> GPS <br/> | Yolo <br/> 객체 추적 <br/> 객체 속도 <br/> |
+| 팀장 <br/> BackEnd <br/> Infra <br/> GPU 서버| BankEnd <br/> Security <br/> MQ 구축 <br/> | BackEnd <br/> ELK 스택 <br/> 관리자page <br/> GPU 서버<br/>| FrontEnd <br/> FCM <br/> Design | Frontend <br/> WebSocket <br/> CCTV 구축 | FrontEnd <br/> GPS <br/> 지도 구축 | Yolo <br/> 객체 추적 <br/> 객체 속도 <br/> |
