@@ -59,7 +59,7 @@ speed_dict = defaultdict(list)
 # RabbitMQ 설정 함수
 def connect_to_rabbitmq():
     credentials = pika.PlainCredentials("guest", "guest")
-    parameters = pika.ConnectionParameters(host="k10e202.p.ssafy.io", port=5672, credentials=credentials)
+    parameters = pika.ConnectionParameters(host="", port=, credentials=credentials)
     connection = pika.BlockingConnection(parameters)
     channel = connection.channel()
     channel.queue_declare(queue="hello", durable=True)
@@ -211,7 +211,7 @@ def getCCTVImage(data):
 
 @app.on_event("startup")
 def start_connection():
-    sio.connect("http://k10e202.p.ssafy.io:1996")
+    sio.connect("")
     Thread(target=process_queue, daemon=True).start()
 
 @app.on_event("shutdown")
